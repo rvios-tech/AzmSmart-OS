@@ -1,0 +1,31 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "dev",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "dev",
+        "--",
+        "-p",
+        "3001"
+      ],
+      "port": 3001
+    },
+    {
+      "name": "storeos",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "--prefix",
+        "F:/rvios-next",
+        "run",
+        "dev",
+        "--",
+        "-p",
+        "3020"
+      ],
+      "port": 3020
+    }
+  ]
+}
