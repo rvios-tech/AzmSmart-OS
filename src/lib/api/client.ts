@@ -19,6 +19,18 @@ export function getToken(): string | null {
   }
 }
 
+/**
+ * يُطلَق حين يرفض الخادم جلسة قائمة (٤٠١ على طلب يحمل رمزًا خارج `/auth/*`):
+ * انتهت، أو تغيّرت كلمة المرور من جهاز آخر. سياق المصادقة يستمع ويُخرج المستخدم.
+ */
+export const SESSION_EXPIRED_EVENT = "azm:session-expired";
+
+function notifyIfExpired(res: Response, token: string | null, path: string) {
+  if (res.status === 401 && token && !path.startsWith("/auth/") && typeof window !== "undefined") {
+    window.dispatchEvent(new Event(SESSION_EXPIRED_EVENT));
+  }
+}
+
 export function setToken(token: string | null): void {
   if (typeof window === "undefined") return;
   try {
@@ -74,6 +86,8 @@ export async function apiFetch<T>(
 
   if (res.status === 204) return undefined as T;
 
+  notifyIfExpired(res, token, path);
+
   const isJson = res.headers.get("content-type")?.includes("application/json");
   const body = isJson ? await res.json().catch(() => null) : null;
 
@@ -115,6 +129,8 @@ export async function uploadFile<T>(path: string, file: File): Promise<T> {
   } catch {
     throw new ApiError(0, "تعذّر الاتصال بالخادم. تحقّق من اتصالك وحاول مجددًا.");
   }
+
+  notifyIfExpired(res, token, path);
 
   const isJson = res.headers.get("content-type")?.includes("application/json");
   const body = isJson ? await res.json().catch(() => null) : null;

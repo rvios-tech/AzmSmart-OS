@@ -19,6 +19,8 @@ export const metadata: Metadata = {
   },
   description:
     "نظام إدارة الأعمال الذكي – منصة متكاملة لإدارة المبيعات والعملاء والمشاريع بكفاءة عالية.",
+  // لوحة التحكم وصفحات العرض خارج نتائج البحث — الصفحة الترحيبية وحدها تُفهرَس
+  robots: { index: false, follow: false },
 };
 
 export default function RootLayout({

@@ -20,6 +20,7 @@ export function Closing({ lines, light }: { lines: string[]; light?: string }) {
             <Lines as="h2" className="h1 text-center" lines={lines} />
             <Rise className="mt-12 flex flex-wrap items-center justify-center gap-3">
               <L data-rise href="/register" className="btn btn-gold">ابدأ مجاناً</L>
+              <L data-rise href="/demo" className="btn">جرّب العرض التجريبي</L>
               <a data-rise href={contactUrl("azmsmart")} className="btn">اطلب عرضاً توضيحياً</a>
               <a data-rise href={waLink("ar", "مرحباً، أود معرفة المزيد عن AzmSmart")} target="_blank" rel="noopener" className="btn">واتساب</a>
             </Rise>

@@ -6,6 +6,7 @@ import { SmoothScroll } from "@/welcome/components/layout/SmoothScroll";
 import { Header } from "@/welcome/components/layout/Header";
 import { Preloader } from "@/welcome/components/layout/Preloader";
 import { LangProvider } from "@/welcome/components/i18n/LangProvider";
+import { SITE_URL } from "@/lib/site-url";
 
 /**
  * الصفحة الترحيبية لعزم سمارت — تخطيط جذري مستقل عن النظام (`(os)`).
@@ -29,11 +30,29 @@ const thm = localFont({
   variable: "--font-thm", display: "swap", fallback: ["Georgia", "serif"],
 });
 
+const DESCRIPTION =
+  "AzmSmart من RVIOS: نظام ذكي يجمع المبيعات والمخزون والعملاء والمالية والموارد البشرية والتجارة الإلكترونية في منصة واحدة مترابطة.";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: { absolute: "AzmSmart — نظام ذكي لإدارة الأعمال" },
-  description:
-    "AzmSmart من RVIOS: نظام ذكي يجمع المبيعات والمخزون والعملاء والمالية والموارد البشرية والتجارة الإلكترونية في منصة واحدة مترابطة.",
+  description: DESCRIPTION,
+  alternates: { canonical: "/" },
+  openGraph: { type: "website", url: "/", siteName: "AzmSmart", title: "AzmSmart — نظام ذكي لإدارة الأعمال", description: DESCRIPTION, locale: "ar" },
+  twitter: { card: "summary_large_image", title: "AzmSmart — نظام ذكي لإدارة الأعمال", description: DESCRIPTION },
 };
+
+/** بيانات منظّمة: تطبيق أعمال على الويب من RVIOS */
+const appJsonLd = JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  name: "AzmSmart",
+  applicationCategory: "BusinessApplication",
+  operatingSystem: "Web, Android",
+  url: `${SITE_URL}/`,
+  description: DESCRIPTION,
+  publisher: { "@type": "Organization", name: "RVIOS Technologies", url: "https://rvios.com" },
+});
 
 export const viewport: Viewport = {
   themeColor: [
@@ -50,6 +69,7 @@ export default function WelcomeLayout({ children }: { children: React.ReactNode 
     <html lang="ar" dir="rtl" data-theme="dark" suppressHydrationWarning className={`${zain.variable} ${yapari.variable} ${thm.variable}`}>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: appJsonLd }} />
       </head>
       <body id="top">
         <LangProvider lang="ar">

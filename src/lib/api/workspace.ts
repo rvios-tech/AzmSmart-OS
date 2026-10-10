@@ -1,4 +1,4 @@
-import { apiFetch } from "./client";
+import { apiFetch, setToken } from "./client";
 
 export interface WorkspaceContext {
   user: { id: string; email: string; displayName: string; avatarUrl: string | null } | null;
@@ -93,5 +93,9 @@ export interface Profile {
 export const getProfile = () => apiFetch<Profile>("/me/profile");
 export const updateProfile = (input: { displayName?: string; phone?: string; avatarUrl?: string; timezone?: string; language?: string }) =>
   apiFetch<Profile>("/me/profile", { method: "PATCH", body: JSON.stringify(input) });
-export const changePassword = (currentPassword: string, newPassword: string) =>
-  apiFetch<{ ok: true }>("/me/password", { method: "POST", body: JSON.stringify({ currentPassword, newPassword }) });
+/** التغيير يُبطل كل الجلسات السابقة في الخادم — والرمز الجديد يُحفظ فتستمر هذه الجلسة. */
+export async function changePassword(currentPassword: string, newPassword: string) {
+  const r = await apiFetch<{ ok: true; accessToken: string }>("/me/password", { method: "POST", body: JSON.stringify({ currentPassword, newPassword }) });
+  setToken(r.accessToken);
+  return r;
+}

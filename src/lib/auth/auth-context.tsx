@@ -10,7 +10,7 @@ import {
 import { useRouter } from "next/navigation";
 
 import * as authApi from "@/lib/api/auth";
-import { getToken, setToken } from "@/lib/api/client";
+import { SESSION_EXPIRED_EVENT, getToken, setToken } from "@/lib/api/client";
 import { switchCompany as switchCompanyApi } from "@/lib/api/workspace";
 
 interface AuthState {
@@ -24,6 +24,8 @@ interface AuthContextValue extends AuthState {
   companies: (authApi.AuthCompany & { role: number })[];
   switchCompany: (companyId: string) => Promise<void>;
   login: (email: string, password: string) => Promise<void>;
+  /** دخول العرض التجريبي (للقراءة فقط) */
+  enterDemo: () => Promise<void>;
   register: (input: {
     email: string;
     password: string;
@@ -124,6 +126,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     [persist],
   );
 
+  const enterDemo = useCallback(async () => {
+    const res = await authApi.demo();
+    try {
+      window.localStorage.removeItem("azm_active_store");
+    } catch {}
+    persist(res.accessToken, res.user, res.company);
+    window.localStorage.setItem(COMPANIES_KEY, JSON.stringify(res.companies));
+    setCompanies(res.companies);
+  }, [persist]);
+
   const register = useCallback(
     async (input: {
       email: string;
@@ -160,8 +172,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     router.push("/login");
   }, [router]);
 
+  // جلسة رفضها الخادم أثناء العمل — خروج فوري بدل أخطاء متتالية في كل صفحة
+  useEffect(() => {
+    const onExpired = () => logout();
+    window.addEventListener(SESSION_EXPIRED_EVENT, onExpired);
+    return () => window.removeEventListener(SESSION_EXPIRED_EVENT, onExpired);
+  }, [logout]);
+
   return (
-    <AuthContext.Provider value={{ ...state, companies, switchCompany, login, register, logout }}>
+    <AuthContext.Provider value={{ ...state, companies, switchCompany, login, enterDemo, register, logout }}>
       {children}
     </AuthContext.Provider>
   );

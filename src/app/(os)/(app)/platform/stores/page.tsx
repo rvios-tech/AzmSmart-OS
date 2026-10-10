@@ -17,6 +17,7 @@ import {
   listPlatformStores, setPlatformStoreStatus, setPlatformStoreVerified, type PlatformShopStore,
 } from "@/lib/api/platform";
 import { formatDateShort, formatNumber } from "@/lib/format";
+import { storeUrl } from "@/lib/shop/constants";
 
 export default function PlatformStoresPage() {
   const [rows, setRows] = useState<PlatformShopStore[] | null>(null);
@@ -88,7 +89,7 @@ export default function PlatformStoresPage() {
                       {s.name}
                       {s.verified && <IconRosetteDiscountCheck className="size-4 text-sky-600" aria-label="موثَّق" />}
                     </div>
-                    <div className="text-xs text-muted-foreground" dir="ltr">/{s.slug} · {formatDateShort(s.createdAt)}</div>
+                    <div className="text-xs text-muted-foreground" dir="ltr"><a href={storeUrl(s.slug)} target="_blank" rel="noopener" className="hover:underline">/{s.slug}</a> · {formatDateShort(s.createdAt)}</div>
                   </TableCell>
                   <TableCell>{s.organization.name}</TableCell>
                   <TableCell className="tabular-nums">{formatNumber(s._count.products)}</TableCell>

@@ -111,6 +111,7 @@ export function Header() {
             <button onClick={toggleTheme} className="ibtn" aria-label={theme === "dark" ? "الوضع الفاتح" : "الوضع الداكن"}>
               <ThemeIcon theme={theme} />
             </button>
+            <Link href="/demo" className="hidden px-3 text-[14px] opacity-80 transition-opacity hover:opacity-100 md:inline">جرّب العرض</Link>
             <Link href="/login" className="hidden px-3 text-[14px] opacity-80 transition-opacity hover:opacity-100 sm:inline">دخول</Link>
             <Link href="/register" className={`btn ms-1 hidden h-11 px-6 text-[14px] sm:inline-flex ${ink ? "" : "btn-gold"}`}>ابدأ مجاناً</Link>
             <button className="ibtn lg:hidden" onClick={() => setOpen((o) => !o)} aria-expanded={open} aria-controls="menu" aria-label={open ? "إغلاق" : "القائمة"}>
@@ -147,6 +148,7 @@ export function Header() {
         <div className="flex flex-wrap gap-3 border-t border-hair pt-6">
           <Link href="/register" className="btn btn-gold">ابدأ مجاناً</Link>
           <Link href="/login" className="btn">دخول</Link>
+          <Link href="/demo" className="btn">جرّب العرض التجريبي</Link>
         </div>
       </div>
     </>

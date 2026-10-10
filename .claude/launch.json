@@ -26,6 +26,21 @@
         "3020"
       ],
       "port": 3020
+    },
+    {
+      "name": "web",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "--prefix",
+        "F:/rvios-web",
+        "next",
+        "dev",
+        "F:/rvios-web",
+        "--webpack",
+        "-p",
+        "3030"
+      ],
+      "port": 3030
     }
   ]
 }

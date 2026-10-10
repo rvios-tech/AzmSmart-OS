@@ -49,7 +49,9 @@ export function DomainCard({ store }: { store: Store }) {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           النطاق الخاص
-          {store.customDomain && <Badge variant="secondary">مفعّل</Badge>}
+          {store.customDomain && (
+            <a href={`https://${store.customDomain}`} target="_blank" rel="noopener" dir="ltr" className="text-sm font-normal text-primary hover:underline">{store.customDomain}</a>
+          )}
           {locked && <Badge variant="outline"><IconLock className="size-3" /> باقة مدفوعة</Badge>}
         </CardTitle>
         <CardDescription>اجعل متجرك يفتح على نطاقك أنت، مثل mystore.com.</CardDescription>

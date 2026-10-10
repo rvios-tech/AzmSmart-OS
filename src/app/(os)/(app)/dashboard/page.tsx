@@ -27,11 +27,8 @@ import {
 import { ApiError } from "@/lib/api/client";
 import { getOverview, type Overview, type Store } from "@/lib/api/shop";
 import { formatMoney, formatNumber, formatRelativeTime } from "@/lib/format";
-import { PLAN_LABEL, orderStatus } from "@/lib/shop/constants";
+import { PLAN_LABEL, orderStatus, storeUrl } from "@/lib/shop/constants";
 import { useWorkspace } from "@/lib/workspace/workspace-context";
-
-/** عنوان واجهة المتجر العامة — يضبطه النشر؛ افتراضيًا مسار نسبي للنسخ. */
-const STOREFRONT = process.env.NEXT_PUBLIC_STOREFRONT_URL ?? "";
 
 function OverviewView({ store }: { store: Store }) {
   const [data, setData] = useState<Overview | null>(null);
@@ -60,7 +57,7 @@ function OverviewView({ store }: { store: Store }) {
     <div className="space-y-6">
       <PageHeader title={store.name} description="ما يحدث في متجرك اليوم.">
         <Button variant="outline" asChild>
-          <a href={`${STOREFRONT}/${store.slug}`} target="_blank" rel="noopener">
+          <a href={storeUrl(store.slug)} target="_blank" rel="noopener">
             <IconExternalLink className="size-4" /> زيارة المتجر
           </a>
         </Button>

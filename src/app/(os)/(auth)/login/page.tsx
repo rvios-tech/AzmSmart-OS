@@ -91,6 +91,10 @@ export default function LoginPage() {
         </Button>
       </form>
 
+      <Button variant="outline" className="w-full" asChild>
+        <Link href="/demo">جرّب العرض التجريبي — بلا تسجيل</Link>
+      </Button>
+
       <p className="text-center text-sm text-muted-foreground">
         ليس لديك حساب؟{" "}
         <Link href="/register" className="font-medium text-foreground hover:underline">
