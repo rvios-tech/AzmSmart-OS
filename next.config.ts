@@ -29,13 +29,13 @@ function securityHeaders(connect: string[], framing: "none" | "self") {
   const self = framing === "self" ? "'self'" : "'none'";
   const csp = [
     "default-src 'self'",
-    `script-src 'self' 'unsafe-inline'${prod ? "" : " 'unsafe-eval'"}`,
+    `script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com${prod ? "" : " 'unsafe-eval'"}`,
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: blob: https:",
     "font-src 'self' data:",
     "media-src 'self' blob: https:",
     "worker-src 'self' blob:",
-    `connect-src 'self' ${connect.filter(Boolean).join(" ")}${prod ? "" : " ws: wss: http://localhost:*"}`,
+    `connect-src 'self' https://cloudflareinsights.com ${connect.filter(Boolean).join(" ")}${prod ? "" : " ws: wss: http://localhost:*"}`,
     `frame-src ${self}`,
     `frame-ancestors ${self}`,
     "object-src 'none'",
