@@ -7,6 +7,7 @@ import { Header } from "@/welcome/components/layout/Header";
 import { Preloader } from "@/welcome/components/layout/Preloader";
 import { LangProvider } from "@/welcome/components/i18n/LangProvider";
 import { SITE_URL } from "@/lib/site-url";
+import { Analytics } from "@/components/analytics";
 
 /**
  * الصفحة الترحيبية لعزم سمارت — تخطيط جذري مستقل عن النظام (`(os)`).
@@ -72,6 +73,7 @@ export default function WelcomeLayout({ children }: { children: React.ReactNode 
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: appJsonLd }} />
       </head>
       <body id="top">
+        <Analytics />
         <LangProvider lang="ar">
           <Stage />
           <SmoothScroll />

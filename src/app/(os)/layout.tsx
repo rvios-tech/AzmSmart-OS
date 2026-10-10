@@ -5,6 +5,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { ThemeConfigProvider } from "@/components/theme-customizer";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/lib/auth/auth-context";
+import { Analytics } from "@/components/analytics";
 
 const tajawal = Tajawal({
   variable: "--font-sans",
@@ -36,6 +37,7 @@ export default function RootLayout({
       className={`${tajawal.variable} h-full antialiased`}
     >
       <body className="min-h-full" suppressHydrationWarning>
+        <Analytics />
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
