@@ -36,8 +36,17 @@ const DESCRIPTION =
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: { absolute: "AzmSmart — نظام ذكي لإدارة الأعمال" },
+  title: { absolute: "AzmSmart عزم سمارت — نظام إدارة الأعمال والمتاجر الإلكترونية | ERP سحابي" },
   description: DESCRIPTION,
+  applicationName: "AzmSmart",
+  keywords: [
+    "عزم سمارت", "AzmSmart", "نظام إدارة أعمال", "نظام ERP", "نظام ERP سحابي", "برنامج إدارة شركات", "نظام إدارة متجر إلكتروني",
+    "نظام مخزون", "برنامج مخزون", "نظام فواتير", "برنامج فواتير إلكترونية", "نظام محاسبة", "نظام CRM", "إدارة العملاء",
+    "إدارة المشاريع والمهام", "نظام موارد بشرية", "لوحة تحكم للمتجر", "تقارير المبيعات", "نظام SaaS عربي",
+    "برنامج إدارة أعمال في السعودية", "برنامج إدارة أعمال في اليمن", "ريفيوس", "RVIOS",
+    "business management system", "cloud ERP", "inventory management", "invoicing software", "CRM", "project management",
+    "online store management", "Arabic business software",
+  ],
   alternates: { canonical: "/" },
   openGraph: { type: "website", url: "/", siteName: "AzmSmart", title: "AzmSmart — نظام ذكي لإدارة الأعمال", description: DESCRIPTION, locale: "ar" },
   twitter: { card: "summary_large_image", title: "AzmSmart — نظام ذكي لإدارة الأعمال", description: DESCRIPTION },
