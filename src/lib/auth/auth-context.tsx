@@ -1,5 +1,6 @@
 "use client";
 
+import { clearPendingEmail, readPendingCompany, readPendingEmail, setPendingEmail } from "./pending";
 import {
   createContext,
   useCallback,
@@ -23,7 +24,9 @@ interface AuthContextValue extends AuthState {
   /** الشركات التي ينتمي إليها المستخدم (للتبديل بينها) */
   companies: (authApi.AuthCompany & { role: number })[];
   switchCompany: (companyId: string) => Promise<void>;
-  login: (email: string, password: string) => Promise<void>;
+  /** `true` = بقي رمز البريد (صفحة التحقق) */
+  login: (email: string, password: string) => Promise<boolean>;
+  verifyEmailCode: (code: string) => Promise<void>;
   /** يعيد `true` لحساب جديد */
   loginWithGoogle: (credential: string) => Promise<boolean>;
   /** دخول العرض التجريبي (للقراءة فقط) */
@@ -33,7 +36,7 @@ interface AuthContextValue extends AuthState {
     password: string;
     displayName: string;
     companyName: string;
-  }) => Promise<void>;
+  }) => Promise<boolean>;
   logout: () => void;
 }
 
@@ -121,6 +124,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = useCallback(
     async (email: string, password: string) => {
       const res = await authApi.login({ email, password });
+      if ("verificationRequired" in res) {
+        setPendingEmail(res.email);
+        return true;
+      }
+      persist(res.accessToken, res.user, res.company);
+      window.localStorage.setItem(COMPANIES_KEY, JSON.stringify(res.companies));
+      setCompanies(res.companies);
+      return false;
+    },
+    [persist],
+  );
+
+  const verifyEmailCode = useCallback(
+    async (code: string) => {
+      const email = readPendingEmail();
+      if (!email) throw new Error("no pending email");
+      const res = await authApi.verifyCode({ email, code, companyId: readPendingCompany() });
+      clearPendingEmail();
       persist(res.accessToken, res.user, res.company);
       window.localStorage.setItem(COMPANIES_KEY, JSON.stringify(res.companies));
       setCompanies(res.companies);
@@ -157,7 +178,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       companyName: string;
     }) => {
       const res = await authApi.register(input);
+      if ("verificationRequired" in res) {
+        setPendingEmail(res.email);
+        return true;
+      }
       persist(res.accessToken, res.user, res.company);
+      return false;
     },
     [persist],
   );
@@ -193,7 +219,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [logout]);
 
   return (
-    <AuthContext.Provider value={{ ...state, companies, switchCompany, login, loginWithGoogle, enterDemo, register, logout }}>
+    <AuthContext.Provider value={{ ...state, companies, switchCompany, login, verifyEmailCode, loginWithGoogle, enterDemo, register, logout }}>
       {children}
     </AuthContext.Provider>
   );

@@ -26,8 +26,8 @@ export default function LoginPage() {
     setError(null);
     setSubmitting(true);
     try {
-      await login(email, password);
-      router.push("/dashboard");
+      const needsCode = await login(email, password);
+      router.push(needsCode ? "/verify-otp" : "/dashboard");
     } catch (err) {
       setError(
         err instanceof ApiError ? err.message : "تعذّر تسجيل الدخول. حاول مجدداً.",

@@ -28,8 +28,8 @@ export default function RegisterPage() {
     setError(null);
     setSubmitting(true);
     try {
-      await register({ email, password, displayName, companyName });
-      router.push("/dashboard");
+      const needsCode = await register({ email, password, displayName, companyName });
+      router.push(needsCode ? "/verify-otp" : "/dashboard");
     } catch (err) {
       setError(
         err instanceof ApiError ? err.message : "تعذّر إنشاء الحساب. حاول مجدداً.",

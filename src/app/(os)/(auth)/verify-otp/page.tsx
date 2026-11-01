@@ -3,19 +3,42 @@
 import * as React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { IconArrowRight, IconShieldLock } from "@tabler/icons-react";
+import { IconArrowRight, IconLoader2, IconShieldLock } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
+import { ApiError } from "@/lib/api/client";
+import { resendCode } from "@/lib/api/auth";
+import { useAuth } from "@/lib/auth/auth-context";
+import { readPendingEmail } from "@/lib/auth/pending";
+import { formatNumber } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 const LENGTH = 6;
+/** مهلة الخادم بين رسالتين */
+const RESEND_SECONDS = 60;
 
 export default function VerifyOtpPage() {
   const router = useRouter();
+  const { verifyEmailCode } = useAuth();
+  const [email] = React.useState(() => (typeof window === "undefined" ? null : readPendingEmail()));
   const [digits, setDigits] = React.useState<string[]>(Array(LENGTH).fill(""));
+  const [submitting, setSubmitting] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
+  const [wait, setWait] = React.useState(RESEND_SECONDS);
   const inputs = React.useRef<Array<HTMLInputElement | null>>([]);
 
   const code = digits.join("");
   const complete = code.length === LENGTH;
+
+  // وصل هنا بلا دخول سابق: لا بريد نتحقق منه
+  React.useEffect(() => {
+    if (!email) router.replace("/login");
+  }, [email, router]);
+
+  React.useEffect(() => {
+    if (wait <= 0) return;
+    const t = window.setTimeout(() => setWait((s) => s - 1), 1000);
+    return () => window.clearTimeout(t);
+  }, [wait]);
 
   function setAt(i: number, value: string) {
     setDigits((prev) => {
@@ -57,31 +80,57 @@ export default function VerifyOtpPage() {
     if (e.key === "ArrowLeft" && i < LENGTH - 1) inputs.current[i + 1]?.focus();
   }
 
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!complete) return;
+    setError(null);
+    setSubmitting(true);
+    try {
+      await verifyEmailCode(code);
+      router.push("/dashboard");
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "تعذّر التحقق. حاول مجدداً.");
+      setDigits(Array(LENGTH).fill(""));
+      inputs.current[0]?.focus();
+      setSubmitting(false);
+    }
+  }
+
+  async function resend() {
+    if (!email || wait > 0) return;
+    setError(null);
+    setWait(RESEND_SECONDS);
+    setDigits(Array(LENGTH).fill(""));
+    inputs.current[0]?.focus();
+    try {
+      await resendCode(email);
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "تعذّر إعادة الإرسال.");
+    }
+  }
+
+  if (!email) return null;
+
   return (
     <div className="space-y-6">
       <div className="space-y-1.5">
         <div className="mb-3 flex size-11 items-center justify-center rounded-xl border bg-card">
           <IconShieldLock className="size-5" />
         </div>
-        <h1 className="text-2xl font-semibold tracking-tight">
-          التحقق بخطوتين
-        </h1>
+        <h1 className="text-2xl font-semibold tracking-tight">تحقّق من بريدك</h1>
         <p className="text-sm text-muted-foreground">
           أرسلنا رمزاً من 6 أرقام إلى{" "}
-          <span className="font-medium text-foreground" dir="ltr">
-            ahmed.alamri@azmsmart.sa
-          </span>
-          . أدخله أدناه للمتابعة.
+          <span className="font-medium text-foreground" dir="ltr">{email}</span>
+          . أدخله أدناه للمتابعة، وإن لم تجده فانظر في مجلد الرسائل غير المرغوبة.
         </p>
       </div>
 
-      <form
-        className="space-y-5"
-        onSubmit={(e) => {
-          e.preventDefault();
-          router.push("/dashboard");
-        }}
-      >
+      <form className="space-y-5" onSubmit={handleSubmit}>
+        {error && (
+          <div className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+            {error}
+          </div>
+        )}
         {/* خانات الرمز تُقرأ من اليسار لليمين كالأرقام. */}
         <div className="flex justify-between gap-2" dir="ltr">
           {digits.map((d, i) => (
@@ -90,8 +139,10 @@ export default function VerifyOtpPage() {
               ref={(el) => {
                 inputs.current[i] = el;
               }}
+              aria-label={`الخانة ${formatNumber(i + 1)}`}
               inputMode="numeric"
               autoComplete={i === 0 ? "one-time-code" : "off"}
+              autoFocus={i === 0}
               maxLength={LENGTH}
               value={d}
               onChange={(e) => handleChange(i, e.target.value)}
@@ -106,23 +157,21 @@ export default function VerifyOtpPage() {
           ))}
         </div>
 
-        <Button type="submit" className="w-full" disabled={!complete}>
+        <Button type="submit" className="w-full" disabled={!complete || submitting}>
+          {submitting && <IconLoader2 className="size-4 animate-spin" />}
           تحقّق
         </Button>
       </form>
 
       <p className="text-center text-sm text-muted-foreground">
         لم يصلك الرمز؟{" "}
-        <button
-          type="button"
-          className="font-medium text-foreground hover:underline"
-          onClick={() => {
-            setDigits(Array(LENGTH).fill(""));
-            inputs.current[0]?.focus();
-          }}
-        >
-          إعادة الإرسال
-        </button>
+        {wait > 0 ? (
+          <span className="tabular-nums">إعادة الإرسال بعد {formatNumber(wait)} ثانية</span>
+        ) : (
+          <button type="button" className="font-medium text-foreground hover:underline" onClick={() => void resend()}>
+            إعادة الإرسال
+          </button>
+        )}
       </p>
 
       <Link

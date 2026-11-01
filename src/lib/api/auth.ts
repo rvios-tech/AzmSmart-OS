@@ -29,6 +29,14 @@ export interface LoginResponse {
   companies: (AuthCompany & { role: number })[];
 }
 
+/** كلمة المرور صحيحة، وبقي رمز البريد — لا جلسة قبله */
+export interface VerificationRequired {
+  verificationRequired: true;
+  email: string;
+  /** `false` إن تعذّر الإرسال — إعادة الإرسال تكمله */
+  sent: boolean;
+}
+
 export interface RegisterResponse {
   accessToken: string;
   user: AuthUser;
@@ -46,8 +54,8 @@ export function login(input: {
   email: string;
   password: string;
   companyId?: string;
-}): Promise<LoginResponse> {
-  return apiFetch<LoginResponse>("/auth/login", {
+}): Promise<LoginResponse | VerificationRequired> {
+  return apiFetch<LoginResponse | VerificationRequired>("/auth/login", {
     method: "POST",
     body: JSON.stringify(input),
     auth: false,
@@ -59,13 +67,21 @@ export function register(input: {
   password: string;
   displayName: string;
   companyName: string;
-}): Promise<RegisterResponse> {
-  return apiFetch<RegisterResponse>("/auth/register", {
+}): Promise<RegisterResponse | VerificationRequired> {
+  return apiFetch<RegisterResponse | VerificationRequired>("/auth/register", {
     method: "POST",
     body: JSON.stringify(input),
     auth: false,
   });
 }
+
+const post = <T,>(path: string, body: unknown) =>
+  apiFetch<T>(path, { method: "POST", body: JSON.stringify(body), auth: false });
+
+export const verifyCode = (input: { email: string; code: string; companyId?: string }) => post<LoginResponse>("/auth/verify", input);
+export const resendCode = (email: string) => post<{ ok: boolean }>("/auth/verify/resend", { email });
+export const forgotPassword = (email: string) => post<{ ok: boolean }>("/auth/password/forgot", { email });
+export const resetPassword = (input: { email: string; code: string; newPassword: string }) => post<{ ok: boolean }>("/auth/password/reset", input);
 
 /** الدخول أو التسجيل بحساب Google — `isNew` لحساب أُنشئ الآن */
 export function google(credential: string): Promise<LoginResponse & { isNew: boolean }> {

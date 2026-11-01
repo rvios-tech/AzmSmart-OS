@@ -2,33 +2,50 @@
 
 import * as React from "react";
 import Link from "next/link";
-import {
-  IconArrowRight,
-  IconEye,
-  IconEyeOff,
-  IconCheck,
-  IconLock,
-} from "@tabler/icons-react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { IconArrowRight, IconEye, IconEyeOff, IconLoader2, IconLock } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { cn } from "@/lib/utils";
-
-const rules = [
-  { label: "8 أحرف على الأقل", test: (v: string) => v.length >= 8 },
-  { label: "حرف كبير واحد", test: (v: string) => /[A-Z]/.test(v) },
-  { label: "رقم واحد", test: (v: string) => /[0-9]/.test(v) },
-  { label: "رمز واحد", test: (v: string) => /[^A-Za-z0-9]/.test(v) },
-];
+import { ApiError } from "@/lib/api/client";
+import { resetPassword } from "@/lib/api/auth";
+import { clearPendingEmail, readPendingEmail } from "@/lib/auth/pending";
 
 export default function ResetPasswordPage() {
+  const router = useRouter();
+  const [email] = React.useState(() => (typeof window === "undefined" ? null : readPendingEmail()));
+  const [code, setCode] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [confirm, setConfirm] = React.useState("");
   const [show, setShow] = React.useState(false);
+  const [submitting, setSubmitting] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
 
-  const passed = rules.filter((r) => r.test(password)).length;
-  const strength = (passed / rules.length) * 100;
+  React.useEffect(() => {
+    if (!email) router.replace("/forgot-password");
+  }, [email, router]);
+
   const match = confirm.length > 0 && confirm === password;
+  const ok = /^\d{6}$/.test(code) && password.length >= 8 && match;
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!email || !ok) return;
+    setError(null);
+    setSubmitting(true);
+    try {
+      await resetPassword({ email, code, newPassword: password });
+      clearPendingEmail();
+      toast.success("تغيّرت كلمة المرور — سجّل الدخول بها");
+      router.push("/login");
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "تعذّر تغيير كلمة المرور.");
+      setSubmitting(false);
+    }
+  }
+
+  if (!email) return null;
 
   return (
     <div className="space-y-6">
@@ -38,105 +55,45 @@ export default function ResetPasswordPage() {
         </div>
         <h1 className="text-2xl font-semibold tracking-tight">تعيين كلمة مرور جديدة</h1>
         <p className="text-sm text-muted-foreground">
-          يجب أن تختلف كلمة المرور الجديدة عن كلمات المرور السابقة.
+          إن كان <span className="font-medium text-foreground" dir="ltr">{email}</span> مسجَّلاً لدينا فقد أرسلنا إليه رمزاً من 6 أرقام.
         </p>
       </div>
 
-      <form className="space-y-4">
+      <form className="space-y-4" onSubmit={handleSubmit}>
+        {error && (
+          <div className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">{error}</div>
+        )}
+        <div className="space-y-2">
+          <Label htmlFor="code">الرمز</Label>
+          <Input id="code" dir="ltr" inputMode="numeric" autoComplete="one-time-code" maxLength={6} className="text-center tracking-[.4em]"
+            value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))} />
+        </div>
         <div className="space-y-2">
           <Label htmlFor="password">كلمة المرور الجديدة</Label>
           <div className="relative">
-            <Input
-              id="password"
-              type={show ? "text" : "password"}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="أدخل كلمة مرور جديدة"
-              className="pe-10"
-            />
-            <button
-              type="button"
-              onClick={() => setShow((s) => !s)}
+            <Input id="password" type={show ? "text" : "password"} autoComplete="new-password" minLength={8} className="pe-10"
+              placeholder="ثماني خانات على الأقل" value={password} onChange={(e) => setPassword(e.target.value)} />
+            <button type="button" onClick={() => setShow((s) => !s)}
               className="absolute end-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-              aria-label={show ? "إخفاء كلمة المرور" : "إظهار كلمة المرور"}
-            >
+              aria-label={show ? "إخفاء كلمة المرور" : "إظهار كلمة المرور"}>
               {show ? <IconEyeOff className="size-4" /> : <IconEye className="size-4" />}
             </button>
           </div>
-
-          {/* مؤشر قوة كلمة المرور */}
-          <div className="flex gap-1.5 pt-1">
-            {rules.map((_, i) => (
-              <span
-                key={i}
-                className={cn(
-                  "h-1 flex-1 rounded-full transition-colors",
-                  i < passed
-                    ? passed <= 2
-                      ? "bg-amber-500"
-                      : passed === 3
-                        ? "bg-sky-500"
-                        : "bg-emerald-500"
-                    : "bg-muted"
-                )}
-              />
-            ))}
-          </div>
-
-          <ul className="grid grid-cols-2 gap-1.5 pt-1">
-            {rules.map((r) => {
-              const ok = r.test(password);
-              return (
-                <li
-                  key={r.label}
-                  className={cn(
-                    "flex items-center gap-1.5 text-xs",
-                    ok ? "text-foreground" : "text-muted-foreground"
-                  )}
-                >
-                  <span
-                    className={cn(
-                      "flex size-3.5 items-center justify-center rounded-full",
-                      ok ? "bg-emerald-500 text-white" : "bg-muted"
-                    )}
-                  >
-                    {ok && <IconCheck className="size-2.5" />}
-                  </span>
-                  {r.label}
-                </li>
-              );
-            })}
-          </ul>
         </div>
-
         <div className="space-y-2">
           <Label htmlFor="confirm">تأكيد كلمة المرور</Label>
-          <Input
-            id="confirm"
-            type={show ? "text" : "password"}
-            value={confirm}
-            onChange={(e) => setConfirm(e.target.value)}
-            placeholder="أعد إدخال كلمة المرور"
-          />
-          {confirm.length > 0 && !match && (
-            <p className="text-xs text-destructive">كلمتا المرور غير متطابقتين.</p>
-          )}
+          <Input id="confirm" type={show ? "text" : "password"} autoComplete="new-password"
+            placeholder="أعد إدخال كلمة المرور" value={confirm} onChange={(e) => setConfirm(e.target.value)} />
+          {confirm.length > 0 && !match && <p className="text-xs text-destructive">كلمتا المرور غير متطابقتين</p>}
         </div>
-
-        <Button
-          asChild
-          className="w-full"
-          disabled={strength < 100 || !match}
-        >
-          <Link href="/login">إعادة تعيين كلمة المرور</Link>
+        <Button type="submit" className="w-full" disabled={!ok || submitting}>
+          {submitting && <IconLoader2 className="size-4 animate-spin" />}
+          تغيير كلمة المرور
         </Button>
       </form>
 
-      <Link
-        href="/login"
-        className="flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-foreground"
-      >
-        <IconArrowRight className="size-4" /> العودة لتسجيل الدخول
+      <Link href="/forgot-password" className="flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-foreground">
+        <IconArrowRight className="size-4" /> طلب رمز جديد
       </Link>
     </div>
   );
