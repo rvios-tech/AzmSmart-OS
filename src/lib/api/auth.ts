@@ -67,6 +67,15 @@ export function register(input: {
   });
 }
 
+/** الدخول أو التسجيل بحساب Google — `isNew` لحساب أُنشئ الآن */
+export function google(credential: string): Promise<LoginResponse & { isNew: boolean }> {
+  return apiFetch<LoginResponse & { isNew: boolean }>("/auth/google", {
+    method: "POST",
+    body: JSON.stringify({ credential }),
+    auth: false,
+  });
+}
+
 export function me(): Promise<MeResponse> {
   return apiFetch<MeResponse>("/auth/me");
 }

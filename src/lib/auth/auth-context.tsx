@@ -24,6 +24,8 @@ interface AuthContextValue extends AuthState {
   companies: (authApi.AuthCompany & { role: number })[];
   switchCompany: (companyId: string) => Promise<void>;
   login: (email: string, password: string) => Promise<void>;
+  /** يعيد `true` لحساب جديد */
+  loginWithGoogle: (credential: string) => Promise<boolean>;
   /** دخول العرض التجريبي (للقراءة فقط) */
   enterDemo: () => Promise<void>;
   register: (input: {
@@ -126,6 +128,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     [persist],
   );
 
+  const loginWithGoogle = useCallback(
+    async (credential: string) => {
+      const res = await authApi.google(credential);
+      persist(res.accessToken, res.user, res.company);
+      window.localStorage.setItem(COMPANIES_KEY, JSON.stringify(res.companies));
+      setCompanies(res.companies);
+      return res.isNew;
+    },
+    [persist],
+  );
+
   const enterDemo = useCallback(async () => {
     const res = await authApi.demo();
     try {
@@ -180,7 +193,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [logout]);
 
   return (
-    <AuthContext.Provider value={{ ...state, companies, switchCompany, login, enterDemo, register, logout }}>
+    <AuthContext.Provider value={{ ...state, companies, switchCompany, login, loginWithGoogle, enterDemo, register, logout }}>
       {children}
     </AuthContext.Provider>
   );

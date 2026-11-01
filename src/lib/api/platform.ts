@@ -127,6 +127,7 @@ export interface PlatformShopStore {
   /** 0=نشط · 1=معلَّق */
   status: number;
   verified: boolean;
+  appearanceLockedUntil: string | null;
   createdAt: string;
   organization: { id: string; name: string; companyCode: string };
   _count: { products: number; orders: number };
@@ -141,6 +142,11 @@ export function setPlatformStoreStatus(id: string, suspended: boolean): Promise<
     method: "PATCH",
     body: JSON.stringify({ suspended }),
   });
+}
+
+/** يفتح تعديل «شكل المتجر» قبل انتهاء أسبوع القفل */
+export function unlockPlatformStoreAppearance(id: string): Promise<Pick<PlatformShopStore, "appearanceLockedUntil">> {
+  return apiFetch(`/platform/shop-stores/${id}/appearance-unlock`, { method: "POST" });
 }
 
 export function setPlatformStoreVerified(id: string, verified: boolean): Promise<PlatformShopStore> {

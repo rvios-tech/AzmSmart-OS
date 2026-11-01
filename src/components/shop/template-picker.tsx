@@ -22,7 +22,7 @@ const BIZ_SIGNATURE_RATE = 0.6;
  * سعر القالب لهذا المتجر — للعرض فقط؛ الخادم يحسبه من جديد عند إصدار الفاتورة.
  * `null` = لا تسمح به الباقة، و`0` = متاح بلا شراء.
  */
-function costOf(tier: TemplateTier, plan: Store["plan"], base: number): number | null {
+export function costOf(tier: TemplateTier, plan: Store["plan"], base: number): number | null {
   if (tier === "free") return 0;
   if (plan === "basic") return null;
   if (plan === "pro") return tier === "standard" ? 0 : Math.round(base * BIZ_SIGNATURE_RATE);

@@ -20,23 +20,25 @@ function assertBuildEnv() {
 /**
  * Security headers for every page. CSP: scripts/styles from this origin (Next's inline bootstrap
  * needs 'unsafe-inline'); network calls only to this origin and the backend — so even injected
- * script can't post a session token to a foreign server via fetch; no plugins, no foreign framing.
+ * script can't post a session token to a foreign server via fetch; no plugins, no foreign framing — only Google sign-in and the store editor's preview are framed here.
  * Images allow any https (merchant/product URLs). Dev adds eval + HMR websockets.
  */
 const originOf = (u?: string) => { try { return u ? new URL(u).origin : ""; } catch { return ""; } };
+const STOREFRONT = originOf(process.env.NEXT_PUBLIC_STOREFRONT_URL) || "https://rvios.store";
+const GOOGLE_SIGN_IN = "https://accounts.google.com";
 function securityHeaders(connect: string[], framing: "none" | "self") {
   const prod = process.env.NODE_ENV === "production";
   const self = framing === "self" ? "'self'" : "'none'";
   const csp = [
     "default-src 'self'",
-    `script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com https://www.googletagmanager.com${prod ? "" : " 'unsafe-eval'"}`,
-    "style-src 'self' 'unsafe-inline'",
-    "img-src 'self' data: blob: https:",
+    `script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com https://www.googletagmanager.com ${GOOGLE_SIGN_IN}${prod ? "" : " 'unsafe-eval'"}`,
+    `style-src 'self' 'unsafe-inline' ${GOOGLE_SIGN_IN}`,
+    `img-src 'self' data: blob: https: ${STOREFRONT}`,
     "font-src 'self' data:",
     "media-src 'self' blob: https:",
     "worker-src 'self' blob:",
-    `connect-src 'self' https://cloudflareinsights.com https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com ${connect.filter(Boolean).join(" ")}${prod ? "" : " ws: wss: http://localhost:*"}`,
-    `frame-src ${self}`,
+    `connect-src 'self' ${GOOGLE_SIGN_IN} https://cloudflareinsights.com https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com ${connect.filter(Boolean).join(" ")}${prod ? "" : " ws: wss: http://localhost:*"}`,
+    `frame-src 'self' ${STOREFRONT} ${GOOGLE_SIGN_IN}`,
     `frame-ancestors ${self}`,
     "object-src 'none'",
     "base-uri 'self'",

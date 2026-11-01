@@ -24,6 +24,10 @@ export interface Store {
   logo: string;
   banner: string;
   showcase: string;
+  /** تعديلات «شكل المتجر» على القالب الأساسي */
+  appearance: { copy?: Record<string, string>; hidden?: string[] } | null;
+  /** يُقفل المحرر بعد كل حفظ أسبوعًا — أو حتى يفتحه فريق RVIOS */
+  appearanceLockedUntil: string | null;
   color: string;
   colorDeep: string;
   theme: string;
@@ -100,6 +104,21 @@ export const createStore = (input: CreateStoreInput) =>
 
 export const updateStore = (id: string, input: UpdateStoreInput) =>
   apiFetch<{ store: Store }>(s(id), { method: "PATCH", ...json(input) });
+
+export interface SaveAppearanceInput {
+  name?: string;
+  color?: string;
+  logo?: string;
+  banner?: string;
+  showcase?: string;
+  copy?: Record<string, string>;
+  hidden?: string[];
+  deleteProducts?: string[];
+  products?: { id?: string; name: string; price: number; oldPrice?: number; image?: string }[];
+}
+
+export const saveAppearance = (id: string, input: SaveAppearanceInput) =>
+  apiFetch<{ store: Store }>(`${s(id)}/appearance`, { method: "PUT", ...json(input) });
 
 export const deleteStore = (id: string) =>
   apiFetch<{ ok: true }>(s(id), { method: "DELETE" });

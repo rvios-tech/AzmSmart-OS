@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/table";
 import { ApiError } from "@/lib/api/client";
 import {
-  listPlatformStores, setPlatformStoreStatus, setPlatformStoreVerified, type PlatformShopStore,
+  listPlatformStores, setPlatformStoreStatus, setPlatformStoreVerified, unlockPlatformStoreAppearance, type PlatformShopStore,
 } from "@/lib/api/platform";
 import { formatDateShort, formatNumber } from "@/lib/format";
 import { storeUrl } from "@/lib/shop/constants";
@@ -45,11 +45,11 @@ export default function PlatformStoresPage() {
     };
   }, [q]);
 
-  async function act(id: string, fn: () => Promise<PlatformShopStore>, ok: string) {
+  async function act(id: string, fn: () => Promise<Partial<PlatformShopStore>>, ok: string) {
     setBusy(id);
     try {
       const u = await fn();
-      setRows((prev) => prev?.map((r) => (r.id === id ? { ...r, status: u.status, verified: u.verified } : r)) ?? prev);
+      setRows((prev) => prev?.map((r) => (r.id === id ? { ...r, status: u.status ?? r.status, verified: u.verified ?? r.verified, appearanceLockedUntil: u.appearanceLockedUntil === undefined ? r.appearanceLockedUntil : u.appearanceLockedUntil } : r)) ?? prev);
       toast.success(ok);
     } catch (err) {
       toast.error(err instanceof ApiError ? err.message : "تعذّر تنفيذ الإجراء.");
@@ -109,6 +109,12 @@ export default function PlatformStoresPage() {
                         onClick={() => void act(s.id, () => setPlatformStoreVerified(s.id, !s.verified), s.verified ? "أُزيل التوثيق" : "وُثّق المتجر")}>
                         {s.verified ? "إلغاء التوثيق" : "توثيق"}
                       </Button>
+                      {s.appearanceLockedUntil && new Date(s.appearanceLockedUntil) > new Date() && (
+                        <Button size="sm" variant="outline" disabled={busy === s.id}
+                          onClick={() => void act(s.id, () => unlockPlatformStoreAppearance(s.id), "فُتح تعديل شكل المتجر")}>
+                          فتح تعديل الشكل
+                        </Button>
+                      )}
                     </div>
                   </TableCell>
                 </TableRow>

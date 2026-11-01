@@ -123,6 +123,7 @@ const CRUMB_LABELS: Record<string, string> = {
   services: "الخدمات",
   portfolio: "معرض الأعمال",
   plan: "الاشتراك",
+  appearance: "شكل المتجر",
   edit: "تعديل",
 };
 

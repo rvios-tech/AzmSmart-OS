@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { IconLoader2 } from "@tabler/icons-react";
 
+import { GoogleButton } from "@/components/auth/google-button";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -44,6 +45,8 @@ export default function LoginPage() {
           أدخل بيانات اعتمادك للوصول إلى حسابك.
         </p>
       </div>
+
+      <GoogleButton />
 
       <form className="space-y-4" onSubmit={handleSubmit}>
         {error && (
