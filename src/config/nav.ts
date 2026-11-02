@@ -81,9 +81,10 @@ export type NavItem = {
 /**
  * من يرى المجموعة. `all` (الافتراضي) لكل مستخدم؛ الباقي بحسب `useWorkspace`:
  * `platform` فريق المنصة · `site` مدير الموقع الرئيسي · `store` صاحب متجر.
+ * `off` مخفيّة حتى تُفعَّل وحدتها (الصفحات تبقى بروابطها).
  * الإخفاء للرسم فقط — المنع الفعلي في الباكند.
  */
-export type NavAudience = "all" | "platform" | "site" | "store";
+export type NavAudience = "all" | "platform" | "site" | "store" | "off";
 
 export type NavGroup = {
   label: string;
@@ -145,33 +146,17 @@ export const navGroups: NavGroup[] = [
     ],
   },
   {
-    label: "مساحة العمل",
+    label: "الفريق",
     items: [
-      {
-        title: "العملاء",
-        icon: IconUsers,
-        items: [
-          { title: "كل العملاء", url: "/customers" },
-          { title: "إضافة عميل", url: "/customers/new" },
-        ],
-      },
-      {
-        title: "الفواتير",
-        icon: IconFileInvoice,
-        items: [
-          { title: "كل الفواتير", url: "/invoices" },
-          { title: "فاتورة جديدة", url: "/invoices/new" },
-        ],
-      },
-      { title: "المشاريع", url: "/projects", icon: IconFolders },
       { title: "الفريق", url: "/team", icon: IconUsersGroup },
       { title: "الأدوار والصلاحيات", url: "/roles", icon: IconShieldLock },
-      { title: "جهات الاتصال", url: "/contacts", icon: IconAddressBook },
       { title: "النشاط", url: "/activity", icon: IconActivity },
     ],
   },
   {
     label: "التطبيقات",
+    // لا عمل لها بعد في حسابات المتاجر — تظهر حين تُفعَّل
+    audience: "off",
     items: [
       { title: "المساعد الذكي", url: "/apps/ai-chat", icon: IconSparkles, badge: "جديد" },
       { title: "المحادثات", url: "/apps/chat", icon: IconMessageCircle },
@@ -195,7 +180,8 @@ export const navGroups: NavGroup[] = [
   },
   {
     label: "لوحات القوالب",
-    audience: "platform",
+    // صفحات عرض من قالب الواجهة الأصلي — ليست جزءًا من النظام
+    audience: "off",
     items: [
       { title: "إدارة العملاء", url: "/dashboard/crm", icon: IconUsers },
       { title: "الأصول الرقمية", url: "/dashboard/crypto", icon: IconCoin, badge: "جديد" },
@@ -207,7 +193,8 @@ export const navGroups: NavGroup[] = [
   },
   {
     label: "الصفحات",
-    audience: "platform",
+    // صفحات عرض من قالب الواجهة الأصلي — ليست جزءًا من النظام
+    audience: "off",
     items: [
       { title: "الأسعار", url: "/pricing", icon: IconTag },
       { title: "نتائج البحث", url: "/search", icon: IconSearch },
@@ -241,7 +228,8 @@ export const navGroups: NavGroup[] = [
   },
   {
     label: "واجهة المستخدم والأمثلة",
-    audience: "platform",
+    // صفحات عرض من قالب الواجهة الأصلي — ليست جزءًا من النظام
+    audience: "off",
     items: [
       { title: "جدول البيانات", url: "/examples/data-table", icon: IconTable },
       { title: "المخططات", url: "/examples/charts", icon: IconChartPie },

@@ -58,7 +58,15 @@ export interface PlatformOverview {
     graceSubscriptions: number;
     expiringSoon: number;
     pendingInvoices: number;
+    pendingRequests: number;
+    staff: number;
+    newUsers7d: number;
+    revenueMonth: number;
+    openInvoicesAmount: number;
   };
+  recentRequests: { id: string; name: string; slug: string; template: string; createdAt: string; organization: { name: string } }[];
+  recentStores: { id: string; name: string; slug: string; status: number; template: string; createdAt: string; organization: { name: string }; products: number; orders: number }[];
+  recentUsers: { id: string; email: string; displayName: string; createdAt: string; isPlatformStaff: boolean }[];
   plans: { plan: number; count: number }[];
   series: { month: string; revenue: number; companies: number; stores: number }[];
 }

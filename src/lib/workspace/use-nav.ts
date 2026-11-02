@@ -14,7 +14,11 @@ export function useNavGroups(): NavGroup[] {
   return useMemo(
     () =>
       navGroups.filter((g) => {
+        // حساب فريق المنصة معزول: لوحة الإدارة وحسابه فقط — لا متجر ولا مساحة عمل
+        if (isPlatform) return g.audience === "platform" || (isSite && g.audience === "site") || g.label === "الحساب";
         switch (g.audience ?? "all") {
+          case "off":
+            return false;
           case "platform":
             return isPlatform;
           case "site":

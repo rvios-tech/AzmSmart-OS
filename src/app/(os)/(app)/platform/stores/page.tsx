@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { toast } from "sonner";
 import { IconBuildingStore, IconLoader2, IconRosetteDiscountCheck, IconSearch } from "@tabler/icons-react";
 
@@ -124,6 +125,9 @@ export default function PlatformStoresPage() {
                           فتح تعديل الشكل
                         </Button>
                       )}
+                      <Button size="sm" variant="outline" asChild>
+                        <Link href={`/platform/stores/${s.id}/appearance`}>تعديل الشكل</Link>
+                      </Button>
                       {isAdmin && (
                         <Button size="sm" variant="ghost" className="text-destructive" disabled={busy === s.id} onClick={() => setDeleting(s)}>
                           حذف

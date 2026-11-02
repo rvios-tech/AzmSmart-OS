@@ -25,7 +25,7 @@ export interface Store {
   banner: string;
   showcase: string;
   /** تعديلات «شكل المتجر» على القالب الأساسي */
-  appearance: { copy?: Record<string, string>; hidden?: string[] } | null;
+  appearance: { copy?: Record<string, string>; hidden?: string[]; images?: Record<string, string> } | null;
   /** يُقفل المحرر بعد كل حفظ أسبوعًا — أو حتى يفتحه فريق RVIOS */
   appearanceLockedUntil: string | null;
   color: string;
@@ -117,6 +117,7 @@ export interface SaveAppearanceInput {
   showcase?: string;
   copy?: Record<string, string>;
   hidden?: string[];
+  images?: Record<string, string>;
   deleteProducts?: string[];
   products?: { id?: string; name: string; price: number; oldPrice?: number; image?: string }[];
 }

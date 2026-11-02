@@ -6,7 +6,7 @@ import { IconLoader2, IconPhotoPlus, IconUpload } from "@tabler/icons-react";
 
 import { Button } from "@/components/ui/button";
 import { ApiError } from "@/lib/api/client";
-import { ACCEPTED_IMAGE_TYPES, MAX_IMAGE_BYTES, uploadImage } from "@/lib/api/uploads";
+import { ACCEPTED_IMAGE_TYPES, MAX_IMAGE_BYTES, uploadImage, type UploadedImage } from "@/lib/api/uploads";
 
 function validate(file: File): string | null {
   if (!ACCEPTED_IMAGE_TYPES.includes(file.type)) return "الصيغة غير مدعومة — استخدم JPG أو PNG أو WebP أو GIF";
@@ -25,8 +25,11 @@ export function ImageUploadButton({
   variant = "outline",
   size = "sm",
   storeId,
+  uploader,
 }: {
   onUploaded: (url: string) => void;
+  /** رفع بديل — لوحة المنصة ترفع إلى مجلد متجر تاجر عبر مسارها */
+  uploader?: (file: File) => Promise<UploadedImage>;
   /** يضع الصورة في مجلد هذا المتجر في التخزين */
   storeId?: string;
   label?: string;
@@ -44,7 +47,7 @@ export function ImageUploadButton({
     if (problem) return toast.error(problem);
     setBusy(true);
     try {
-      const up = await uploadImage(file, storeId);
+      const up = await (uploader ? uploader(file) : uploadImage(file, storeId));
       onUploaded(up.url);
     } catch (err) {
       toast.error(err instanceof ApiError ? err.message : "تعذّر رفع الصورة.");

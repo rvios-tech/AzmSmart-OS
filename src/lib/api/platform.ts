@@ -1,3 +1,4 @@
+import type { ProductsResponse, SaveAppearanceInput, Store } from "./shop";
 import { apiFetch } from "./client";
 
 export interface PlatformMe {
@@ -265,3 +266,10 @@ export const listPlatformUsers = (q?: string, staffOnly = false) => {
 
 export const setPlatformUserRole = (id: string, role: 0 | 1 | 2 | null) =>
   apiFetch<{ id: string; isPlatformStaff: boolean; platformRole: number | null }>(`/platform/users/${id}/staff`, { method: "PATCH", body: JSON.stringify({ role }) });
+
+// ── محرر شكل المتجر من لوحة المنصة (بلا قفل الأسبوع) ─────────────
+export const getTeamStoreEditor = (id: string) =>
+  apiFetch<{ store: Store } & ProductsResponse>(`/platform/shop-stores/${id}/editor`);
+
+export const saveTeamAppearance = (id: string, input: SaveAppearanceInput) =>
+  apiFetch<{ store: Store }>(`/platform/shop-stores/${id}/appearance`, { method: "PUT", body: JSON.stringify(input) });

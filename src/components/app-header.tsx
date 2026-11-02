@@ -115,6 +115,7 @@ const CRUMB_LABELS: Record<string, string> = {
   new: "جديد",
   store: "المتجر",
   platform: "إدارة المنصة",
+  stores: "المتاجر",
   companies: "الشركات",
   subscriptions: "اشتراكات المتاجر",
   site: "الموقع الرئيسي",
