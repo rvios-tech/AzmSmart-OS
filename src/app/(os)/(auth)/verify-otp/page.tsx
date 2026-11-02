@@ -9,6 +9,7 @@ import { ApiError } from "@/lib/api/client";
 import { resendCode } from "@/lib/api/auth";
 import { useAuth } from "@/lib/auth/auth-context";
 import { readPendingEmail } from "@/lib/auth/pending";
+import { afterAuthPath } from "@/lib/shop/store-draft";
 import { formatNumber } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
@@ -87,7 +88,7 @@ export default function VerifyOtpPage() {
     setSubmitting(true);
     try {
       await verifyEmailCode(code);
-      router.push("/dashboard");
+      router.push(afterAuthPath());
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "تعذّر التحقق. حاول مجدداً.");
       setDigits(Array(LENGTH).fill(""));
@@ -121,7 +122,7 @@ export default function VerifyOtpPage() {
         <p className="text-sm text-muted-foreground">
           أرسلنا رمزاً من 6 أرقام إلى{" "}
           <span className="font-medium text-foreground" dir="ltr">{email}</span>
-          . أدخله أدناه للمتابعة، وإن لم تجده فانظر في مجلد الرسائل غير المرغوبة.
+          . أدخله أدناه للمتابعة.
         </p>
       </div>
 

@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import { IconLoader2 } from "@tabler/icons-react";
 
 import { GoogleButton } from "@/components/auth/google-button";
+import { DraftNotice } from "@/components/shop/draft-notice";
+import { afterAuthPath } from "@/lib/shop/store-draft";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -27,7 +29,7 @@ export default function LoginPage() {
     setSubmitting(true);
     try {
       const needsCode = await login(email, password);
-      router.push(needsCode ? "/verify-otp" : "/dashboard");
+      router.push(needsCode ? "/verify-otp" : afterAuthPath());
     } catch (err) {
       setError(
         err instanceof ApiError ? err.message : "تعذّر تسجيل الدخول. حاول مجدداً.",
@@ -45,6 +47,8 @@ export default function LoginPage() {
           أدخل بيانات اعتمادك للوصول إلى حسابك.
         </p>
       </div>
+
+      <DraftNotice />
 
       <GoogleButton />
 

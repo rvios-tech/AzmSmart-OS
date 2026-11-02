@@ -44,7 +44,7 @@ export interface Store {
   savedCustomDomain: string | null;
   plan: Plan;
   verified: boolean;
-  /** 0=نشط · 1=موقوف */
+  /** 0=نشط · 1=موقوف · 2=طلب بانتظار تفعيل فريق المنصة */
   status: number;
   country: string;
   currency: string;
@@ -71,6 +71,10 @@ export interface CreateStoreInput {
   tagline?: string;
   color?: string;
   colorDeep?: string;
+  /** باقة مدفوعة: المتجر طلبٌ يفعّله فريق المنصة بعد الدفع، ومعه فاتورتا الباقة والقالب */
+  plan?: "plus" | "pro";
+  months?: 1 | 12;
+  template?: string;
 }
 
 export type UpdateStoreInput = Partial<
@@ -120,8 +124,9 @@ export interface SaveAppearanceInput {
 export const saveAppearance = (id: string, input: SaveAppearanceInput) =>
   apiFetch<{ store: Store }>(`${s(id)}/appearance`, { method: "PUT", ...json(input) });
 
-export const deleteStore = (id: string) =>
-  apiFetch<{ ok: true }>(s(id), { method: "DELETE" });
+/** `confirm` = رابط المتجر — يلزم لحذف المتجر الوحيد */
+export const deleteStore = (id: string, confirm?: string) =>
+  apiFetch<{ ok: true }>(`${s(id)}${confirm ? `?confirm=${encodeURIComponent(confirm)}` : ""}`, { method: "DELETE" });
 
 export const checkSlug = (q: string, except?: string) =>
   apiFetch<SlugCheck>(

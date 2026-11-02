@@ -3,6 +3,8 @@
 import Link from "next/link";
 import {
   IconAlertTriangle,
+  IconBrandWhatsapp,
+  IconClockHour4,
   IconBuildingStore,
   IconLoader2,
   IconLock,
@@ -11,6 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useStore } from "@/lib/shop/store-context";
+import { teamWhatsapp } from "@/lib/contact";
 import type { Store } from "@/lib/api/shop";
 
 /**
@@ -77,6 +80,26 @@ export function RequireStore({
           </p>
         </CardContent>
       </Card>
+    );
+  }
+
+  if (store.status === 2) {
+    const text = `مرحبًا فريق RVIOS، أريد إكمال الدفع وتفعيل متجري «${store.name}» (${store.slug}).`;
+    return (
+      <div className="space-y-4">
+        <Card className="border-amber-500/40 bg-amber-500/5">
+          <CardContent className="flex flex-wrap items-center justify-between gap-3 py-4 text-sm">
+            <span className="flex items-center gap-2">
+              <IconClockHour4 className="size-4 shrink-0" />
+              متجرك بانتظار التفعيل: أكمل الدفع مع فريق RVIOS فيتفعّل بالباقة والقالب اللذين اخترتهما. يمكنك تجهيز منتجاتك الآن.
+            </span>
+            <Button size="sm" variant="outline" asChild>
+              <a href={teamWhatsapp(text)} target="_blank" rel="noopener noreferrer"><IconBrandWhatsapp className="size-4" /> تواصل مع الفريق</a>
+            </Button>
+          </CardContent>
+        </Card>
+        {children(store)}
+      </div>
     );
   }
 

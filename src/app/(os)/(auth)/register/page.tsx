@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import { IconLoader2 } from "@tabler/icons-react";
 
 import { GoogleButton } from "@/components/auth/google-button";
+import { DraftNotice } from "@/components/shop/draft-notice";
+import { afterAuthPath } from "@/lib/shop/store-draft";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -29,7 +31,7 @@ export default function RegisterPage() {
     setSubmitting(true);
     try {
       const needsCode = await register({ email, password, displayName, companyName });
-      router.push(needsCode ? "/verify-otp" : "/dashboard");
+      router.push(needsCode ? "/verify-otp" : afterAuthPath());
     } catch (err) {
       setError(
         err instanceof ApiError ? err.message : "تعذّر إنشاء الحساب. حاول مجدداً.",
@@ -47,6 +49,8 @@ export default function RegisterPage() {
           حساب وشركة جديدة معاً — تصير مالك شركتك فور التسجيل.
         </p>
       </div>
+
+      <DraftNotice />
 
       <GoogleButton />
 

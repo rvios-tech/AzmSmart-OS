@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 
 import { ApiError } from "@/lib/api/client";
 import { useAuth } from "@/lib/auth/auth-context";
+import { afterAuthPath } from "@/lib/shop/store-draft";
 
 const CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
 const SCRIPT = "https://accounts.google.com/gsi/client";
@@ -62,7 +63,7 @@ export function GoogleButton() {
           setError(null);
           try {
             const isNew = await loginWithGoogle(credential);
-            router.push(isNew ? "/store/new" : "/dashboard");
+            router.push(isNew ? "/store/new" : afterAuthPath());
           } catch (err) {
             setError(err instanceof ApiError ? err.message : "تعذّر الدخول بحساب Google.");
           }

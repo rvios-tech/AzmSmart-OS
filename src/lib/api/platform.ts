@@ -216,3 +216,52 @@ export function updatePlatformSettings(values: Record<string, string | number | 
     body: JSON.stringify({ values }),
   });
 }
+
+// ── طلبات المتاجر المدفوعة ───────────────────────────────
+export interface StoreRequest {
+  id: string;
+  name: string;
+  slug: string;
+  whatsapp: string;
+  country: string;
+  template: string;
+  createdAt: string;
+  company: { id: string; name: string };
+  owner: { email: string; displayName: string } | null;
+  invoices: { id: string; invoiceNumber: string; kind: number; plan: number | null; months: number | null; item: string | null; amount: string; currency: string; status: number }[];
+  total: number;
+}
+
+export const listStoreRequests = () => apiFetch<StoreRequest[]>("/platform/shop-stores/requests");
+
+export const activateStoreRequest = (id: string, paymentReference?: string) =>
+  apiFetch<{ ok: true }>(`/platform/shop-stores/${id}/activate`, { method: "POST", body: JSON.stringify({ paymentReference }) });
+
+export const rejectStoreRequest = (id: string, reason?: string) =>
+  apiFetch<{ ok: true }>(`/platform/shop-stores/${id}/reject`, { method: "POST", body: JSON.stringify({ reason }) });
+
+/** حذف متجر نهائيًا — للمدير العام وحده */
+export const deletePlatformStore = (id: string) =>
+  apiFetch<{ ok: true }>(`/platform/shop-stores/${id}`, { method: "DELETE" });
+
+// ── الحسابات وصلاحيات فريق المنصة ─────────────────────────
+export interface PlatformUser {
+  id: string;
+  email: string;
+  displayName: string;
+  createdAt: string;
+  lastLoginAt: string | null;
+  emailVerifiedAt: string | null;
+  isPlatformStaff: boolean;
+  platformRole: number | null;
+  google: boolean;
+  companies: { id: string; name: string; role: number }[];
+}
+
+export const listPlatformUsers = (q?: string, staffOnly = false) => {
+  const qs = new URLSearchParams({ ...(q ? { q } : {}), ...(staffOnly ? { staff: "1" } : {}) }).toString();
+  return apiFetch<PlatformUser[]>(`/platform/users${qs ? `?${qs}` : ""}`);
+};
+
+export const setPlatformUserRole = (id: string, role: 0 | 1 | 2 | null) =>
+  apiFetch<{ id: string; isPlatformStaff: boolean; platformRole: number | null }>(`/platform/users/${id}/staff`, { method: "PATCH", body: JSON.stringify({ role }) });

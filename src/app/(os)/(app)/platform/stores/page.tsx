@@ -14,12 +14,19 @@ import {
 } from "@/components/ui/table";
 import { ApiError } from "@/lib/api/client";
 import {
-  listPlatformStores, setPlatformStoreStatus, setPlatformStoreVerified, unlockPlatformStoreAppearance, type PlatformShopStore,
+  deletePlatformStore, listPlatformStores, setPlatformStoreStatus, setPlatformStoreVerified, unlockPlatformStoreAppearance, type PlatformShopStore,
 } from "@/lib/api/platform";
 import { formatDateShort, formatNumber } from "@/lib/format";
 import { storeUrl } from "@/lib/shop/constants";
+import { useWorkspace } from "@/lib/workspace/workspace-context";
+import {
+  AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export default function PlatformStoresPage() {
+  const { ctx } = useWorkspace();
+  const isAdmin = ctx?.platformRole === 2;
+  const [deleting, setDeleting] = useState<PlatformShopStore | null>(null);
   const [rows, setRows] = useState<PlatformShopStore[] | null>(null);
   const [q, setQ] = useState("");
   const [busy, setBusy] = useState<string | null>(null);
@@ -95,16 +102,18 @@ export default function PlatformStoresPage() {
                   <TableCell className="tabular-nums">{formatNumber(s._count.products)}</TableCell>
                   <TableCell className="tabular-nums">{formatNumber(s._count.orders)}</TableCell>
                   <TableCell>
-                    {s.status === 1
+                    {s.status === 2
+                      ? <Badge variant="secondary" className="bg-amber-500/10 text-amber-600">بانتظار التفعيل</Badge>
+                      : s.status === 1
                       ? <Badge variant="secondary" className="bg-rose-500/10 text-rose-600">معلَّق</Badge>
                       : <Badge variant="secondary" className="bg-emerald-500/10 text-emerald-600">نشط</Badge>}
                   </TableCell>
                   <TableCell className="pe-6">
                     <div className="flex gap-1.5">
-                      <Button size="sm" variant="outline" disabled={busy === s.id}
+                      {s.status !== 2 && <Button size="sm" variant="outline" disabled={busy === s.id}
                         onClick={() => void act(s.id, () => setPlatformStoreStatus(s.id, s.status !== 1), s.status === 1 ? "أُعيد تفعيل المتجر" : "عُلّق المتجر")}>
                         {s.status === 1 ? "تفعيل" : "تعليق"}
-                      </Button>
+                      </Button>}
                       <Button size="sm" variant="outline" disabled={busy === s.id}
                         onClick={() => void act(s.id, () => setPlatformStoreVerified(s.id, !s.verified), s.verified ? "أُزيل التوثيق" : "وُثّق المتجر")}>
                         {s.verified ? "إلغاء التوثيق" : "توثيق"}
@@ -113,6 +122,11 @@ export default function PlatformStoresPage() {
                         <Button size="sm" variant="outline" disabled={busy === s.id}
                           onClick={() => void act(s.id, () => unlockPlatformStoreAppearance(s.id), "فُتح تعديل شكل المتجر")}>
                           فتح تعديل الشكل
+                        </Button>
+                      )}
+                      {isAdmin && (
+                        <Button size="sm" variant="ghost" className="text-destructive" disabled={busy === s.id} onClick={() => setDeleting(s)}>
+                          حذف
                         </Button>
                       )}
                     </div>
@@ -126,6 +140,31 @@ export default function PlatformStoresPage() {
           </Table>
         </CardContent>
       </Card>
+      <AlertDialog open={!!deleting} onOpenChange={(o) => !o && setDeleting(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>حذف متجر {deleting?.name} نهائيًا؟</AlertDialogTitle>
+            <AlertDialogDescription>يُحذف المتجر بمنتجاته وطلباته وصوره، ويتحرر رابطه. لا يمكن التراجع. للإيقاف المؤقت استعمل «تعليق».</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>إلغاء</AlertDialogCancel>
+            <Button variant="destructive" disabled={!!deleting && busy === deleting.id} onClick={() => void (async () => {
+              const s = deleting!;
+              setBusy(s.id);
+              try {
+                await deletePlatformStore(s.id);
+                setRows((prev) => prev?.filter((r) => r.id !== s.id) ?? prev);
+                toast.success(`حُذف متجر ${s.name}`);
+                setDeleting(null);
+              } catch (err) {
+                toast.error(err instanceof ApiError ? err.message : "تعذّر حذف المتجر.");
+              } finally {
+                setBusy(null);
+              }
+            })()}>حذف نهائي</Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

@@ -22,6 +22,7 @@ import { COUNTRIES, PAY_METHOD_LABEL, SECTORS } from "@/lib/shop/constants";
 import { useStore } from "@/lib/shop/store-context";
 import { TemplatePicker } from "@/components/shop/template-picker";
 import { DomainCard } from "@/components/shop/domain-card";
+import { DeleteStoreCard } from "@/components/shop/delete-store-card";
 
 function SettingsView({ store }: { store: Store }) {
   const { reload } = useStore();
@@ -153,6 +154,7 @@ function SettingsView({ store }: { store: Store }) {
       </form>
       {/* خارج النموذج: يُحفظ وحده، و Enter فيه لا يحفظ بقية الإعدادات */}
       <DomainCard store={store} />
+      <DeleteStoreCard store={store} />
     </div>
   );
 }

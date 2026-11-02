@@ -16,9 +16,10 @@ import {
 } from "@/components/ui/select";
 import { ApiError } from "@/lib/api/client";
 import {
-  checkSlug, createShopInvoice, createStore, getPricing, type Plan, type Pricing, type SlugCheck,
+  checkSlug, createStore, getPricing, type Plan, type Pricing, type SlugCheck,
 } from "@/lib/api/shop";
 import { teamWhatsapp } from "@/lib/contact";
+import { clearDraft, readDraft } from "@/lib/shop/store-draft";
 import { formatBilling } from "@/lib/format";
 import {
   COUNTRIES, PLAN_LABEL, SECTORS, STOREFRONT_URL, STORE_TEMPLATES, TEMPLATE_TIER_LABEL,
@@ -40,20 +41,24 @@ export default function NewStorePage() {
   const router = useRouter();
   const { reload, setActive, slots } = useStore();
 
-  const [step, setStep] = useState(0);
-  const [templateId, setTemplateId] = useState("essential");
-  const [plan, setPlan] = useState<Plan>("basic");
-  const [billing, setBilling] = useState<Billing>("month");
+  // طلب بدأه التاجر في منصة المتاجر: يكمله هنا من الخطوة الأخيرة. اللوحة لا تُرسم قبل الجلسة،
+  // فالقراءة الأولى في المتصفح دائمًا
+  const [draft] = useState(() => (typeof window === "undefined" ? null : readDraft()));
+  const dial = draft ? COUNTRIES.find((c) => draft.whatsapp.startsWith(String(c.dial))) : undefined;
+  const [step, setStep] = useState(draft ? (draft.plan === "basic" ? 2 : 3) : 0);
+  const [templateId, setTemplateId] = useState(draft?.template && STORE_TEMPLATES.some((t) => t.id === draft.template) ? draft.template : "essential");
+  const [plan, setPlan] = useState<Plan>(draft?.plan ?? "basic");
+  const [billing, setBilling] = useState<Billing>(draft?.billing ?? "month");
   const [pricing, setPricing] = useState<Pricing | null>(null);
 
-  const [name, setName] = useState("");
-  const [slug, setSlug] = useState("");
+  const [name, setName] = useState(draft?.name ?? "");
+  const [slug, setSlug] = useState(draft?.slug ?? "");
   const [sector, setSector] = useState("other");
-  const [country, setCountry] = useState("YE");
-  const [whatsapp, setWhatsapp] = useState("");
+  const [country, setCountry] = useState<string>(dial?.code ?? "YE");
+  const [whatsapp, setWhatsapp] = useState(draft ? (dial ? draft.whatsapp.slice(String(dial.dial).length) : draft.whatsapp) : "");
   const [city, setCity] = useState("");
   const [tagline, setTagline] = useState("");
-  const [color, setColor] = useState(COLORS[0]);
+  const [color, setColor] = useState(draft?.color ?? COLORS[0]);
   const [saving, setSaving] = useState(false);
   const [check, setCheck] = useState<SlugCheck | null>(null);
   const [checking, setChecking] = useState(false);
@@ -119,21 +124,13 @@ export default function NewStorePage() {
     const wa = paid ? window.open("", "_blank") : null;
     setSaving(true);
     try {
+      // المدفوع طلبٌ: يُحجز المتجر بانتظار الفريق، ويتفعّل بالباقة والقالب بعد الدفع
       const { store } = await createStore({
         name: name.trim(), slug: slug.trim() || undefined, sector, country, whatsapp: whatsapp.trim(),
         city: city.trim() || undefined, tagline: tagline.trim() || undefined, color, colorDeep: color,
+        ...(paid ? { plan: plan as "plus" | "pro", months: billing === "year" ? 12 : 1, template: templateId } : {}),
       });
-      if (paid) {
-        await createShopInvoice({ storeRef: store.id, kind: 0, plan: plan as "plus" | "pro", months: billing === "year" ? 12 : 1 });
-        if (premium) {
-          try {
-            await createShopInvoice({ storeRef: store.id, kind: 4, template: templateId });
-          } catch (err) {
-            // مشمول في الباقة: يختاره من إعدادات المتجر بعد تفعيلها
-            if (!(err instanceof ApiError && err.status === 409)) throw err;
-          }
-        }
-      }
+      clearDraft();
       await reload();
       setActive(store.id);
       if (!paid) {
@@ -152,11 +149,11 @@ export default function NewStorePage() {
         wa.opener = null;
         wa.location.href = teamWhatsapp(message);
       }
-      toast.success("حفظنا طلبك — أكمل الدفع مع الفريق على واتساب", {
+      toast.success("وصل طلبك إلى فريق RVIOS — أكمل الدفع معهم على واتساب ليتفعّل متجرك", {
         action: { label: "واتساب", onClick: () => window.open(teamWhatsapp(message), "_blank", "noopener") },
         duration: 15000,
       });
-      router.push("/store/plan");
+      router.push("/dashboard");
     } catch (err) {
       wa?.close();
       toast.error(err instanceof ApiError ? err.message : "تعذّر إنشاء المتجر.");
@@ -168,6 +165,14 @@ export default function NewStorePage() {
   return (
     <div className="mx-auto max-w-6xl space-y-6">
       <PageHeader title="متجر جديد" description="القالب، ثم الباقة، ثم بيانات متجرك." />
+
+      {draft && (
+        <Card className="border-primary/30 bg-primary/5">
+          <CardContent className="py-3 text-sm">
+            أكملنا طلبك من منصة المتاجر بالقالب والباقة والبيانات التي اخترتها — راجعها ثم {paid ? "تواصل مع الفريق لإكمال الدفع" : "أنشئ متجرك"}.
+          </CardContent>
+        </Card>
+      )}
 
       <ol className="flex flex-wrap gap-2 text-sm">
         {steps.map((s, i) => (
@@ -351,9 +356,9 @@ export default function NewStorePage() {
                 </div>
                 <ol className="space-y-3 text-sm">
                   {[
-                    ["اضغط «تواصل مع الفريق»", "نحفظ بيانات متجرك، ويفتح واتساب برسالة جاهزة فيها تفاصيل طلبك."],
+                    ["اضغط «تواصل مع الفريق»", "يصل طلبك إلى فريق RVIOS، ويفتح واتساب برسالة جاهزة فيها تفاصيله."],
                     ["أكمل الدفع مع الفريق", "يرسل لك الفريق طرق الدفع المتاحة في بلدك ويؤكد استلام المبلغ."],
-                    ["يتفعّل متجرك", "تتفعّل الباقة والقالب، وتجد فواتيرك في صفحة الاشتراك."],
+                    ["يفعّل الفريق متجرك", "بعد استلام الدفع يفعّله الفريق بالباقة والقالب اللذين اخترتهما، وحتى ذلك يمكنك تجهيز منتجاتك."],
                   ].map(([t, d], i) => (
                     <li key={t} className="flex gap-3 rounded-lg border p-3">
                       <span className="grid size-6 shrink-0 place-items-center rounded-full bg-primary text-xs text-primary-foreground tabular-nums">{i + 1}</span>
