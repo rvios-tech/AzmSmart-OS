@@ -297,14 +297,25 @@ export interface OrdersResponse {
 
 export const listOrders = (
   storeId: string,
-  params: { status?: number; page?: number } = {},
-) => {
+  params: { status?: number; page?: number; q?: string } = {},
+) => apiFetch<OrdersResponse>(`${s(storeId)}/orders${orderQuery(params)}`);
+
+export type ExportedOrder = Pick<Order,
+  "ref" | "createdAt" | "status" | "payMethod" | "payStatus" | "custName" | "custPhone" | "custAddress"
+  | "zoneName" | "note" | "subtotal" | "deliveryFee" | "total"> & { items: { name: string; qty: number }[] };
+
+/** السجل كاملًا بالمرشّح الحالي (حتى ٥٠٠٠ طلب) — للمدير فأعلى */
+export const exportOrders = (storeId: string, params: { status?: number; q?: string } = {}) =>
+  apiFetch<{ orders: ExportedOrder[]; truncated: boolean }>(`${s(storeId)}/orders/export${orderQuery(params)}`);
+
+function orderQuery(params: { status?: number; page?: number; q?: string }) {
   const q = new URLSearchParams();
   if (params.status !== undefined) q.set("status", String(params.status));
   if (params.page) q.set("page", String(params.page));
+  if (params.q?.trim()) q.set("q", params.q.trim());
   const qs = q.toString();
-  return apiFetch<OrdersResponse>(`${s(storeId)}/orders${qs ? `?${qs}` : ""}`);
-};
+  return qs ? `?${qs}` : "";
+}
 
 export const getOrder = (storeId: string, id: string) =>
   apiFetch<Order>(`${s(storeId)}/orders/${id}`);
