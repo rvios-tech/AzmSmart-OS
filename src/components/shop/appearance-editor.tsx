@@ -23,6 +23,7 @@ import type { UploadedImage } from "@/lib/api/uploads";
 import { teamWhatsapp } from "@/lib/contact";
 import { formatDateShort, formatNumber } from "@/lib/format";
 import { STOREFRONT_URL, storeUrl, templateName } from "@/lib/shop/constants";
+import { BODY_FONTS, DISPLAY_FONTS, SOCIAL_NETWORKS, SOCIAL_PLACEMENTS } from "@/lib/shop/store-fonts";
 import { cn } from "@/lib/utils";
 
 const COLORS = ["#9E2226", "#2F5D50", "#1F4E79", "#7A4B1E", "#5B2A6E", "#A8641B", "#2C2C2C", "#0F766E"];
@@ -43,7 +44,12 @@ type ImageKey = keyof typeof IMAGES;
 const isImage = (k: string): k is ImageKey => k in IMAGES;
 
 interface DraftProduct { key: string; id?: string; name: string; price: number; oldPrice: number | null; image: string; categoryId: string | null }
-interface Draft { name: string; color: string; logo: string; banner: string; showcase: string; copy: Record<string, string>; hidden: string[]; images: Record<string, string> }
+interface Draft {
+  name: string; color: string; logo: string; banner: string; showcase: string; copy: Record<string, string>; hidden: string[]; images: Record<string, string>;
+  fonts: { display?: string; body?: string };
+  /** حسابات التواصل ومكان عرضها (`placement`) */
+  social: Record<string, string>;
+}
 /** ما يصفه المتجر المعروض عن قالبه: نصوصه وصوره */
 interface Schema { copy: { key: string; text: string }[]; images: Map<string, string> }
 
@@ -58,6 +64,7 @@ export interface AppearanceApi {
 const initialDraft = (s: Store): Draft => ({
   name: s.name, color: s.color, logo: s.logo, banner: s.banner, showcase: s.showcase,
   copy: { ...s.appearance?.copy }, hidden: [...(s.appearance?.hidden ?? [])], images: { ...s.appearance?.images },
+  fonts: { ...s.appearance?.fonts }, social: { ...s.appearance?.social },
 });
 
 /** ما يعرضه القالب الأساسي لنصٍّ لم يُعدَّل بعد — كما في `mergeStore` بمنصة المتاجر */
@@ -141,7 +148,7 @@ export function AppearanceEditor({ store, api, team = false }: { store: Store; a
           slug: store.slug, name: draft.name, color: draft.color, whatsapp: store.whatsapp, template: store.template,
           planTier: { basic: "free", plus: "pro", pro: "biz" }[store.plan], customDomain: null, createdAt: store.createdAt,
           tagline: store.tagline, about: store.about, city: store.city,
-          logo: draft.logo, banner: draft.banner, showcase: draft.showcase, appearance: { copy: draft.copy, hidden: draft.hidden, images: draft.images },
+          logo: draft.logo, banner: draft.banner, showcase: draft.showcase, appearance: { copy: draft.copy, hidden: draft.hidden, images: draft.images, fonts: draft.fonts, social: draft.social },
         },
         products: products.map((p) => ({ id: p.key, categoryId: p.categoryId, name: p.name, description: "", price: p.price, oldPrice: p.oldPrice, image: p.image })),
       },
@@ -174,7 +181,7 @@ export function AppearanceEditor({ store, api, team = false }: { store: Store; a
       });
       await api.save({
         name: draft.name, color: draft.color, logo: draft.logo, banner: draft.banner, showcase: draft.showcase,
-        copy: draft.copy, hidden: draft.hidden, images: draft.images, deleteProducts: deleted,
+        copy: draft.copy, hidden: draft.hidden, images: draft.images, fonts: draft.fonts, social: draft.social, deleteProducts: deleted,
         products: changed.map((p) => {
           const was = original.find((o) => o.key === p.key);
           return { ...(p.id ? { id: p.id } : {}), name: p.name, price: p.price, oldPrice: p.oldPrice ?? 0, ...(was?.image === p.image ? {} : { image: p.image }) };
@@ -245,6 +252,10 @@ export function AppearanceEditor({ store, api, team = false }: { store: Store; a
                 <Row label="اسم المتجر" onClick={() => setSelected("name")} />
                 <Row label="الشعار" hidden={draft.hidden.includes("logo")} onClick={() => setSelected("logo")} onRestore={() => setHidden("logo", false)} />
                 <Row label="لون المتجر" onClick={() => setSelected("color")} />
+                <Row label="الخطوط" onClick={() => setSelected("fonts")} />
+              </Group>
+              <Group title="التواصل">
+                <Row label={`حسابات التواصل${Object.keys(draft.social).filter((k) => k !== "placement").length ? ` · ${formatNumber(Object.keys(draft.social).filter((k) => k !== "placement").length)}` : ""}`} onClick={() => setSelected("social")} />
               </Group>
               {essential ? (
                 <>
@@ -351,6 +362,24 @@ function ElementPanel({ target, store, draft, products, readOnly, samples, atLim
   if (target === "name") {
     return <TextPanel label="اسم المتجر" max={60} value={draft.name} readOnly={readOnly} onConfirm={(v) => { onDraft((d) => ({ ...d, name: v })); onDone(); }} />;
   }
+  if (target === "fonts") {
+    const pick = (k: "display" | "body", id: string) => onDraft((d) => {
+      const fonts = { ...d.fonts };
+      if (id) fonts[k] = id; else delete fonts[k];
+      return { ...d, fonts };
+    });
+    return (
+      <div className="space-y-4">
+        <h3 className="font-medium">الخطوط</h3>
+        <FontList title="الخط الرئيسي — العناوين" options={DISPLAY_FONTS} value={draft.fonts.display ?? ""} readOnly={readOnly} onPick={(id) => pick("display", id)} />
+        <FontList title="الخط الثانوي — النصوص" options={BODY_FONTS} value={draft.fonts.body ?? ""} readOnly={readOnly} onPick={(id) => pick("body", id)} />
+        <p className="text-xs text-muted-foreground">يتغيّر الخط في المعاينة فور اختياره.</p>
+      </div>
+    );
+  }
+  if (target === "social") {
+    return <SocialPanel value={draft.social} readOnly={readOnly} onConfirm={(social) => { onDraft((d) => ({ ...d, social })); onDone(); }} />;
+  }
   if (target === "color") {
     return (
       <div className="space-y-2">
@@ -403,6 +432,63 @@ function ElementPanel({ target, store, draft, products, readOnly, samples, atLim
     return <ProductPanel product={p} {...up} readOnly={readOnly} onConfirm={(patch) => { onProduct(key, patch); onDone(); }} onRemove={() => onRemoveProduct(key)} />;
   }
   return <p className="text-sm text-muted-foreground">لا يمكن تعديل هذا العنصر من هنا.</p>;
+}
+
+function FontList({ title, options, value, readOnly, onPick }: {
+  title: string; options: { id: string; name: string }[]; value: string; readOnly: boolean; onPick: (id: string) => void;
+}) {
+  return (
+    <div className="space-y-2">
+      <Label>{title}</Label>
+      <div className="grid grid-cols-2 gap-1.5">
+        {[{ id: "", name: "خط القالب" }, ...options].map((f) => (
+          <button key={f.id || "default"} type="button" disabled={readOnly} aria-pressed={value === f.id} onClick={() => onPick(f.id)}
+            className={cn("rounded-md border px-2.5 py-1.5 text-start text-sm transition-colors hover:bg-muted", value === f.id && "border-primary bg-primary/10 font-medium")}>
+            {f.name}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/** حسابات التواصل: ما يُترك فارغًا لا يظهر في المتجر — فلا أيقونة بلا حساب */
+function SocialPanel({ value, readOnly, onConfirm }: { value: Record<string, string>; readOnly: boolean; onConfirm: (v: Record<string, string>) => void }) {
+  const [v, setV] = useState<Record<string, string>>(value);
+  const set = (k: string, val: string) => setV((o) => ({ ...o, [k]: val }));
+  function confirm() {
+    const out: Record<string, string> = {};
+    for (const n of SOCIAL_NETWORKS) {
+      const t = (v[n.key] ?? "").trim().replace(/^@/, "");
+      if (t) out[n.key] = t;
+    }
+    out.placement = v.placement || "info";
+    onConfirm(out);
+  }
+  return (
+    <div className="space-y-3">
+      <h3 className="font-medium">حسابات التواصل</h3>
+      <p className="text-xs text-muted-foreground">اكتب ما لديك فقط — الحساب الفارغ لا يظهر في المتجر.</p>
+      {SOCIAL_NETWORKS.map((n) => (
+        <div key={n.key} className="space-y-1">
+          <Label htmlFor={`s-${n.key}`} className="text-xs">{n.label}</Label>
+          <Input id={`s-${n.key}`} dir="ltr" disabled={readOnly} placeholder={n.hint} value={v[n.key] ?? ""} onChange={(e) => set(n.key, e.target.value)} />
+        </div>
+      ))}
+      <div className="space-y-1.5">
+        <Label className="text-xs">مكان الظهور</Label>
+        <div className="grid gap-1.5">
+          {SOCIAL_PLACEMENTS.map((p) => (
+            <button key={p.id} type="button" disabled={readOnly} aria-pressed={(v.placement || "info") === p.id} onClick={() => set("placement", p.id)}
+              className={cn("rounded-md border px-2.5 py-1.5 text-start text-sm hover:bg-muted", (v.placement || "info") === p.id && "border-primary bg-primary/10 font-medium")}>
+              {p.label}
+            </button>
+          ))}
+        </div>
+      </div>
+      <Button size="sm" className="w-full" disabled={readOnly} onClick={confirm}>تأكيد</Button>
+    </div>
+  );
 }
 
 function TextPanel({ label, value, max, long, readOnly, onConfirm, onDelete }: {
