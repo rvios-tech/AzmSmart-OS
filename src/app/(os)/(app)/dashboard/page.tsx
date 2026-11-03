@@ -210,7 +210,7 @@ function OverviewView({ store }: { store: Store }) {
 
 export default function DashboardPage() {
   const router = useRouter();
-  const { status, isPlatform, isSite, ctx } = useWorkspace();
+  const { status, isPlatform, isSite } = useWorkspace();
   const elsewhere = status === "ready" ? (isSite ? "/site" : isPlatform ? "/platform" : null) : null;
 
   useEffect(() => {

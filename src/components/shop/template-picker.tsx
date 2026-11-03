@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { IconCheck, IconLoader2, IconLock } from "@tabler/icons-react";
 
@@ -36,6 +37,7 @@ export function costOf(tier: TemplateTier, plan: Store["plan"], base: number): n
  */
 export function TemplatePicker({ store }: { store: Store }) {
   const { reload } = useStore();
+  const router = useRouter();
   const [pricing, setPricing] = useState<Pricing | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
 
@@ -70,7 +72,7 @@ export function TemplatePicker({ store }: { store: Store }) {
     try {
       await createShopInvoice({ storeRef: store.id, kind: 4, template: id });
       toast.success("أُنشئت فاتورة القالب — حوّل المبلغ وأرفق الإيصال من صفحة الاشتراك", {
-        action: { label: "الاشتراك", onClick: () => (window.location.href = "/store/plan") },
+        action: { label: "الاشتراك", onClick: () => router.push("/store/plan") },
       });
     } catch (err) {
       toast.error(err instanceof ApiError ? err.message : "تعذّر إنشاء الفاتورة.");

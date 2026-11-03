@@ -26,7 +26,6 @@ import {
   IconPencil,
   IconCopy,
   IconLink,
-  IconChevronRight,
   IconFolderPlus,
   IconServer2,
   IconLayoutSidebar,

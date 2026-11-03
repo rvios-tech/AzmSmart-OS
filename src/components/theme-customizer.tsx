@@ -70,18 +70,17 @@ export function ThemeConfigProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const [config, setConfig] = React.useState<ThemeConfig>(defaultConfig);
-  const [open, setOpen] = React.useState(false);
-
-  // تحميل الإعدادات المحفوظة مرة واحدة عند الإقلاع.
-  React.useEffect(() => {
+  // المحفوظ يُقرأ عند الإنشاء: لا يُرسم منه شيء على الخادم (نافذة التخصيص مغلقة)، فلا اختلاف عند التحميل
+  const [config, setConfig] = React.useState<ThemeConfig>(() => {
+    if (typeof window === "undefined") return defaultConfig;
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) setConfig({ ...defaultConfig, ...JSON.parse(raw) });
+      return raw ? { ...defaultConfig, ...JSON.parse(raw) } : defaultConfig;
     } catch {
-      // تجاهل
+      return defaultConfig;
     }
-  }, []);
+  });
+  const [open, setOpen] = React.useState(false);
 
   // تطبيق الإعدادات على المستند وحفظها.
   React.useEffect(() => {

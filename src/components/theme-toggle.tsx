@@ -7,8 +7,8 @@ import { Button } from "@/components/ui/button";
 
 export function ThemeToggle() {
   const { setTheme, resolvedTheme } = useTheme();
-  const [mounted, setMounted] = React.useState(false);
-  React.useEffect(() => setMounted(true), []);
+  // المظهر الفعلي يُعرف في المتصفح وحده — الخادم يرسم القمر دائمًا
+  const mounted = React.useSyncExternalStore(() => () => {}, () => true, () => false);
 
   return (
     <Button
