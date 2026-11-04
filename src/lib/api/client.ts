@@ -145,3 +145,78 @@ export async function uploadFile<T>(path: string, file: File): Promise<T> {
 
   return body as T;
 }
+
+/** حدث من بثّ SSE: اسمه وبياناته (JSON) */
+export interface SseEvent<T = unknown> {
+  event: string;
+  data: T;
+}
+
+/**
+ * طلب POST يُرد بثًّا (Server-Sent Events) — للمساعد الذكي. أخطاء ما قبل البث
+ * (حصّة، صلاحية، تحقّق) تصل ردًّا عاديًا فتُحوَّل إلى [ApiError] كما في
+ * [apiFetch]؛ بعد فتح البث تصل الأحداث واحدًا واحدًا إلى `onEvent`. `signal`
+ * يقطع الطلب فيُلغى التوليد عند المزوّد أيضًا.
+ */
+export async function streamSse<T>(
+  path: string,
+  body: unknown,
+  onEvent: (e: SseEvent<T>) => void,
+  signal?: AbortSignal,
+): Promise<void> {
+  const token = getToken();
+  let res: Response;
+  try {
+    res = await fetch(`${API_BASE_URL}${path}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "text/event-stream",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: JSON.stringify(body),
+      signal,
+    });
+  } catch (e) {
+    if ((e as Error)?.name === "AbortError") throw e;
+    throw new ApiError(0, "تعذّر الاتصال بالخادم. تحقّق من اتصالك وحاول مجددًا.");
+  }
+
+  notifyIfExpired(res, token, path);
+
+  if (!res.ok || !res.headers.get("content-type")?.includes("text/event-stream") || !res.body) {
+    const json = await res.json().catch(() => null);
+    const message =
+      (json && typeof json === "object" && "message" in json
+        ? extractMessage((json as { message: unknown }).message)
+        : null) ?? `خطأ غير متوقّع (${res.status})`;
+    throw new ApiError(res.status, message, json);
+  }
+
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let buf = "";
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buf += decoder.decode(value, { stream: true });
+    let cut: number;
+    // الأحداث تفصلها سطر فارغ؛ قد يصل الحدث مقسومًا على دفعتين
+    while ((cut = buf.indexOf("\n\n")) >= 0) {
+      const block = buf.slice(0, cut);
+      buf = buf.slice(cut + 2);
+      let event = "message";
+      let data = "";
+      for (const line of block.split("\n")) {
+        if (line.startsWith("event:")) event = line.slice(6).trim();
+        else if (line.startsWith("data:")) data += line.slice(5).trim();
+      }
+      if (!data) continue; // نبضات «: ping»
+      try {
+        onEvent({ event, data: JSON.parse(data) as T });
+      } catch {
+        /* حدث تالف — يُتجاهل ولا يوقف البث */
+      }
+    }
+  }
+}

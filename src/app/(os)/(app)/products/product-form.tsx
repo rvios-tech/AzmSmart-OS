@@ -1,11 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { IconLoader2, IconPlus, IconTrash } from "@tabler/icons-react";
+import { IconLoader2, IconPlus, IconSparkles, IconTrash } from "@tabler/icons-react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ImageDropzone, ImageUploadButton } from "@/components/image-uploader";
+import { ProductWriter } from "@/components/ai/ai-tools";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -67,6 +70,7 @@ export function ProductForm({
   const [opt2, setOpt2] = useState(initial?.opt2Name ?? "");
   const [variants, setVariants] = useState<VariantRow[]>((initial?.variants ?? []).map(toRow));
   const [cats, setCats] = useState<Category[]>([]);
+  const [writer, setWriter] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -126,10 +130,38 @@ export function ProductForm({
     setVariants((prev) => prev.map((v, idx) => (idx === i ? { ...v, ...patch } : v)));
 
   return (
+    <>
+    <Dialog open={writer} onOpenChange={setWriter}>
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-5xl">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2"><IconSparkles className="size-5 text-primary" /> RVIOS AI — كاتب المنتجات</DialogTitle>
+          <DialogDescription>يكتب الاسم والوصف من معلوماتك، فتعدّله ثم تضعه في النموذج وتحفظ بنفسك.</DialogDescription>
+        </DialogHeader>
+        {writer && (
+          <ProductWriter
+            storeId={store.id}
+            initial={{ name, category: cats.find((c) => c.id === categoryId)?.name, details: [summary, description].filter(Boolean).join(" — ") }}
+            onApply={(r) => {
+              setName(r.name);
+              setSummary(r.summary);
+              setDescription(r.description);
+              setWriter(false);
+              toast.success("وُضع النص في النموذج — راجعه ثم احفظ المنتج");
+            }}
+          />
+        )}
+      </DialogContent>
+    </Dialog>
     <form onSubmit={submit} className="grid gap-6 lg:grid-cols-3">
       <div className="space-y-6 lg:col-span-2">
         <Card>
-          <CardHeader><CardTitle>المعلومات الأساسية</CardTitle></CardHeader>
+          <CardHeader className="flex flex-row items-center justify-between gap-3">
+            <CardTitle>المعلومات الأساسية</CardTitle>
+            {/* RVIOS AI يكتب، والتاجر يراجع ويحفظ بنفسه — المساعد لا يحفظ شيئًا */}
+            <Button type="button" variant="outline" size="sm" className="gap-1.5" onClick={() => setWriter(true)}>
+              <IconSparkles className="size-4 text-primary" /> اكتب بالذكاء الاصطناعي
+            </Button>
+          </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="name">اسم المنتج</Label>
@@ -280,5 +312,6 @@ export function ProductForm({
         </Card>
       </div>
     </form>
+    </>
   );
 }

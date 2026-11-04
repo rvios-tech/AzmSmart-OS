@@ -121,6 +121,7 @@ export const navGroups: NavGroup[] = [
     audience: "store",
     items: [
       { title: "نظرة عامة", url: "/dashboard", icon: IconLayoutDashboard },
+      { title: "RVIOS AI", url: "/ai", icon: IconSparkles, badge: "جديد" },
       { title: "التحليلات", url: "/dashboard/analytics", icon: IconChartBar },
       { title: "التقارير", url: "/reports", icon: IconReportAnalytics },
       {
@@ -154,7 +155,6 @@ export const navGroups: NavGroup[] = [
     // لا عمل لها بعد في حسابات المتاجر — تظهر حين تُفعَّل
     audience: "off",
     items: [
-      { title: "المساعد الذكي", url: "/apps/ai-chat", icon: IconSparkles, badge: "جديد" },
       { title: "المحادثات", url: "/apps/chat", icon: IconMessageCircle },
       { title: "البريد", url: "/apps/mail", icon: IconMail },
       { title: "التقويم", url: "/apps/calendar", icon: IconCalendarEvent },

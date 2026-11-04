@@ -77,6 +77,7 @@ const CRUMB_LABELS: Record<string, string> = {
   activity: "النشاط",
   apps: "التطبيقات",
   "ai-chat": "المساعد الذكي",
+  ai: "RVIOS AI",
   chat: "المحادثات",
   mail: "البريد",
   calendar: "التقويم",
