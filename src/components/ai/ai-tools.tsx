@@ -13,7 +13,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ApiError } from "@/lib/api/client";
 import {
-  aiGenerate, type AiLang, type AiMarketingResult, type AiProductResult, type AiSeoResult,
+  aiGenerate, type AiLang, type AiMarketingResult, type AiPolicyKind, type AiPolicyResult, type AiProductResult,
+  type AiReplyResult, type AiSeoResult,
 } from "@/lib/api/ai";
 import { cn } from "@/lib/utils";
 
@@ -353,6 +354,132 @@ export function SeoAssistant({ storeId, ready = true, onUsed }: { storeId: strin
             )}
             {r.improvedDescription && <Field label="الوصف المحسّن" value={r.improvedDescription} onChange={(v) => set("improvedDescription", v)} rows={7} />}
             <Button type="button" variant="outline" className="gap-2" disabled={busy || !ready} onClick={run}><IconRefresh className="size-4" /> اقتراحات أخرى</Button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ═══ الرد على العملاء ══════════════════════════════════════════════════════
+
+export function ReplyWriter({ storeId, ready = true, onUsed }: { storeId: string; ready?: boolean; onUsed?: (used: number, limit: number) => void }) {
+  const [message, setMessage] = useState("");
+  const [kind, setKind] = useState<"message" | "review">("message");
+  const [rating, setRating] = useState("0");
+  const [context, setContext] = useState("");
+  const [lang, setLang] = useState<AiLang>("ar");
+  const [busy, setBusy] = useState(false);
+  const [r, setR] = useState<AiReplyResult | null>(null);
+
+  async function run() {
+    setBusy(true);
+    try {
+      const res = await aiGenerate(storeId, "reply", lang, {
+        message: message.trim(), kind, rating: kind === "review" && rating !== "0" ? Number(rating) : undefined, context: context.trim() || undefined,
+      });
+      setR(res.result);
+      onUsed?.(res.used, res.limit);
+    } catch (e) {
+      toast.error(errText(e));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
+      <Shell title="الرد على العملاء" hint="الصق رسالة العميل أو تقييمه، ويقترح ثلاثة ردود مهذّبة تحل الموقف." busy={busy} onRun={run} ready={ready} canRun={message.trim().length >= 2}>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <div className="space-y-2"><Label>النوع</Label>
+            <Select value={kind} onValueChange={(v) => setKind(v as "message" | "review")}><SelectTrigger className="w-full"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="message">رسالة أو شكوى</SelectItem><SelectItem value="review">تقييم على منتج</SelectItem></SelectContent></Select>
+          </div>
+          {kind === "review" ? (
+            <div className="space-y-2"><Label>النجوم</Label>
+              <Select value={rating} onValueChange={setRating}><SelectTrigger className="w-full"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="0">غير محدد</SelectItem>{[5, 4, 3, 2, 1].map((n) => <SelectItem key={n} value={String(n)}>{"★".repeat(n)}</SelectItem>)}</SelectContent></Select>
+            </div>
+          ) : (
+            <div className="space-y-2"><Label>اللغة</Label><LangSelect value={lang} onChange={setLang} /></div>
+          )}
+        </div>
+        <div className="space-y-2"><Label htmlFor="rp-msg">رسالة العميل</Label><Textarea id="rp-msg" dir="auto" rows={4} value={message} maxLength={2000} onChange={(e) => setMessage(e.target.value)} placeholder="تأخر طلبي ثلاثة أيام ولم يرد أحد…" /></div>
+        <div className="space-y-2"><Label htmlFor="rp-ctx">ما تعرفه أو تستطيع تقديمه (اختياري)</Label><Textarea id="rp-ctx" rows={2} value={context} maxLength={1000} onChange={(e) => setContext(e.target.value)} placeholder="الطلب خرج أمس مع المندوب، ونستطيع توصيله مجانًا المرة القادمة" /></div>
+      </Shell>
+
+      <div className="min-w-0 rounded-xl border bg-muted/20 p-4">
+        {!r ? (
+          <Empty busy={busy} text="ستظهر الردود هنا — انسخ المناسب وأرسله بنفسك." />
+        ) : (
+          <div className="space-y-3">
+            {r.replies.map((it, i) => (
+              <div key={i} className="rounded-lg border bg-background p-3">
+                <div className="mb-1 flex items-center justify-between"><span className="text-xs font-medium text-muted-foreground">{it.tone || `الرد ${i + 1}`}</span><CopyButton text={it.text} /></div>
+                <p dir="auto" className="whitespace-pre-wrap text-sm leading-7">{it.text}</p>
+              </div>
+            ))}
+            {r.tip && <p className="rounded-lg bg-primary/5 p-3 text-sm" dir="auto"><span className="font-medium">نصيحة: </span>{r.tip}</p>}
+            <Button type="button" variant="outline" className="gap-2" disabled={busy || !ready} onClick={run}><IconRefresh className="size-4" /> ردود أخرى</Button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ═══ صفحات المتجر وسياساته ═════════════════════════════════════════════════
+
+const POLICIES: [AiPolicyKind, string, string][] = [
+  ["exchange", "سياسة الاستبدال والاسترجاع", "مدة الاستبدال، الشروط، من يدفع التوصيل…"],
+  ["shipping", "سياسة الشحن والتوصيل", "المدن، المدد المتوقعة، رسوم خاصة… (مناطقك ورسومها تُقرأ من متجرك)"],
+  ["privacy", "سياسة الخصوصية", "أي ملاحظة خاصة بمتجرك"],
+  ["about", "من نحن", "قصة المتجر، منذ متى، ما يميزكم، المدينة…"],
+  ["faq", "أسئلة شائعة للعملاء", "الأسئلة التي تصلك كثيرًا"],
+  ["terms", "شروط الشراء", "تأكيد الطلب، الإلغاء، الطلبات الخاصة…"],
+];
+
+export function PolicyWriter({ storeId, ready = true, onUsed }: { storeId: string; ready?: boolean; onUsed?: (used: number, limit: number) => void }) {
+  const [kind, setKind] = useState<AiPolicyKind>("exchange");
+  const [details, setDetails] = useState("");
+  const [lang, setLang] = useState<AiLang>("ar");
+  const [busy, setBusy] = useState(false);
+  const [r, setR] = useState<AiPolicyResult | null>(null);
+  const hint = POLICIES.find((p) => p[0] === kind)?.[2] ?? "";
+
+  async function run() {
+    setBusy(true);
+    try {
+      const res = await aiGenerate(storeId, "policy", lang, { kind, details: details.trim() || undefined });
+      setR(res.result);
+      onUsed?.(res.used, res.limit);
+    } catch (e) {
+      toast.error(errText(e));
+    } finally {
+      setBusy(false);
+    }
+  }
+  const set = <K extends keyof AiPolicyResult>(k: K, v: AiPolicyResult[K]) => setR((p) => (p ? { ...p, [k]: v } : p));
+
+  return (
+    <div className="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
+      <Shell title="صفحات المتجر وسياساته" hint="سياسات واضحة تطمئن المشتري — تُكتب من إعداد متجرك، وما لا يُعرف يُترك بين [قوسين] لتكمله." busy={busy} onRun={run} ready={ready} canRun>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <div className="space-y-2"><Label>الصفحة</Label>
+            <Select value={kind} onValueChange={(v) => setKind(v as AiPolicyKind)}><SelectTrigger className="w-full"><SelectValue /></SelectTrigger><SelectContent>{POLICIES.map(([v, l]) => <SelectItem key={v} value={v}>{l}</SelectItem>)}</SelectContent></Select>
+          </div>
+          <div className="space-y-2"><Label>اللغة</Label><LangSelect value={lang} onChange={setLang} /></div>
+        </div>
+        <div className="space-y-2"><Label htmlFor="pl-det">تفاصيلك (اختياري)</Label><Textarea id="pl-det" rows={4} value={details} maxLength={2000} onChange={(e) => setDetails(e.target.value)} placeholder={hint} /></div>
+      </Shell>
+
+      <div className="min-w-0 rounded-xl border bg-muted/20 p-4">
+        {!r ? (
+          <Empty busy={busy} text="ستظهر الصفحة هنا — راجعها ثم ضعها في وصف متجرك أو رسائلك." />
+        ) : (
+          <div className="space-y-4">
+            <Field label="العنوان" value={r.title} onChange={(v) => set("title", v)} />
+            <Field label="النص" value={r.body} onChange={(v) => set("body", v)} rows={12} />
+            <Field label="ملخص قصير" value={r.short} onChange={(v) => set("short", v)} rows={2} />
+            <Button type="button" variant="outline" className="gap-2" disabled={busy || !ready} onClick={run}><IconRefresh className="size-4" /> صيغة أخرى</Button>
           </div>
         )}
       </div>

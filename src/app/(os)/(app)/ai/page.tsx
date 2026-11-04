@@ -7,12 +7,12 @@ import { toast } from "sonner";
 import {
   IconAlertTriangle, IconArrowUp, IconChartBar, IconCopy, IconDots, IconMenu2, IconMessage, IconPencil,
   IconPlayerStopFilled, IconPlus, IconRefresh, IconSparkles, IconSpeakerphone, IconTag, IconTrash, IconTrendingUp,
-  IconBulb, IconTruckDelivery, IconSearch, IconFileDescription,
+  IconBulb, IconTruckDelivery, IconSearch, IconFileDescription, IconMessageReply, IconFileText,
 } from "@tabler/icons-react";
 
 import { RequireStore } from "@/components/require-store";
 import { Markdown } from "@/components/ai/markdown";
-import { MarketingWriter, ProductWriter, SeoAssistant, copyText } from "@/components/ai/ai-tools";
+import { MarketingWriter, PolicyWriter, ProductWriter, ReplyWriter, SeoAssistant, copyText } from "@/components/ai/ai-tools";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -45,12 +45,14 @@ import { cn } from "@/lib/utils";
    ───────────────────────────────────────────────────────────────────────── */
 
 const MAX_CHARS = 4000;
-type Tab = "chat" | "product" | "marketing" | "seo";
+type Tab = "chat" | "product" | "marketing" | "seo" | "reply" | "policy";
 const TABS: { id: Tab; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
   { id: "chat", label: "المحادثة", icon: IconMessage },
   { id: "product", label: "كاتب المنتجات", icon: IconFileDescription },
   { id: "marketing", label: "المسوّق", icon: IconSpeakerphone },
   { id: "seo", label: "الظهور في البحث", icon: IconSearch },
+  { id: "reply", label: "الرد على العملاء", icon: IconMessageReply },
+  { id: "policy", label: "صفحات المتجر", icon: IconFileText },
 ];
 
 const SUGGEST: Record<AiMode, { icon: React.ComponentType<{ className?: string }>; title: string; prompt: string }[]> = {
@@ -361,6 +363,8 @@ function Workspace({ store }: { store: Store }) {
           {tab === "product" && <ProductWriter storeId={store.id} ready={ready && !exhausted} onUsed={onUsed} />}
           {tab === "marketing" && <MarketingWriter storeId={store.id} ready={ready && !exhausted} onUsed={onUsed} />}
           {tab === "seo" && <SeoAssistant storeId={store.id} ready={ready && !exhausted} onUsed={onUsed} />}
+          {tab === "reply" && <ReplyWriter storeId={store.id} ready={ready && !exhausted} onUsed={onUsed} />}
+          {tab === "policy" && <PolicyWriter storeId={store.id} ready={ready && !exhausted} onUsed={onUsed} />}
           <p className="mt-6 text-xs text-muted-foreground">RVIOS AI يقترح ولا ينفّذ: راجع النص ثم انسخه إلى المتجر بنفسك.</p>
         </Card>
       ) : (

@@ -100,6 +100,7 @@ export const navGroups: NavGroup[] = [
       { title: "اشتراكات المتاجر", url: "/platform/subscriptions", icon: IconCalendarDollar },
       { title: "الفواتير", url: "/platform/invoices", icon: IconFileInvoice },
       { title: "الحسابات", url: "/platform/users", icon: IconUserShield },
+      { title: "RVIOS AI", url: "/platform/ai", icon: IconSparkles },
       { title: "إعدادات المنصة", url: "/platform/settings", icon: IconSettings },
     ],
   },

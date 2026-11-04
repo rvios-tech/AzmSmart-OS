@@ -99,6 +99,19 @@ export interface AiSeoResult {
   improvedDescription: string;
 }
 
+export interface AiReplyResult {
+  replies: { tone: string; text: string }[];
+  tip: string;
+}
+export interface AiPolicyResult {
+  title: string;
+  body: string;
+  short: string;
+}
+export type AiPolicyKind = "exchange" | "shipping" | "privacy" | "about" | "faq" | "terms";
+
+export interface AiReplyInput { message: string; kind?: "message" | "review"; rating?: number; context?: string }
+export interface AiPolicyInput { kind: AiPolicyKind; details?: string }
 export interface AiProductInput { name: string; category?: string; details?: string; audience?: string; tone?: string }
 export interface AiMarketingInput { topic: string; platform: string; tone?: string; goal?: string; occasion?: string; offer?: string; count?: number }
 export interface AiSeoInput { name: string; description?: string; keywords?: string; city?: string }
@@ -107,6 +120,8 @@ type ToolMap = {
   product: { input: AiProductInput; result: AiProductResult };
   marketing: { input: AiMarketingInput; result: AiMarketingResult };
   seo: { input: AiSeoInput; result: AiSeoResult };
+  reply: { input: AiReplyInput; result: AiReplyResult };
+  policy: { input: AiPolicyInput; result: AiPolicyResult };
 };
 
 export function aiGenerate<K extends keyof ToolMap>(storeId: string, tool: K, language: AiLang, input: ToolMap[K]["input"]) {
