@@ -12,6 +12,8 @@ interface WorkspaceValue {
   isPlatform: boolean;
   /** شركة الموقع الرئيسي المحجوزة */
   isSite: boolean;
+  /** موظف منصة داخل لوحة شركة أخرى (جلسة دعم) — يرى قائمتها لا قائمة المنصة */
+  isSupport: boolean;
   /** يملك متجرًا أو لا يملك مساحة أخرى تخصّه — أي مستخدم عادي يرى المتجر */
   showStore: boolean;
   /** التسمية التي تظهر تحت اسمه: «مدير المنصة» أو «مالك» … */
@@ -46,11 +48,14 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
   }, [reload]);
 
   const value = useMemo<WorkspaceValue>(() => {
-    const isPlatform = ctx?.platformRole != null;
+    const isSupport = !!ctx?.support;
+    const isPlatform = ctx?.platformRole != null && !isSupport;
     const isSite = !!ctx?.isSite;
     const roleLabel = isPlatform
       ? PLATFORM_ROLE_LABELS[ctx!.platformRole!] ?? "فريق المنصة"
-      : isSite
+      : isSupport
+        ? "فريق RVIOS (دعم)"
+        : isSite
         ? "مدير الموقع"
         : ROLE_LABELS[ctx?.role ?? 8] ?? "عضو";
     return {
@@ -58,6 +63,7 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
       ctx,
       isPlatform,
       isSite,
+      isSupport,
       showStore: !isSite && (!isPlatform || (ctx?.storeCount ?? 0) > 0),
       roleLabel,
       reload,

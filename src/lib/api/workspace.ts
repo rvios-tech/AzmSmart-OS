@@ -16,6 +16,8 @@ export interface WorkspaceContext {
   platformRole: number | null;
   isSite: boolean;
   storeCount: number;
+  /** جلسة دعم من فريق المنصة داخل هذه الشركة */
+  support?: boolean;
 }
 
 export function getWorkspaceContext(): Promise<WorkspaceContext> {

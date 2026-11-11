@@ -13,6 +13,7 @@ import { useRouter } from "next/navigation";
 import * as authApi from "@/lib/api/auth";
 import { SESSION_EXPIRED_EVENT, getToken, setToken } from "@/lib/api/client";
 import { switchCompany as switchCompanyApi } from "@/lib/api/workspace";
+import { endSupport, inSupport } from "./support";
 
 interface AuthState {
   status: "loading" | "authenticated" | "unauthenticated";
@@ -201,6 +202,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = useCallback(() => {
     window.localStorage.removeItem(COMPANIES_KEY);
+    for (const k of ["azm_staff_token", "azm_staff_company", "azm_support_return"]) window.localStorage.removeItem(k);
     try {
       window.localStorage.removeItem("azm_active_store");
     } catch {}
@@ -213,7 +215,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // جلسة رفضها الخادم أثناء العمل — خروج فوري بدل أخطاء متتالية في كل صفحة
   useEffect(() => {
-    const onExpired = () => logout();
+    // جلسة دعم انتهت: يعود الموظف إلى لوحة المنصة لا إلى صفحة الدخول
+    const onExpired = () => (inSupport() ? endSupport() : logout());
     window.addEventListener(SESSION_EXPIRED_EVENT, onExpired);
     return () => window.removeEventListener(SESSION_EXPIRED_EVENT, onExpired);
   }, [logout]);

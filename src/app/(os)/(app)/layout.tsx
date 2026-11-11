@@ -5,6 +5,7 @@ import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthGate } from "@/components/auth-gate";
 import { DemoBanner } from "@/components/demo-banner";
+import { SupportBanner } from "@/components/support-banner";
 import { StoreProvider } from "@/lib/shop/store-context";
 import { WorkspaceProvider } from "@/lib/workspace/workspace-context";
 
@@ -20,6 +21,7 @@ export default function AppLayout({
             <AppSidebar />
             <SidebarInset className="min-w-0">
               <DemoBanner />
+              <SupportBanner />
               <AppHeader />
               <main className="app-main min-w-0 flex-1 p-4 md:p-6">{children}</main>
             </SidebarInset>

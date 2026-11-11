@@ -40,6 +40,20 @@
         "3030"
       ],
       "port": 3030
+    },
+    {
+      "name": "api",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "--prefix",
+        "F:/باكند RVIOS/api",
+        "run",
+        "start:dev"
+      ],
+      "env": {
+        "PORT": "3002"
+      },
+      "port": 3002
     }
   ]
 }

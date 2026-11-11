@@ -94,7 +94,7 @@ export default function PlatformStoresPage() {
                 <TableRow key={s.id}>
                   <TableCell className="ps-6">
                     <div className="flex items-center gap-1.5 font-medium">
-                      {s.name}
+                      <Link href={`/platform/stores/${s.id}`} className="hover:underline">{s.name}</Link>
                       {s.verified && <IconRosetteDiscountCheck className="size-4 text-sky-600" aria-label="موثَّق" />}
                     </div>
                     <div className="text-xs text-muted-foreground" dir="ltr"><a href={storeUrl(s.slug)} target="_blank" rel="noopener" className="hover:underline">/{s.slug}</a> · {formatDateShort(s.createdAt)}</div>
@@ -125,6 +125,9 @@ export default function PlatformStoresPage() {
                           فتح تعديل الشكل
                         </Button>
                       )}
+                      <Button size="sm" asChild>
+                        <Link href={`/platform/stores/${s.id}`}>إدارة</Link>
+                      </Button>
                       <Button size="sm" variant="outline" asChild>
                         <Link href={`/platform/stores/${s.id}/appearance`}>تعديل الشكل</Link>
                       </Button>

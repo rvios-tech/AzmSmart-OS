@@ -17,6 +17,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
+import { PayAccountsEditor } from "@/components/platform/pay-accounts-editor";
 
 const PRICE_FIELDS = [
   { key: "price.plus", label: "الباقة الاحترافية (شهريًا)" },
@@ -41,9 +42,10 @@ function flatten(s: PlatformSettings): Record<string, string> {
     "app.maintenance": s.app.maintenance ? "1" : "0",
     "app.maintenanceMessage": s.app.maintenanceMessage ?? "",
     "app.storeUrl": s.app.storeUrl ?? "",
+    "notify.emails": s.notify?.emails ?? "",
+    "notify.whatsapp": s.notify?.whatsapp ?? "",
   };
   for (const [id, price] of Object.entries(s.templates)) out[`tpl.${id}`] = String(price);
-  for (const m of s.methods) out[`pay.${m.id}`] = m.instructions;
   return out;
 }
 
@@ -83,7 +85,8 @@ export default function PlatformSettingsPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="إعدادات المنصة" description="أسعار الباقات والقوالب، وتعليمات الدفع، وإعدادات تطبيق AZM." />
+      <PageHeader title="إعدادات المنصة" description="أسعار الباقات والقوالب، وحسابات الدفع، وتنبيهات الفريق، وإعدادات تطبيق AZM." />
+      <PayAccountsEditor initial={snap.accounts} providers={snap.providers} onSaved={(accounts) => setSnap((s) => (s ? { ...s, accounts } : s))} />
       <form onSubmit={save} className="space-y-6">
         <Card>
           <CardHeader>
@@ -161,17 +164,22 @@ export default function PlatformSettingsPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>وسائل الدفع</CardTitle>
-            <CardDescription>تظهر للتاجر في فاتورته: رقم الحساب أو المحفظة والاسم.</CardDescription>
+            <CardTitle>تنبيهات فريق المنصة</CardTitle>
+            <CardDescription>
+              طلب متجر جديد، إيصال دفع، طلب تصميم خاص، رسالة من الموقع — تصل في «التنبيهات» وتطبيق RVOS دائمًا، وإلى هذه القنوات إن ضُبطت. افصل بين القيم بفاصلة.
+            </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            {snap.methods.map((m) => (
-              <div key={m.id} className="space-y-2">
-                <Label>{m.name}</Label>
-                <Textarea rows={2} maxLength={600} value={v[`pay.${m.id}`] ?? ""}
-                  onChange={(e) => setV((p) => ({ ...p, [`pay.${m.id}`]: e.target.value }))} />
-              </div>
-            ))}
+          <CardContent className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label>بريد الفريق</Label>
+              <Input dir="ltr" placeholder="team@rvios.com, sales@rvios.com" value={v["notify.emails"] ?? ""} onChange={(e) => setV((p) => ({ ...p, "notify.emails": e.target.value }))} />
+              <p className="text-xs text-muted-foreground">يعمل حين يكون بريد Resend مفعّلًا في الخادم.</p>
+            </div>
+            <div className="space-y-2">
+              <Label>أرقام واتساب الفريق</Label>
+              <Input dir="ltr" placeholder="967778211887, 966500000000" value={v["notify.whatsapp"] ?? ""} onChange={(e) => setV((p) => ({ ...p, "notify.whatsapp": e.target.value }))} />
+              <p className="text-xs text-muted-foreground">بالصيغة الدولية بلا +؛ يحتاج واتساب Cloud API مضبوطًا في الخادم.</p>
+            </div>
           </CardContent>
         </Card>
 

@@ -1,5 +1,7 @@
 "use client";
 
+import { PayAccounts } from "@/components/pay-accounts";
+import type { PayAccount } from "@/lib/api/platform-ops";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { IconCheck, IconLoader2 } from "@tabler/icons-react";
@@ -97,7 +99,7 @@ function PlanView({ store }: { store: Store }) {
     if (!p?.key.trim()) return toast.error("ألصق رابط صورة الإيصال");
     setBusy(true);
     try {
-      await submitInvoiceProof(inv.id, { method: (p.method || undefined) as "kuraimi" | "jaib" | "paypal" | undefined, proofKey: p.key.trim() });
+      await submitInvoiceProof(inv.id, { method: (p.method || undefined) as string | undefined, proofKey: p.key.trim() });
       toast.success("وصل إيصالك وفُعّلت باقتك فورًا. سنراجعه خلال يوم عمل.");
       await Promise.all([load(), reload()]);
     } catch (err) {
@@ -202,15 +204,16 @@ function PlanView({ store }: { store: Store }) {
                 {inv.status === 0 && (
                   <div className="space-y-3 text-sm">
                     <p className="text-muted-foreground">اكتب رقم الفاتورة <b dir="ltr">{inv.invoiceNumber}</b> في ملاحظات التحويل.</p>
-                    {pricing?.methods.map((m) => (
+                    <PayAccounts accounts={pricing?.accounts} />
+                    {pricing && !pricing.accounts?.length && pricing.methods.map((m) => (
                       <div key={m.id} className="rounded-md bg-muted p-3"><b>{m.name}:</b> {m.instructions}</div>
                     ))}
-                    {pricing && pricing.methods.length === 0 && <p className="text-amber-600">لم تُضبط وسائل الدفع بعد — تواصل مع الدعم.</p>}
+                    {pricing && !pricing.accounts?.length && pricing.methods.length === 0 && <p className="text-amber-600">لم تُضبط وسائل الدفع بعد — تواصل مع الدعم.</p>}
                     <div className="grid gap-2 sm:grid-cols-4">
                       <Select value={proof[inv.id]?.method ?? ""} onValueChange={(v) => setProof((p) => ({ ...p, [inv.id]: { key: p[inv.id]?.key ?? "", method: v } }))}>
                         <SelectTrigger className="w-full"><SelectValue placeholder="وسيلة الدفع" /></SelectTrigger>
                         <SelectContent>
-                          {pricing?.methods.map((m) => <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>)}
+                          {payMethodsOf(pricing).map((m) => <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>)}
                         </SelectContent>
                       </Select>
                       <div className="flex gap-2 sm:col-span-2">
@@ -230,6 +233,15 @@ function PlanView({ store }: { store: Store }) {
       </Card>
     </div>
   );
+}
+
+/** وسائل الإيصال: مزوّدو الحسابات المعلنة بلا تكرار، وإلا الوسائل القديمة */
+function payMethodsOf(pricing: { accounts?: PayAccount[]; methods: { id: string; name: string }[] } | null | undefined) {
+  if (!pricing) return [];
+  if (!pricing.accounts?.length) return pricing.methods;
+  const seen = new Map<string, string>();
+  for (const a of pricing.accounts) if (!seen.has(a.provider)) seen.set(a.provider, a.providerName ?? a.provider);
+  return [...seen].map(([id, name]) => ({ id, name }));
 }
 
 export default function StorePlanPage() {

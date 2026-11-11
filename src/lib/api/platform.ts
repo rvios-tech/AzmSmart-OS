@@ -86,7 +86,7 @@ export const PLATFORM_INVOICE_STATUS_LABELS = [
 ];
 
 export const INVOICE_KIND_LABELS = ["اشتراك", "بناء متجر", "دومين", "متجر إضافي", "قالب"];
-export const PAY_METHOD_NAMES: Record<string, string> = { kuraimi: "الكريمي", jaib: "جيب", paypal: "PayPal" };
+export const PAY_METHOD_NAMES: Record<string, string> = { kuraimi: "الكريمي", jaib: "جيب", jawali: "جوالي", onecash: "ون كاش", floosak: "فلوسك", paypal: "PayPal" };
 
 export function listPlatformInvoices(status?: number): Promise<PlatformInvoice[]> {
   const query = status !== undefined ? `?status=${status}` : "";
@@ -205,6 +205,11 @@ export interface PlatformSettings {
   /** إعدادات تطبيق AZM الجوال (`GET /app/config`) */
   app: { minVersion: string; latestVersion: string | null; maintenance: boolean; maintenanceMessage: string | null; storeUrl: string | null };
   methods: { id: string; name: string; scope: string; instructions: string }[];
+  /** حسابات الاستلام المعلنة (`pay.accounts`) */
+  accounts: import("./platform-ops").PayAccount[];
+  providers: import("./platform-ops").PayProvider[];
+  /** قنوات تنبيه الفريق: بريد وأرقام واتساب، مفصولة بفواصل */
+  notify: { emails: string; whatsapp: string };
 }
 
 export function getPlatformSettings(): Promise<PlatformSettings> {

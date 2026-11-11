@@ -450,6 +450,8 @@ export interface Pricing {
   plans?: Record<"free" | "pro" | "biz", { month: number | null; year: number | null }>;
   templates?: { id: string; tier: "free" | "standard" | "signature"; price: number }[];
   methods: Array<{ id: string; name: string; scope: string; instructions: string }>;
+  /** حسابات الاستلام المعلنة (الكريمي، جيب، جوالي…) */
+  accounts?: import("./platform-ops").PayAccount[];
 }
 
 export interface ShopInvoice {
@@ -491,7 +493,7 @@ export const createShopInvoice = (input: {
 
 export const submitInvoiceProof = (
   id: string,
-  input: { method?: "kuraimi" | "jaib" | "paypal"; proofKey: string },
+  input: { method?: string; proofKey: string },
 ) =>
   apiFetch<ShopInvoice>(`/shop/invoices/${id}/proof`, {
     method: "POST",
