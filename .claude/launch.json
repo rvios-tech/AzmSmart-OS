@@ -54,6 +54,15 @@
         "PORT": "3002"
       },
       "port": 3002
+    },
+    {
+      "name": "rvos-web",
+      "runtimeExecutable": "python",
+      "runtimeArgs": [
+        "F:/تطبيق ادارة منصة RVIOS/RVIOS-APP/tool/serve_web.py",
+        "8087"
+      ],
+      "port": 8087
     }
   ]
 }
