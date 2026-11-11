@@ -168,6 +168,7 @@ export default function EditPostPage() {
                 rows={18}
                 className="resize-none border-0 px-0 text-base leading-relaxed shadow-none focus-visible:ring-0 dark:bg-transparent"
               />
+              <p className="border-t pt-2 text-xs text-muted-foreground">تنسيق المقال: <code dir="ltr">## </code>عنوان فرعي · <code dir="ltr">&gt; </code>اقتباس · <code dir="ltr">- </code>عنصر قائمة · سطر فارغ بين الفقرات. المقال المنشور يظهر في مدونة rvios.com خلال دقائق.</p>
             </CardContent>
           </Card>
 
