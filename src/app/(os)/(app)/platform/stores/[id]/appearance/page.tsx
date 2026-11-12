@@ -9,6 +9,8 @@ import { ApiError } from "@/lib/api/client";
 import { getTeamStoreEditor, saveTeamAppearance } from "@/lib/api/platform";
 import type { Store } from "@/lib/api/shop";
 import { uploadStoreImageAsTeam } from "@/lib/api/uploads";
+import { apiFetch } from "@/lib/api/client";
+import { setStoreTemplate } from "@/lib/api/platform-ops";
 
 /** فريق المنصة يعدّل شكل أي متجر — بالمحرر نفسه، وبلا قفل الأسبوع */
 export default function TeamAppearancePage({ params }: { params: Promise<{ id: string }> }) {
@@ -41,6 +43,9 @@ export default function TeamAppearancePage({ params }: { params: Promise<{ id: s
     save: (input) => saveTeamAppearance(id, input),
     afterSave: refresh,
     uploader: (file) => uploadStoreImageAsTeam(id, file),
+    saveExtras: (x) => apiFetch(`/platform/shop-stores/${id}/extras`, { method: "PUT", body: JSON.stringify(x) }),
+    // الفريق يبدّل لأي قالب، والمدفوع يُمنح للمتجر
+    setTemplate: (tpl) => setStoreTemplate(id, tpl),
   }), [id, refresh]);
 
   if (error) {

@@ -25,7 +25,7 @@ export interface Store {
   banner: string;
   showcase: string;
   /** تعديلات «شكل المتجر» على القالب الأساسي */
-  appearance: { copy?: Record<string, string>; hidden?: string[]; images?: Record<string, string>; fonts?: { display?: string; body?: string }; social?: Record<string, string> } | null;
+  appearance: { copy?: Record<string, string>; hidden?: string[]; images?: Record<string, string>; fonts?: { display?: string; body?: string }; social?: Record<string, string>; extras?: import("@/components/shop/store-extras-panel").StoreExtras } | null;
   /** يُقفل المحرر بعد كل حفظ أسبوعًا — أو حتى يفتحه فريق RVIOS */
   appearanceLockedUntil: string | null;
   color: string;
@@ -108,6 +108,10 @@ export const createStore = (input: CreateStoreInput) =>
 
 export const updateStore = (id: string, input: UpdateStoreInput) =>
   apiFetch<{ store: Store }>(s(id), { method: "PATCH", ...json(input) });
+
+/** شريط الإعلان والسياسات وزر واتساب ووصف البحث — بلا قفل الأسبوع */
+export const saveStoreExtras = (id: string, extras: import("@/components/shop/store-extras-panel").StoreExtras) =>
+  apiFetch<{ store: Store }>(`${s(id)}/extras`, { method: "PUT", ...json(extras) });
 
 export interface SaveAppearanceInput {
   name?: string;

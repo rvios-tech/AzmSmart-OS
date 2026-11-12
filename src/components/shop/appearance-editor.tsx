@@ -3,8 +3,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import {
-  IconArrowRight, IconBrandWhatsapp, IconEyeOff, IconLoader2, IconLock, IconPlus, IconTrash,
+  IconArrowRight, IconBrandWhatsapp, IconCheck, IconDeviceDesktop, IconDeviceMobile, IconDeviceTablet, IconEyeOff, IconLoader2, IconLock, IconPlus, IconTrash,
 } from "@tabler/icons-react";
+
+import { StoreExtrasPanel, type StoreExtras } from "@/components/shop/store-extras-panel";
 
 import { ImageUploadButton } from "@/components/image-uploader";
 import { PageHeader } from "@/components/page-header";
@@ -22,7 +24,7 @@ import type { ProductsResponse, SaveAppearanceInput, Store } from "@/lib/api/sho
 import type { UploadedImage } from "@/lib/api/uploads";
 import { teamWhatsapp } from "@/lib/contact";
 import { formatDateShort, formatNumber } from "@/lib/format";
-import { STOREFRONT_URL, storeUrl, templateName } from "@/lib/shop/constants";
+import { STORE_TEMPLATES, STOREFRONT_URL, TEMPLATE_TIER_LABEL, storeUrl, templateName } from "@/lib/shop/constants";
 import { BODY_FONTS, DISPLAY_FONTS, SOCIAL_NETWORKS, SOCIAL_PLACEMENTS } from "@/lib/shop/store-fonts";
 import { cn } from "@/lib/utils";
 
@@ -59,7 +61,18 @@ export interface AppearanceApi {
   afterSave: () => Promise<void>;
   /** رفع بديل (لوحة المنصة) */
   uploader?: (file: File) => Promise<UploadedImage>;
+  /** إضافات المتجر (الإعلان، السياسات، واتساب، البحث) — تُحفظ وحدها بلا قفل */
+  saveExtras?: (extras: StoreExtras) => Promise<unknown>;
+  /** تبديل القالب من داخل المحرر */
+  setTemplate?: (id: string) => Promise<unknown>;
 }
+
+/** عرض المعاينة: سطح المكتب، أو لوح، أو جوال */
+const DEVICES = [
+  { id: "desktop", label: "سطح المكتب", icon: IconDeviceDesktop, width: "100%" },
+  { id: "tablet", label: "لوح", icon: IconDeviceTablet, width: "820px" },
+  { id: "mobile", label: "جوال", icon: IconDeviceMobile, width: "390px" },
+] as const;
 
 const initialDraft = (s: Store): Draft => ({
   name: s.name, color: s.color, logo: s.logo, banner: s.banner, showcase: s.showcase,
@@ -94,6 +107,24 @@ export function AppearanceEditor({ store, api, team = false }: { store: Store; a
   const [saving, setSaving] = useState(false);
   const [now] = useState(() => Date.now());
   const newKey = useRef(0);
+  const [device, setDevice] = useState<(typeof DEVICES)[number]["id"]>("desktop");
+  const [frameKey, setFrameKey] = useState(0);
+  const [switching, setSwitching] = useState<string | null>(null);
+
+  async function switchTemplate(id: string) {
+    if (!api.setTemplate || id === store.template) return;
+    setSwitching(id);
+    try {
+      await api.setTemplate(id);
+      await api.afterSave();
+      setFrameKey((k) => k + 1);
+      toast.success(`صار قالب المتجر «${templateName(id)}»`);
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : "تعذّر تغيير القالب.");
+    } finally {
+      setSwitching(null);
+    }
+  }
 
   const essential = store.template === "essential";
   const lockedUntil = !team && store.appearanceLockedUntil && new Date(store.appearanceLockedUntil).getTime() > now ? store.appearanceLockedUntil : null;
@@ -233,7 +264,50 @@ export function AppearanceEditor({ store, api, team = false }: { store: Store; a
 
       <div className="grid items-start gap-4 lg:grid-cols-[340px_1fr]">
         <aside className="space-y-3 rounded-xl border bg-card p-4 lg:sticky lg:top-20 lg:max-h-[calc(100svh-6rem)] lg:overflow-y-auto">
-          {selected ? (
+          {selected === "extras" || selected === "template" ? (
+            <>
+              <button type="button" className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground" onClick={() => setSelected(null)}>
+                <IconArrowRight className="size-4" /> كل العناصر
+              </button>
+              {selected === "extras" && api.saveExtras && (
+                <StoreExtrasPanel
+                  initial={store.appearance?.extras ?? {}}
+                  onSave={async (x) => {
+                    await api.saveExtras!(x);
+                    await api.afterSave();
+                    setFrameKey((k) => k + 1);
+                  }}
+                />
+              )}
+              {selected === "template" && (
+                <div className="space-y-2">
+                  <p className="text-sm font-semibold">قالب المتجر</p>
+                  <p className="text-xs text-muted-foreground">يتغيّر فورًا مع بقاء منتجاتك ونصوصك. القوالب المدفوعة تحتاج باقة مدفوعة وشراء القالب من «الباقة والفواتير».</p>
+                  <div className="grid grid-cols-2 gap-2">
+                    {STORE_TEMPLATES.map((t) => {
+                      const on = store.template === t.id;
+                      const owned = t.tier === "free" || store.ownedTemplates?.includes(t.id);
+                      return (
+                        <button
+                          key={t.id}
+                          type="button"
+                          disabled={on || !!switching || !api.setTemplate}
+                          onClick={() => void switchTemplate(t.id)}
+                          className={cn("rounded-lg border p-2 text-start text-xs transition hover:border-primary disabled:cursor-default", on && "border-primary bg-primary/5")}
+                        >
+                          <span className="flex items-center justify-between font-medium">
+                            {t.name}
+                            {switching === t.id ? <IconLoader2 className="size-3.5 animate-spin" /> : on ? <IconCheck className="size-3.5 text-primary" /> : null}
+                          </span>
+                          <span className="text-muted-foreground">{TEMPLATE_TIER_LABEL[t.tier]}{owned && t.tier !== "free" ? " · مملوك" : ""}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </>
+          ) : selected ? (
             <>
               <button type="button" className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground" onClick={() => setSelected(null)}>
                 <IconArrowRight className="size-4" /> كل العناصر
@@ -248,6 +322,10 @@ export function AppearanceEditor({ store, api, team = false }: { store: Store; a
             </>
           ) : (
             <>
+              <Group title="التصميم العام">
+                {api.setTemplate && <Row label={`القالب · ${templateName(store.template)}`} onClick={() => setSelected("template")} />}
+                {api.saveExtras && <Row label="إضافات المتجر: الإعلان، السياسات، واتساب، Google" onClick={() => setSelected("extras")} />}
+              </Group>
               <Group title="الهوية">
                 <Row label="اسم المتجر" onClick={() => setSelected("name")} />
                 <Row label="الشعار" hidden={draft.hidden.includes("logo")} onClick={() => setSelected("logo")} onRestore={() => setHidden("logo", false)} />
@@ -302,8 +380,24 @@ export function AppearanceEditor({ store, api, team = false }: { store: Store; a
           )}
         </aside>
 
-        <div className="overflow-hidden rounded-xl border bg-muted">
-          <iframe ref={frame} title="معاينة المتجر" src={`${storeUrl(store.slug)}?editor=1`} className="h-[calc(100svh-9rem)] min-h-[560px] w-full bg-background" />
+        <div className="space-y-2">
+          <div className="flex items-center justify-center gap-1 rounded-xl border bg-card p-1" role="radiogroup" aria-label="حجم المعاينة">
+            {DEVICES.map((d) => (
+              <Button key={d.id} type="button" size="sm" variant={device === d.id ? "default" : "ghost"} role="radio" aria-checked={device === d.id} onClick={() => setDevice(d.id)}>
+                <d.icon className="size-4" /> {d.label}
+              </Button>
+            ))}
+          </div>
+          <div className="overflow-hidden rounded-xl border bg-muted">
+            <iframe
+              key={frameKey}
+              ref={frame}
+              title="معاينة المتجر"
+              src={`${storeUrl(store.slug)}?editor=1`}
+              style={{ width: DEVICES.find((d) => d.id === device)!.width, maxWidth: "100%" }}
+              className="mx-auto block h-[calc(100svh-12rem)] min-h-[560px] bg-background transition-[width] duration-300"
+            />
+          </div>
         </div>
       </div>
 
