@@ -10,9 +10,9 @@ import { SITE_URL } from "@/lib/site-url";
 import { Analytics } from "@/components/analytics";
 
 /**
- * الصفحة الترحيبية لعزم سمارت — تخطيط جذري مستقل عن النظام (`(os)`).
+ * الصفحة الترحيبية لـ RVIOS OS — تخطيط جذري مستقل عن النظام (`(os)`).
  *
- * التصميم من موقع RVIOS الرئيسي (`F:\rvios-web`، صفحة AzmSmart) بمسرحه
+ * التصميم من موقع RVIOS الرئيسي (`F:\rvios-web`، صفحة RVIOS OS) بمسرحه
  * ثلاثي الأبعاد وخطوطه وأنماطه. ولأن أنماطه عامة (`body`، `:root`،
  * `html[data-theme]`) فلا تُحمَّل مع النظام: لكل تخطيط جذري حزمة CSS خاصة،
  * والانتقال بينهما تحميل صفحة كامل.
@@ -32,15 +32,15 @@ const thm = localFont({
 });
 
 const DESCRIPTION =
-  "AzmSmart من RVIOS: نظام ذكي يجمع المبيعات والمخزون والعملاء والمالية والموارد البشرية والتجارة الإلكترونية في منصة واحدة مترابطة.";
+  "RVIOS OS من RVIOS: نظام ذكي يجمع المبيعات والمخزون والعملاء والمالية والموارد البشرية والتجارة الإلكترونية في منصة واحدة مترابطة.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: { absolute: "AzmSmart عزم سمارت — نظام إدارة الأعمال والمتاجر الإلكترونية | ERP سحابي" },
+  title: { absolute: "RVIOS OS — نظام إدارة الأعمال والمتاجر الإلكترونية | ERP سحابي" },
   description: DESCRIPTION,
-  applicationName: "AzmSmart",
+  applicationName: "RVIOS OS",
   keywords: [
-    "عزم سمارت", "AzmSmart", "نظام إدارة أعمال", "نظام ERP", "نظام ERP سحابي", "برنامج إدارة شركات", "نظام إدارة متجر إلكتروني",
+    "RVIOS OS", "RVIOS OS", "نظام إدارة أعمال", "نظام ERP", "نظام ERP سحابي", "برنامج إدارة شركات", "نظام إدارة متجر إلكتروني",
     "نظام مخزون", "برنامج مخزون", "نظام فواتير", "برنامج فواتير إلكترونية", "نظام محاسبة", "نظام CRM", "إدارة العملاء",
     "إدارة المشاريع والمهام", "نظام موارد بشرية", "لوحة تحكم للمتجر", "تقارير المبيعات", "نظام SaaS عربي",
     "برنامج إدارة أعمال في السعودية", "برنامج إدارة أعمال في اليمن", "ريفيوس", "RVIOS",
@@ -48,15 +48,15 @@ export const metadata: Metadata = {
     "online store management", "Arabic business software",
   ],
   alternates: { canonical: "/" },
-  openGraph: { type: "website", url: "/", siteName: "AzmSmart", title: "AzmSmart — نظام ذكي لإدارة الأعمال", description: DESCRIPTION, locale: "ar" },
-  twitter: { card: "summary_large_image", title: "AzmSmart — نظام ذكي لإدارة الأعمال", description: DESCRIPTION },
+  openGraph: { type: "website", url: "/", siteName: "RVIOS OS", title: "RVIOS OS — نظام ذكي لإدارة الأعمال", description: DESCRIPTION, locale: "ar" },
+  twitter: { card: "summary_large_image", title: "RVIOS OS — نظام ذكي لإدارة الأعمال", description: DESCRIPTION },
 };
 
 /** بيانات منظّمة: تطبيق أعمال على الويب من RVIOS */
 const appJsonLd = JSON.stringify({
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
-  name: "AzmSmart",
+  name: "RVIOS OS",
   applicationCategory: "BusinessApplication",
   operatingSystem: "Web, Android",
   url: `${SITE_URL}/`,

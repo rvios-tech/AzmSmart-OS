@@ -48,8 +48,8 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
-/* عزم سمارت – لوحة الألوان النهارية
-   مُشتقّة من شعار عزم سمارت: أحمر #C1272D (٢٥°)، ذهبي/بنّي #D19261 (٥٨°)،
+/* RVIOS OS – لوحة الألوان النهارية
+   مُشتقّة من شعار RVIOS OS: أحمر #C1272D (٢٥°)، ذهبي/بنّي #D19261 (٥٨°)،
    وخلفية كريمية #FFF0D5 (٨٢°) — انظر src/components/brand-mark.tsx. */
 :root {
   --background: oklch(0.99 0.004 80);
@@ -58,7 +58,7 @@
   --card-foreground: oklch(0.16 0.02 40);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.16 0.02 40);
-  /* الأحمر الرئيسي لشعار عزم سمارت */
+  /* الأحمر الرئيسي لشعار RVIOS OS */
   --primary: oklch(0.5293 0.1892 25);
   --primary-foreground: oklch(0.98 0.01 80);
   --secondary: oklch(0.95 0.015 60);
@@ -89,7 +89,7 @@
   --sidebar-ring: oklch(0.55 0.17 25);
 }
 
-/* عزم سمارت – لوحة الألوان الليلية */
+/* RVIOS OS – لوحة الألوان الليلية */
 .dark {
   --background: oklch(0.14 0.02 40);
   --foreground: oklch(0.96 0.01 70);

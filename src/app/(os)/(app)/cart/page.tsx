@@ -93,7 +93,7 @@ export default function CartPage() {
     e.preventDefault();
     const code = promo.trim().toUpperCase();
     if (!code) return;
-    if (code === "SAVE10" || code === "AZMSMART10") {
+    if (code === "SAVE10" || code === "RVIOS10") {
       setApplied({ code, rate: 0.1 });
       toast.success("تم تطبيق كود الخصم", {
         description: `${code} — خصم 10% على طلبك.`,

@@ -1,5 +1,5 @@
 /**
- * روابط الصفحة الترحيبية خارج عزم سمارت — منتجات RVIOS الأخرى وموقع الشركة.
+ * روابط الصفحة الترحيبية خارج RVIOS OS — منتجات RVIOS الأخرى وموقع الشركة.
  * تُضبط بالبيئة للإنتاج، والافتراض لخوادم التطوير المحلية.
  */
 const trim = (u: string) => u.replace(/\/+$/, "");
@@ -8,7 +8,7 @@ const trim = (u: string) => u.replace(/\/+$/, "");
 export const RVIOS_URL = trim(process.env.NEXT_PUBLIC_RVIOS_URL ?? "http://localhost:3000");
 /** واجهة منصة المتاجر */
 export const STOREOS_URL = trim(process.env.NEXT_PUBLIC_STOREOS_URL ?? "http://store.rvios.com");
-/** الصفحة الترحيبية نفسها — هنا في عزم سمارت */
+/** الصفحة الترحيبية نفسها — هنا في RVIOS OS */
 export const AZMSMART_URL = "/";
 
 /** صفحة التواصل في موقع RVIOS بموضوع محدّد */

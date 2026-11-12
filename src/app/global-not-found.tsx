@@ -12,7 +12,7 @@ import { ErrorState } from "@/components/error-state";
  */
 const tajawal = Tajawal({ variable: "--font-sans", subsets: ["arabic", "latin"], weight: ["400", "500", "700"] });
 
-export const metadata: Metadata = { title: "الصفحة غير موجودة · عزم سمارت" };
+export const metadata: Metadata = { title: "الصفحة غير موجودة · RVIOS OS" };
 
 export default function GlobalNotFound() {
   return (

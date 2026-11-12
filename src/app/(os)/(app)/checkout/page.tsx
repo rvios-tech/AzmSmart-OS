@@ -128,8 +128,8 @@ export default function CheckoutPage() {
                 <Input
                   id="email"
                   type="email"
-                  placeholder="ahmed@azmsmart.sa"
-                  defaultValue="ahmed.alamri@azmsmart.sa"
+                  placeholder="ahmed@rvios.com"
+                  defaultValue="ahmed.alamri@rvios.com"
                   dir="ltr"
                   required
                 />

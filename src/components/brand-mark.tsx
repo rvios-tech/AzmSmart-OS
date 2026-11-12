@@ -2,7 +2,7 @@ import Image from "next/image";
 import { cn } from "@/lib/utils";
 
 /**
- * شعار عزم سمارت — العلامة بالكريمي فوق الأحمر، كأيقونة النظام (`app/icon.svg`).
+ * شعار RVIOS OS — العلامة بالكريمي فوق الأحمر، كأيقونة النظام (`app/icon.svg`).
  *
  * مصدر واحد لكل ظهور للعلامة (الدخول، الصيانة، قريباً، الشريط الجانبي)
  * بدل نسخ الصندوق ذاته في كل صفحة.
@@ -24,8 +24,8 @@ export function BrandMark({
       style={{ width: `calc(var(--spacing) * ${size})`, height: `calc(var(--spacing) * ${size})` }}
     >
       <Image
-        src="/brand/azmsmart-mark-light.svg"
-        alt="عزم سمارت"
+        src="/brand/rvios-mark-light.svg"
+        alt="RVIOS OS"
         width={40}
         height={40}
         className="h-full w-full object-contain"

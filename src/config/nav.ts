@@ -59,7 +59,7 @@ export type Workspace = {
 };
 
 export const workspaces: Workspace[] = [
-  { name: "عزم سمارت", plan: "مؤسسي", icon: IconSparkles },
+  { name: "RVIOS OS", plan: "مؤسسي", icon: IconSparkles },
   { name: "دار الخليج للتقنية", plan: "ناشئة", icon: IconRocket },
   { name: "مجموعة الأفق", plan: "مجاني", icon: IconWorld },
 ];

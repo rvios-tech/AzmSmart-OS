@@ -99,7 +99,7 @@ export default function PlatformOrganizationsPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="الشركات" description="كل الشركات المشتركة في عزم سمارت." />
+      <PageHeader title="الشركات" description="كل الشركات المشتركة في RVIOS OS." />
 
       <div className="grid gap-4 sm:grid-cols-3">
         <SummaryTile label="إجمالي الشركات" value={formatNumber(stats.total)} />

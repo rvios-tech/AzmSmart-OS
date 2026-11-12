@@ -278,7 +278,7 @@ export default function FileManagerPage() {
   }
 
   function copyLink(f: FileNode) {
-    const link = `https://azmsmart.sa/files/${f.id}`;
+    const link = `https://rvios.com/files/${f.id}`;
     navigator.clipboard
       ?.writeText(link)
       .then(() => toast.success("تم نسخ الرابط", { description: link }))

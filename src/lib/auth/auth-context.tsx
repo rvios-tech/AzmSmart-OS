@@ -46,6 +46,23 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 const USER_KEY = "azm_user";
 const COMPANY_KEY = "azm_company";
 const COMPANIES_KEY = "azm_companies";
+/** رمز «الجهاز الموثوق» — يبقى بعد تسجيل الخروج: هو ثقة بالجهاز لا جلسة */
+const TRUST_KEY = "rv_trust";
+
+function readTrust(): string | undefined {
+  try {
+    return window.localStorage.getItem(TRUST_KEY) ?? undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+function saveTrust(t: string | undefined) {
+  if (!t) return;
+  try {
+    window.localStorage.setItem(TRUST_KEY, t);
+  } catch {}
+}
 
 function readCached<T>(key: string): T | null {
   try {
@@ -96,6 +113,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       try {
         await authApi.me();
+        // جلسة صالحة: تُجدَّد بصمت (جلسات الدعم لا تتجدّد — مدتها القصيرة مقصودة)
+        if (!inSupport() && !authApi.isDemoCompany(cachedCompany)) {
+          authApi
+            .refresh()
+            .then((r) => setToken(r.accessToken))
+            .catch(() => undefined);
+        }
       } catch {
         // الرمز مرفوض أو منتهٍ أو العضوية سُحبت — نفس معالجة الخادم.
         setToken(null);
@@ -124,11 +148,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = useCallback(
     async (email: string, password: string) => {
-      const res = await authApi.login({ email, password });
+      const res = await authApi.login({ email, password, trustToken: readTrust() });
       if ("verificationRequired" in res) {
         setPendingEmail(res.email);
         return true;
       }
+      saveTrust(res.trustToken);
       persist(res.accessToken, res.user, res.company);
       window.localStorage.setItem(COMPANIES_KEY, JSON.stringify(res.companies));
       setCompanies(res.companies);
@@ -143,6 +168,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (!email) throw new Error("no pending email");
       const res = await authApi.verifyCode({ email, code, companyId: readPendingCompany() });
       clearPendingEmail();
+      saveTrust(res.trustToken);
       persist(res.accessToken, res.user, res.company);
       window.localStorage.setItem(COMPANIES_KEY, JSON.stringify(res.companies));
       setCompanies(res.companies);

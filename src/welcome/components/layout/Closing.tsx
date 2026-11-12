@@ -22,7 +22,7 @@ export function Closing({ lines, light }: { lines: string[]; light?: string }) {
               <L data-rise href="/register" className="btn btn-gold">ابدأ مجاناً</L>
               <L data-rise href="/demo" className="btn">جرّب العرض التجريبي</L>
               <a data-rise href={contactUrl("azmsmart")} className="btn">اطلب عرضاً توضيحياً</a>
-              <a data-rise href={waLink("ar", "مرحباً، أود معرفة المزيد عن AzmSmart")} target="_blank" rel="noopener" className="btn">واتساب</a>
+              <a data-rise href={waLink("ar", "مرحباً، أود معرفة المزيد عن RVIOS OS")} target="_blank" rel="noopener" className="btn">واتساب</a>
             </Rise>
             <p className="mt-8 text-center">
               <a href={`mailto:${site.email}`} className="link-line latin text-lg text-mist hover:text-ivory">{site.email}</a>

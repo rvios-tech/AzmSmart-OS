@@ -28,7 +28,7 @@ export function Preloader() {
     <div ref={ref} aria-hidden="true" className="fixed inset-0 z-[90] grid place-items-center bg-obsidian">
       <div className="grid place-items-center gap-8">
         <LogoMark stroke className="w-[min(36vw,260px)] text-gold" />
-        <p className="latin text-[11px] tracking-[0.5em] text-ivory/50">AZMSMART · RVIOS</p>
+        <p className="latin text-[11px] tracking-[0.5em] text-ivory/50">RVIOS OS</p>
       </div>
     </div>
   );

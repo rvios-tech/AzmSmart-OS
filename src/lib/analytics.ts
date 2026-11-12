@@ -1,5 +1,5 @@
 /**
- * Google Analytics لعزم سمارت (الصفحة الترحيبية ولوحة التحكم). في الإنتاج وحده فلا تُحسب
+ * Google Analytics لـ RVIOS OS (الصفحة الترحيبية ولوحة التحكم). في الإنتاج وحده فلا تُحسب
  * زيارات التطوير. `NEXT_PUBLIC_GA_IDS` (مفصولة بفواصل) يستبدل الافتراضي، وقيمة فارغة تعطّله.
  */
 const raw = process.env.NEXT_PUBLIC_GA_IDS ?? "G-L8KCY9M4ZP";

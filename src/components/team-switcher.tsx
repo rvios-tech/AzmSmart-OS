@@ -38,7 +38,7 @@ export function TeamSwitcher() {
   const { stores, store, slots, setActive } = useStore();
   const { roleLabel } = useWorkspace();
 
-  const title = store?.name ?? company?.name ?? "عزم سمارت";
+  const title = store?.name ?? company?.name ?? "RVIOS OS";
   const subtitle = store ? PLAN_LABEL[store.plan] : roleLabel;
 
   return (

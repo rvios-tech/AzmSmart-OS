@@ -36,7 +36,7 @@ import { cn } from "@/lib/utils";
 import { integrations, type Integration } from "@/data";
 
 function scopesFor(i: Integration): string[] {
-  const base = ["قراءة بيانات مساحة عملك في عزم سمارت", `مزامنة ثنائية الاتجاه مع ${i.name}`];
+  const base = ["قراءة بيانات مساحة عملك في RVIOS OS", `مزامنة ثنائية الاتجاه مع ${i.name}`];
   const byCategory: Record<string, string[]> = {
     "التواصل": ["إرسال الرسائل والتنبيهات إلى القنوات", "قراءة قائمة القنوات والأعضاء"],
     "المطورون": ["قراءة المستودعات وطلبات الدمج والمشكلات", "نشر حالات الإيداع والفحوص"],
@@ -151,7 +151,7 @@ export default function IntegrationsPage() {
     <div className="space-y-6">
       <PageHeader
         title="التكاملات"
-        description="اربط عزم سمارت بالأدوات التي يستخدمها فريقك بالفعل."
+        description="اربط RVIOS OS بالأدوات التي يستخدمها فريقك بالفعل."
       >
         <div className="relative w-full sm:w-64">
           <IconSearch className="absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
@@ -291,7 +291,7 @@ export default function IntegrationsPage() {
                   </Label>
                   <Input
                     id="workspace"
-                    placeholder={`https://azmsmart.${connecting.name.toLowerCase().replace(/\s/g, "")}.com`}
+                    placeholder={`https://rvios.${connecting.name.toLowerCase().replace(/\s/g, "")}.com`}
                   />
                 </div>
 
@@ -361,7 +361,7 @@ export default function IntegrationsPage() {
                 <dl className="space-y-3 text-sm">
                   <div className="flex items-center justify-between">
                     <dt className="text-muted-foreground">الحساب المرتبط</dt>
-                    <dd className="font-medium">alex.morgan@azmsmart.sa</dd>
+                    <dd className="font-medium">alex.morgan@rvios.com</dd>
                   </div>
                   <div className="flex items-center justify-between">
                     <dt className="text-muted-foreground">تاريخ الربط</dt>
@@ -380,7 +380,7 @@ export default function IntegrationsPage() {
                   <div className="flex items-center gap-2">
                     <Input
                       readOnly
-                      value={`https://api.azmsmart.sa/hooks/${managing.id.toLowerCase()}`}
+                      value={`https://api.rvios.com/hooks/${managing.id.toLowerCase()}`}
                       className="font-mono text-xs"
                     />
                     <Button
@@ -389,7 +389,7 @@ export default function IntegrationsPage() {
                       size="icon"
                       onClick={() => {
                         navigator.clipboard.writeText(
-                          `https://api.azmsmart.sa/hooks/${managing.id.toLowerCase()}`
+                          `https://api.rvios.com/hooks/${managing.id.toLowerCase()}`
                         );
                         toast.success("تم نسخ رابط خطاف الويب");
                       }}

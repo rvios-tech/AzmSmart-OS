@@ -15,8 +15,8 @@ const tajawal = Tajawal({
 
 export const metadata: Metadata = {
   title: {
-    default: "عزم سمارت",
-    template: "%s · عزم سمارت",
+    default: "RVIOS OS",
+    template: "%s · RVIOS OS",
   },
   description:
     "نظام إدارة الأعمال الذكي – منصة متكاملة لإدارة المبيعات والعملاء والمشاريع بكفاءة عالية.",

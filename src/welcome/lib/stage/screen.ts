@@ -11,7 +11,7 @@ const T = {
     siteH1: "نبني الثقة،", siteH2: "ونصنع المستقبل.", siteP: "حلول استثمارية وعقارية متكاملة في المملكة.", siteCta: "اطلب استشارة",
     storeUrl: "store.rvios.com/alsaeed", storeName: "متجر السعيد للعطور", storeBadge: "متجر موثّق", cats: ["الكل", "عطور شرقية", "بخور", "هدايا"],
     products: [["العود الملكي", "45"], ["مسك أبيض", "28"], ["عنبر فاخر", "52"], ["طقم هدايا", "70"]], add: "أضف للسلة", toast: "أُضيف إلى السلة", wa: "إتمام الطلب عبر واتساب",
-    appUrl: "app.azmsmart.com", appTitle: "لوحة التحكم", kpis: ["مبيعات اليوم", "طلبات جديدة", "صافي الربح"], chart: "المبيعات هذا الأسبوع", orders: "آخر الطلبات",
+    appUrl: "app.rvios.com", appTitle: "لوحة التحكم", kpis: ["مبيعات اليوم", "طلبات جديدة", "صافي الربح"], chart: "المبيعات هذا الأسبوع", orders: "آخر الطلبات",
     rows: [["طلب ‎#2381", "تم الشحن"], ["طلب ‎#2382", "قيد التجهيز"], ["طلب ‎#2383", "بانتظار الدفع"], ["طلب ‎#2384", "تم التسليم"]],
     menu: ["الرئيسية", "المبيعات", "المخزون", "العملاء", "المالية"],
   },
@@ -20,7 +20,7 @@ const T = {
     siteH1: "Building trust,", siteH2: "shaping tomorrow.", siteP: "Integrated investment and real-estate solutions.", siteCta: "Book a consultation",
     storeUrl: "store.rvios.com/alsaeed", storeName: "Al-Saeed Perfumes", storeBadge: "Verified", cats: ["All", "Oriental", "Incense", "Gifts"],
     products: [["Royal Oud", "45"], ["White Musk", "28"], ["Fine Amber", "52"], ["Gift Set", "70"]], add: "Add to cart", toast: "Added to cart", wa: "Checkout on WhatsApp",
-    appUrl: "app.azmsmart.com", appTitle: "Dashboard", kpis: ["Today's sales", "New orders", "Net profit"], chart: "Sales this week", orders: "Latest orders",
+    appUrl: "app.rvios.com", appTitle: "Dashboard", kpis: ["Today's sales", "New orders", "Net profit"], chart: "Sales this week", orders: "Latest orders",
     rows: [["Order #2381", "Shipped"], ["Order #2382", "Preparing"], ["Order #2383", "Awaiting pay"], ["Order #2384", "Delivered"]],
     menu: ["Overview", "Sales", "Inventory", "Customers", "Finance"],
   },
@@ -44,7 +44,7 @@ function cssVar(name: string, fallback: string) {
 
 /**
  * شاشة اللابتوب: لوحة رسم ثنائية الأبعاد تُرسم كل إطار وتُستخدم كخامة.
- * ثلاثة تطبيقات تتبدل تلقائياً (أو بالتمرير/النقر): موقع شركة، متجر StoreOS، لوحة AzmSmart.
+ * ثلاثة تطبيقات تتبدل تلقائياً (أو بالتمرير/النقر): موقع شركة، متجر StoreOS، لوحة RVIOS OS.
  */
 export class ScreenUI {
   readonly canvas: HTMLCanvasElement;
@@ -462,7 +462,7 @@ export class ScreenUI {
     this.cursor(t, [[W * 0.55, H * 0.35], [bx, by]], 1.3, 2.4);
   }
 
-  // ——— 3) لوحة AzmSmart ———
+  // ——— 3) لوحة RVIOS OS ———
   private drawDash(t: number) {
     const { ctx, W, H, k } = this;
     const P = PAL[this.theme];
@@ -485,7 +485,7 @@ export class ScreenUI {
     ctx.textAlign = rtl ? "right" : "left";
     ctx.fillStyle = P.fg;
     ctx.font = this.f(16, 700);
-    ctx.fillText("AzmSmart", rtl ? W - 72 * k : 72 * k, top + 42 * k);
+    ctx.fillText("RVIOS OS", rtl ? W - 72 * k : 72 * k, top + 42 * k);
     L.menu.forEach((m, n) => {
       const y = top + (110 + n * 52) * k;
       if (n === 0) {

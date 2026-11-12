@@ -13,7 +13,7 @@ const icons = [
   "M7 3h7l5 5v13H7zM14 3v5h5M10 17v-3M13 17v-5M16 17v-2",
 ];
 
-/** لوحة تحكم AzmSmart الزجاجية. active اختياري للتحكم من الخارج */
+/** لوحة تحكم RVIOS OS الزجاجية. active اختياري للتحكم من الخارج */
 export function Dashboard({ active, onChange, chips = true, tilt = true, className = "" }: {
   active?: number; onChange?: (i: number) => void; chips?: boolean; tilt?: boolean; className?: string;
 }) {
@@ -38,7 +38,7 @@ export function Dashboard({ active, onChange, chips = true, tilt = true, classNa
 
   return (
     <div className={className}>
-      <div ref={ref} className="dash glass" role="img" aria-label={`AzmSmart — ${dashData[m].t}`}>
+      <div ref={ref} className="dash glass" role="img" aria-label={`RVIOS OS — ${dashData[m].t}`}>
         <aside>
           <span className="az">AZ</span>
           {icons.map((p, i) => <i key={i} className={i === m ? "on" : ""}><svg viewBox="0 0 24 24"><path d={p} /></svg></i>)}

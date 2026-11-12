@@ -28,7 +28,7 @@ import {
 } from "@/lib/api/ai-admin";
 import { formatCompact, formatDateShort, formatNumber } from "@/lib/format";
 
-const AUD: Record<AiAudience, string> = { merchant: "التجّار (لوحة عزم سمارت)", public: "الزوّار (rvios.com وstore.rvios.com)" };
+const AUD: Record<AiAudience, string> = { merchant: "التجّار (لوحة RVIOS OS)", public: "الزوّار (rvios.com وstore.rvios.com)" };
 const FEATURE: Record<string, string> = {
   chat: "محادثة", insights: "تحليلات", product: "كاتب المنتجات", marketing: "المسوّق", seo: "البحث", reply: "الرد على العملاء", policy: "صفحات المتجر", title: "عناوين",
 };

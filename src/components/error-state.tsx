@@ -48,14 +48,14 @@ export function ErrorState({
         />
       </div>
 
-      {/* الترويسة — شعار عزم سمارت */}
+      {/* الترويسة — شعار RVIOS OS */}
       <header className="flex items-center px-6 py-5">
         <Link
           href="/dashboard"
           className="flex items-center gap-2 font-semibold"
         >
           <BrandMark />
-          <span className="tracking-tight">عزم سمارت</span>
+          <span className="tracking-tight">RVIOS OS</span>
         </Link>
       </header>
 
@@ -105,7 +105,7 @@ export function ErrorState({
 
       {/* التذييل */}
       <footer className="px-6 py-6 text-center text-sm text-muted-foreground">
-        © {new Date().getFullYear()} عزم سمارت. جميع الحقوق محفوظة.
+        © {new Date().getFullYear()} RVIOS OS. جميع الحقوق محفوظة.
       </footer>
     </div>
   );

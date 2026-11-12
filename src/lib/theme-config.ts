@@ -33,7 +33,7 @@ export type Accent = {
 };
 
 export const accents: Accent[] = [
-  { key: "azm", label: "أحمر عزم", swatch: "oklch(0.5293 0.1892 25)", primary: null, fg: "oklch(0.985 0 0)" },
+  { key: "azm", label: "أحمر ريفيوس", swatch: "oklch(0.5293 0.1892 25)", primary: null, fg: "oklch(0.985 0 0)" },
   { key: "blue", label: "أزرق", swatch: "oklch(0.6 0.2 264)", primary: "oklch(0.58 0.22 264)", fg: "oklch(0.985 0 0)" },
   { key: "violet", label: "بنفسجي", swatch: "oklch(0.61 0.22 292)", primary: "oklch(0.61 0.22 292)", fg: "oklch(0.985 0 0)" },
   { key: "green", label: "أخضر", swatch: "oklch(0.62 0.17 152)", primary: "oklch(0.58 0.16 152)", fg: "oklch(0.985 0 0)" },
@@ -97,7 +97,7 @@ export function buildThemeCss(config: ThemeConfig): string {
   const accent = accents.find((a) => a.key === config.accent);
   const font = fonts.find((f) => f.key === config.font);
   const lines: string[] = [];
-  lines.push("/* مظهر عزم سمارت — مُولَّد من لوحة تخصيص المظهر. */");
+  lines.push("/* مظهر RVIOS OS — مُولَّد من لوحة تخصيص المظهر. */");
   lines.push(":root {");
   lines.push(`  --radius: ${config.radius}rem;`);
   if (accent?.primary) {

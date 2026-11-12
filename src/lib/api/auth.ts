@@ -24,6 +24,8 @@ export function demo(): Promise<LoginResponse> {
 
 export interface LoginResponse {
   accessToken: string;
+  /** «جهاز موثوق» — يُرسل مع الدخول التالي فلا يُطلب رمز البريد طوال مدته */
+  trustToken?: string;
   user: AuthUser;
   company: AuthCompany;
   companies: (AuthCompany & { role: number })[];
@@ -54,6 +56,7 @@ export function login(input: {
   email: string;
   password: string;
   companyId?: string;
+  trustToken?: string;
 }): Promise<LoginResponse | VerificationRequired> {
   return apiFetch<LoginResponse | VerificationRequired>("/auth/login", {
     method: "POST",
@@ -90,6 +93,11 @@ export function google(credential: string): Promise<LoginResponse & { isNew: boo
     body: JSON.stringify({ credential }),
     auth: false,
   });
+}
+
+/** تجديد رمز الجلسة قبل انتهائه — جلسة منزلقة لمن يفتح اللوحة باستمرار */
+export function refresh(): Promise<{ accessToken: string }> {
+  return apiFetch<{ accessToken: string }>("/auth/refresh", { method: "POST" });
 }
 
 export function me(): Promise<MeResponse> {

@@ -48,7 +48,7 @@ export default function DemoPage() {
         <span className="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs text-muted-foreground">
           <IconEye className="size-3.5" /> عرض تجريبي — بلا تسجيل
         </span>
-        <h1 className="text-2xl font-semibold tracking-tight">جرّب عزم سمارت كاملًا</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">جرّب RVIOS OS كاملًا</h1>
         <p className="text-sm leading-relaxed text-muted-foreground">
           ادخل لوحة تحكم «مؤسسة الواحة للتجارة» — شركة ببيانات واقعية في كل وحدة — وتجوّل فيها كما يفعل فريقها كل يوم.
         </p>

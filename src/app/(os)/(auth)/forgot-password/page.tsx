@@ -46,7 +46,7 @@ export default function ForgotPasswordPage() {
         <div className="space-y-2">
           <Label htmlFor="email">البريد الإلكتروني</Label>
           <Input id="email" type="email" dir="ltr" className="text-start" required autoComplete="email"
-            placeholder="ahmed@azmsmart.sa" value={email} onChange={(e) => setEmail(e.target.value)} />
+            placeholder="ahmed@rvios.com" value={email} onChange={(e) => setEmail(e.target.value)} />
         </div>
         <Button type="submit" className="w-full" disabled={submitting}>
           {submitting && <IconLoader2 className="size-4 animate-spin" />}

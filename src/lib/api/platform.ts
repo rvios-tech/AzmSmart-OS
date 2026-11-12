@@ -202,7 +202,7 @@ export interface PlatformSettings {
   currency: string;
   /** أسعار القوالب المدفوعة — الافتراضي أو ما ضُبط (`tpl.<id>`) */
   templates: Record<string, number>;
-  /** إعدادات تطبيق AZM الجوال (`GET /app/config`) */
+  /** إعدادات تطبيق RVIOS الجوال (`GET /app/config`) */
   app: { minVersion: string; latestVersion: string | null; maintenance: boolean; maintenanceMessage: string | null; storeUrl: string | null };
   methods: { id: string; name: string; scope: string; instructions: string }[];
   /** حسابات الاستلام المعلنة (`pay.accounts`) */

@@ -40,8 +40,8 @@ export const onboarding: typeof Onboarding = [
 ];
 
 export const azmFaq: typeof AzmFaq = [
-  { q: "Does AzmSmart work with my existing online store?", a: "It's built to connect directly to your online store, so orders flow into inventory and finance with no manual entry. We'll review your current store with you during the demo." },
+  { q: "Does RVIOS OS work with my existing online store?", a: "It's built to connect directly to your online store, so orders flow into inventory and finance with no manual entry. We'll review your current store with you during the demo." },
   { q: "Do I need to use every module from day one?", a: "No. Start with the modules you need today and add more as your business grows." },
-  { q: "Can I use it on my phone?", a: "Yes. The interface is fully responsive and runs in any browser on any device — and with the AZM app, your KPIs are always in your pocket." },
+  { q: "Can I use it on my phone?", a: "Yes. The interface is fully responsive and runs in any browser on any device — and with the RVIOS app, your KPIs are always in your pocket." },
   { q: "How do I know which pricing fits my company?", a: "Pricing depends on your modules, number of users, and branches. Book a demo and we'll follow up with a detailed proposal." },
 ];

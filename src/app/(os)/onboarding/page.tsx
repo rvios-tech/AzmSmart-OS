@@ -51,17 +51,17 @@ export default function OnboardingPage() {
   const [step, setStep] = useState(0);
 
   const [fullName, setFullName] = useState("أحمد العمري");
-  const [email, setEmail] = useState("ahmed.alamri@azmsmart.sa");
+  const [email, setEmail] = useState("ahmed.alamri@rvios.com");
   const [password, setPassword] = useState("");
 
-  const [workspace, setWorkspace] = useState("عزم سمارت");
-  const [slug, setSlug] = useState("azmsmart");
+  const [workspace, setWorkspace] = useState("RVIOS OS");
+  const [slug, setSlug] = useState("rvios");
   const [teamSize, setTeamSize] = useState("11–50");
   const [industry, setIndustry] = useState("saas");
 
   const [invites, setInvites] = useState<Invite[]>([
-    { id: 1, email: "sara.alrashdi@azmsmart.sa", role: "admin" },
-    { id: 2, email: "abdallah.alshammari@azmsmart.sa", role: "member" },
+    { id: 1, email: "sara.alrashdi@rvios.com", role: "admin" },
+    { id: 2, email: "abdallah.alshammari@rvios.com", role: "member" },
     { id: 3, email: "", role: "member" },
   ]);
 
@@ -98,7 +98,7 @@ export default function OnboardingPage() {
           <span className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
             <IconSparkles className="size-5" />
           </span>
-          <span className="tracking-tight">عزم سمارت</span>
+          <span className="tracking-tight">RVIOS OS</span>
         </Link>
         <Button variant="ghost" size="sm" asChild>
           <Link href="/dashboard">تخطٍّ الآن</Link>
@@ -163,7 +163,7 @@ export default function OnboardingPage() {
               <div className="space-y-6">
                 <StepHeading
                   eyebrow="الخطوة 1 من 4"
-                  title="مرحباً بك في عزم سمارت"
+                  title="مرحباً بك في RVIOS OS"
                   description="لنجهّز حسابك، لن يستغرق الأمر سوى دقيقة."
                 />
                 <div className="space-y-4">
@@ -181,7 +181,7 @@ export default function OnboardingPage() {
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      placeholder="noura@azmsmart.sa"
+                      placeholder="noura@rvios.com"
                     />
                   </Field>
                   <Field label="كلمة المرور" htmlFor="password" hint="8 أحرف على الأقل">
@@ -210,13 +210,13 @@ export default function OnboardingPage() {
                       id="workspace"
                       value={workspace}
                       onChange={(e) => setWorkspace(e.target.value)}
-                      placeholder="عزم سمارت"
+                      placeholder="RVIOS OS"
                     />
                   </Field>
                   <Field label="رابط مساحة العمل" htmlFor="slug">
                     <InputGroup>
                       <InputGroupAddon>
-                        <InputGroupText>azmsmart.sa/</InputGroupText>
+                        <InputGroupText>rvios.com/</InputGroupText>
                       </InputGroupAddon>
                       <InputGroupInput
                         id="slug"
@@ -286,7 +286,7 @@ export default function OnboardingPage() {
                           onChange={(e) =>
                             updateInvite(inv.id, { email: e.target.value })
                           }
-                          placeholder="zameel@azmsmart.sa"
+                          placeholder="zameel@rvios.com"
                           className="ps-9"
                         />
                       </div>
@@ -352,7 +352,7 @@ export default function OnboardingPage() {
                 <div className="mx-auto max-w-sm space-y-3 rounded-xl border bg-muted/30 p-4 text-start">
                   <SummaryRow label="الحساب" value={fullName} />
                   <Separator />
-                  <SummaryRow label="مساحة العمل" value={`azmsmart.sa/${slug || "azmsmart"}`} />
+                  <SummaryRow label="مساحة العمل" value={`rvios.com/${slug || "rvios"}`} />
                   <Separator />
                   <SummaryRow
                     label="المدعوّون"

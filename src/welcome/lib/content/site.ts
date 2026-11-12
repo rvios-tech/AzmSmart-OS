@@ -17,14 +17,14 @@ export const siteText = {
   ar: {
     tagline: "نبني الأنظمة. نطوّر الحلول. نمكّن الأعمال.",
     description:
-      "RVIOS Technologies — نصمّم ونطوّر المواقع الإلكترونية والأنظمة وتطبيقات الويب والمتاجر الإلكترونية وصفحات الهبوط، ونتولى صيانتها وتطويرها. ومن منتجاتنا RVIOS StoreOS وAzmSmart وAZM.",
+      "RVIOS Technologies — نصمّم ونطوّر المواقع الإلكترونية والأنظمة وتطبيقات الويب والمتاجر الإلكترونية وصفحات الهبوط، ونتولى صيانتها وتطويرها. ومن منتجاتنا RVIOS StoreOS وRVIOS OS وتطبيق RVIOS.",
     city: "صنعاء، اليمن",
     wa: "مرحباً RVIOS، أود الحديث عن مشروع",
   },
   en: {
     tagline: "We build systems. We engineer solutions. We empower businesses.",
     description:
-      "RVIOS Technologies designs and develops websites, web systems and apps, online stores and landing pages — and keeps them maintained and growing. Our products include RVIOS StoreOS, AzmSmart and AZM.",
+      "RVIOS Technologies designs and develops websites, web systems and apps, online stores and landing pages — and keeps them maintained and growing. Our products include RVIOS StoreOS, RVIOS OS and the RVIOS app.",
     city: "Sana'a, Yemen",
     wa: "Hello RVIOS, I'd like to talk about a project",
   },

@@ -11,13 +11,13 @@ import { content } from "@/welcome/lib/content";
 import { contactUrl } from "@/welcome/lib/content/links";
 
 /**
- * الصفحة الترحيبية لعزم سمارت — صفحة AzmSmart في موقع RVIOS الرئيسي، نُقلت
+ * الصفحة الترحيبية لـ RVIOS OS — صفحة RVIOS OS في موقع RVIOS الرئيسي، نُقلت
  * إلى هنا لتكون واجهة النظام نفسه، وموقع RVIOS يحوّل إليها. الفرق عن الأصل:
  * أزرار البدء تدخل النظام مباشرةً (`/register`، `/login`)، وطلب العرض
  * التوضيحي يفتح صفحة التواصل في موقع RVIOS.
  */
 const t = {
-  label: "AzmSmart — من منتجات RVIOS",
+  label: "RVIOS OS — من منتجات RVIOS",
   head: ["إدارة أعمالك بذكاء،", "من مكان واحد."],
   lead: "نظام ذكي لإدارة الأعمال والتجارة الإلكترونية: المبيعات والمخزون والعملاء والمالية والموارد البشرية مترابطة في منصة واحدة.",
   facts: "ست وحدات مترابطة — يعمل من أي جهاز — عربي بالكامل — مرتبط بمتجرك الإلكتروني",
@@ -59,7 +59,7 @@ export default function WelcomePage() {
 
       <Scene id="azm-pains" theme="paper" className="px-[var(--pad)] py-[clamp(100px,16vh,170px)]">
         <div className="mx-auto max-w-[1480px]">
-          <span className="label">قبل AzmSmart</span>
+          <span className="label">قبل RVIOS OS</span>
           <Lines className="h2 mt-6" lines={["هل يبدو يوم عملك هكذا؟"]} />
           <Rise className="mt-16 grid border-t border-hair-ink md:grid-cols-3" stagger={0.1}>
             {t.pains.map((p, i) => (
@@ -76,7 +76,7 @@ export default function WelcomePage() {
         <div className="mx-auto max-w-[1480px]">
           <span className="label">كيف يعمل</span>
           <Lines className="h2 mt-6" lines={["عملية واحدة،", "تتحدّث بها كل الأقسام."]} />
-          <Rise><p data-rise className="lead mt-6 max-w-[52ch] text-mist">حين يصل طلب، لا يحتاج أحد أن يُدخله مرة ثانية. ينقله AzmSmart تلقائياً عبر كل قسم يعنيه.</p></Rise>
+          <Rise><p data-rise className="lead mt-6 max-w-[52ch] text-mist">حين يصل طلب، لا يحتاج أحد أن يُدخله مرة ثانية. ينقله RVIOS OS تلقائياً عبر كل قسم يعنيه.</p></Rise>
           <Flow />
         </div>
       </Scene>
@@ -91,7 +91,7 @@ export default function WelcomePage() {
 
       <Scene id="azm-sectors" theme="paper" className="px-[var(--pad)] py-[clamp(100px,16vh,170px)]">
         <div className="mx-auto max-w-[1480px]">
-          <span className="label">لمن AzmSmart</span>
+          <span className="label">لمن RVIOS OS</span>
           <Lines className="h2 mt-6" lines={["مصمم لأعمال مثل عملك."]} />
           <Rise className="mt-16 grid border-t border-hair-ink sm:grid-cols-2 lg:grid-cols-4" stagger={0.08}>
             {sectors.map((s, i) => (
@@ -128,7 +128,7 @@ export default function WelcomePage() {
         </div>
       </Scene>
 
-      <Closing lines={["جاهز لتجربة", "AzmSmart؟"]} light={GOLD} />
+      <Closing lines={["جاهز لتجربة", "RVIOS OS؟"]} light={GOLD} />
     </>
   );
 }

@@ -177,7 +177,7 @@ const raw: Raw[] = [
       {
         from: "requester",
         time: "15 يوليو 2026 · 8:30 ص",
-        body: "هذا هو الرابط من تطبيق Okta لدينا: https://app.azmsmart.sa/auth/saml/callback — أرجو إخباري إن كان صحيحاً.",
+        body: "هذا هو الرابط من تطبيق Okta لدينا: https://app.rvios.com/auth/saml/callback — أرجو إخباري إن كان صحيحاً.",
       },
       {
         from: "agent",

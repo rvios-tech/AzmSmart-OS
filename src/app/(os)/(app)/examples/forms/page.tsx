@@ -78,7 +78,7 @@ export default function FormsPage() {
               <InputGroupInput
                 id="acc-email"
                 type="email"
-                defaultValue="ahmed.alamri@azmsmart.sa"
+                defaultValue="ahmed.alamri@rvios.com"
               />
             </InputGroup>
           </FieldRow>
@@ -86,7 +86,7 @@ export default function FormsPage() {
           <FieldRow
             htmlFor="acc-username"
             label="اسم المستخدم"
-            description="معرّفك الفريد على azmsmart.sa."
+            description="معرّفك الفريد على rvios.com."
           >
             <InputGroup>
               <InputGroupAddon>
@@ -117,7 +117,7 @@ export default function FormsPage() {
             <Textarea
               id="acc-bio"
               rows={3}
-              defaultValue="رئيس المنتج في عزم سمارت. أبني برمجيات هادئة ومركّزة لفرق تنجز وتُطلق."
+              defaultValue="رئيس المنتج في RVIOS OS. أبني برمجيات هادئة ومركّزة لفرق تنجز وتُطلق."
             />
           </FieldRow>
         </CardContent>
@@ -275,7 +275,7 @@ export default function FormsPage() {
               htmlFor="var-help"
               hint="استخدم 24 حرفاً أو أقل، بلا مسافات."
             >
-              <Input id="var-help" defaultValue="azmsmart-production" />
+              <Input id="var-help" defaultValue="rvios-production" />
             </Field>
             <Field
               label="حالة الخطأ"
@@ -289,7 +289,7 @@ export default function FormsPage() {
                 <InputGroupInput
                   id="var-error"
                   aria-invalid
-                  defaultValue="ahmed@azmsmart"
+                  defaultValue="ahmed@rvios"
                 />
               </InputGroup>
             </Field>

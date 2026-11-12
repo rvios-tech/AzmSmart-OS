@@ -11,7 +11,7 @@ export default function AuthLayout({
       <div className="flex flex-col gap-4 p-6 md:p-10">
         <Link href="/dashboard" className="flex items-center gap-2 font-semibold">
           <BrandMark />
-          عزم سمارت
+          RVIOS OS
         </Link>
         <div className="flex flex-1 items-center justify-center">
           <div className="w-full max-w-sm">{children}</div>
@@ -31,7 +31,7 @@ export default function AuthLayout({
           <div />
           <blockquote className="space-y-4">
             <p className="text-2xl font-medium leading-snug tracking-tight">
-              «غيّر عزم سمارت طريقة عمل فريقنا بالكامل. التحليلات وحدها وفّرت
+              «غيّر RVIOS OS طريقة عمل فريقنا بالكامل. التحليلات وحدها وفّرت
               علينا تكاليف الاشتراك في الشهر الأول.»
             </p>
             <footer className="text-sm text-white/70">

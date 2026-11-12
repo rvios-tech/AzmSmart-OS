@@ -169,7 +169,7 @@ export default function SupportPage() {
       requester: currentUser.name,
       requesterEmail: currentUser.email,
       requesterAvatar: currentUser.avatar,
-      company: "عزم سمارت",
+      company: "RVIOS OS",
       priority,
       status: "مفتوحة",
       category,

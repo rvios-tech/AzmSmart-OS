@@ -85,7 +85,7 @@ export default function PlatformSettingsPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="إعدادات المنصة" description="أسعار الباقات والقوالب، وحسابات الدفع، وتنبيهات الفريق، وإعدادات تطبيق AZM." />
+      <PageHeader title="إعدادات المنصة" description="أسعار الباقات والقوالب، وحسابات الدفع، وتنبيهات الفريق، وإعدادات تطبيق RVIOS." />
       <PayAccountsEditor initial={snap.accounts} providers={snap.providers} onSaved={(accounts) => setSnap((s) => (s ? { ...s, accounts } : s))} />
       <form onSubmit={save} className="space-y-6">
         <Card>
@@ -135,7 +135,7 @@ export default function PlatformSettingsPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>تطبيق AZM</CardTitle>
+            <CardTitle>تطبيق RVIOS</CardTitle>
             <CardDescription>يقرؤها التطبيق عند الإقلاع: أدنى إصدار مسموح (وإلا طلب التحديث)، ووضع الصيانة.</CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4 sm:grid-cols-2">

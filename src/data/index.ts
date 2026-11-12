@@ -1,5 +1,5 @@
 // ---------------------------------------------------------------------------
-// بيانات توضيحية لنظام عزم سمارت – جميع الأرقام والمعلومات للأغراض التجريبية فقط.
+// بيانات توضيحية لنظام RVIOS OS – جميع الأرقام والمعلومات للأغراض التجريبية فقط.
 // ---------------------------------------------------------------------------
 
 export const revenueByMonth = [
@@ -230,7 +230,7 @@ export const recentActivity: Activity[] = [
 
 export const currentUser = {
   name: "أحمد العمري",
-  email: "ahmed.alamri@azmsmart.sa",
+  email: "ahmed.alamri@rvios.com",
   role: "مدير النظام",
   avatar: "https://api.dicebear.com/9.x/avataaars/svg?seed=8",
 };
@@ -316,8 +316,8 @@ export const getInvoiceById = (id: string) =>
   invoices.find((inv) => inv.id === id);
 
 export const company = {
-  name: "عزم سمارت",
-  email: "billing@azmsmart.sa",
+  name: "RVIOS OS",
+  email: "billing@rvios.com",
   address: "طريق الملك فهد، برج المملكة، الدور 24",
   city: "الرياض 12214",
   country: "المملكة العربية السعودية",
@@ -341,16 +341,16 @@ export type TeamMember = {
 };
 
 export const team: TeamMember[] = [
-  { id: "TM-01", name: "أحمد العمري", role: "رئيس المنتج", department: "المنتج", email: "ahmed.alamri@azmsmart.sa", avatar: "https://api.dicebear.com/9.x/avataaars/svg?seed=8", status: "نشط", location: "الرياض، السعودية" },
-  { id: "TM-02", name: "سارة الراشدي", role: "مديرة النمو", department: "التسويق", email: "sara.alrashdi@azmsmart.sa", avatar: "https://api.dicebear.com/9.x/avataaars/svg?seed=32", status: "نشط", location: "دبي، الإمارات" },
-  { id: "TM-03", name: "عبدالله الشمري", role: "مهندس أول", department: "الهندسة", email: "abdallah.alshammari@azmsmart.sa", avatar: "https://api.dicebear.com/9.x/avataaars/svg?seed=33", status: "بعيد", location: "أبوظبي، الإمارات" },
-  { id: "TM-04", name: "نورة المطيري", role: "مصممة منتجات", department: "التصميم", email: "noura.almutairi@azmsmart.sa", avatar: "https://api.dicebear.com/9.x/avataaars/svg?seed=45", status: "نشط", location: "الرياض، السعودية" },
-  { id: "TM-05", name: "خالد القحطاني", role: "مهندس خلفية", department: "الهندسة", email: "khalid.alqahtani@azmsmart.sa", avatar: "https://api.dicebear.com/9.x/avataaars/svg?seed=52", status: "غير متصل", location: "جدة، السعودية" },
-  { id: "TM-06", name: "هند الزهراني", role: "قائدة نجاح العملاء", department: "نجاح العملاء", email: "hind.alzahrani@azmsmart.sa", avatar: "https://api.dicebear.com/9.x/avataaars/svg?seed=47", status: "نشط", location: "الدوحة، قطر" },
-  { id: "TM-07", name: "فيصل الغامدي", role: "محلل بيانات", department: "البيانات", email: "faisal.alghamdi@azmsmart.sa", avatar: "https://api.dicebear.com/9.x/avataaars/svg?seed=59", status: "نشط", location: "الكويت، الكويت" },
-  { id: "TM-08", name: "ريم الدوسري", role: "مهندسة واجهات", department: "الهندسة", email: "reem.aldosari@azmsmart.sa", avatar: "https://api.dicebear.com/9.x/avataaars/svg?seed=41", status: "بعيد", location: "المنامة، البحرين" },
-  { id: "TM-09", name: "ماجد الحربي", role: "مهندس DevOps", department: "الهندسة", email: "majed.alharbi@azmsmart.sa", avatar: "https://api.dicebear.com/9.x/avataaars/svg?seed=60", status: "نشط", location: "مسقط، عُمان" },
-  { id: "TM-10", name: "دانة النعيمي", role: "استراتيجية المحتوى", department: "التسويق", email: "dana.alnaimi@azmsmart.sa", avatar: "https://api.dicebear.com/9.x/avataaars/svg?seed=44", status: "غير متصل", location: "عمّان، الأردن" },
+  { id: "TM-01", name: "أحمد العمري", role: "رئيس المنتج", department: "المنتج", email: "ahmed.alamri@rvios.com", avatar: "https://api.dicebear.com/9.x/avataaars/svg?seed=8", status: "نشط", location: "الرياض، السعودية" },
+  { id: "TM-02", name: "سارة الراشدي", role: "مديرة النمو", department: "التسويق", email: "sara.alrashdi@rvios.com", avatar: "https://api.dicebear.com/9.x/avataaars/svg?seed=32", status: "نشط", location: "دبي، الإمارات" },
+  { id: "TM-03", name: "عبدالله الشمري", role: "مهندس أول", department: "الهندسة", email: "abdallah.alshammari@rvios.com", avatar: "https://api.dicebear.com/9.x/avataaars/svg?seed=33", status: "بعيد", location: "أبوظبي، الإمارات" },
+  { id: "TM-04", name: "نورة المطيري", role: "مصممة منتجات", department: "التصميم", email: "noura.almutairi@rvios.com", avatar: "https://api.dicebear.com/9.x/avataaars/svg?seed=45", status: "نشط", location: "الرياض، السعودية" },
+  { id: "TM-05", name: "خالد القحطاني", role: "مهندس خلفية", department: "الهندسة", email: "khalid.alqahtani@rvios.com", avatar: "https://api.dicebear.com/9.x/avataaars/svg?seed=52", status: "غير متصل", location: "جدة، السعودية" },
+  { id: "TM-06", name: "هند الزهراني", role: "قائدة نجاح العملاء", department: "نجاح العملاء", email: "hind.alzahrani@rvios.com", avatar: "https://api.dicebear.com/9.x/avataaars/svg?seed=47", status: "نشط", location: "الدوحة، قطر" },
+  { id: "TM-07", name: "فيصل الغامدي", role: "محلل بيانات", department: "البيانات", email: "faisal.alghamdi@rvios.com", avatar: "https://api.dicebear.com/9.x/avataaars/svg?seed=59", status: "نشط", location: "الكويت، الكويت" },
+  { id: "TM-08", name: "ريم الدوسري", role: "مهندسة واجهات", department: "الهندسة", email: "reem.aldosari@rvios.com", avatar: "https://api.dicebear.com/9.x/avataaars/svg?seed=41", status: "بعيد", location: "المنامة، البحرين" },
+  { id: "TM-09", name: "ماجد الحربي", role: "مهندس DevOps", department: "الهندسة", email: "majed.alharbi@rvios.com", avatar: "https://api.dicebear.com/9.x/avataaars/svg?seed=60", status: "نشط", location: "مسقط، عُمان" },
+  { id: "TM-10", name: "دانة النعيمي", role: "استراتيجية المحتوى", department: "التسويق", email: "dana.alnaimi@rvios.com", avatar: "https://api.dicebear.com/9.x/avataaars/svg?seed=44", status: "غير متصل", location: "عمّان، الأردن" },
 ];
 
 export const getTeamMember = (i: number) => team[i % team.length];
@@ -402,7 +402,7 @@ export type Project = {
 const projectSeeds = [
   { name: "تطبيق الجوال الجديد", key: "APP", category: "المنتج", color: "var(--chart-1)", status: "على المسار" as ProjectStatus, progress: 68, desc: "إعادة بناء تطبيق iOS وAndroid على نظام تصميم موحد مع دعم العمل دون اتصال." },
   { name: "منصة الفوترة v2", key: "BILL", category: "الهندسة", color: "var(--chart-2)", status: "في خطر" as ProjectStatus, progress: 42, desc: "ترحيل الفواتير والاشتراكات إلى محرك الفوترة الجديد المتدرج." },
-  { name: "إعادة تصميم الموقع", key: "WEB", category: "التسويق", color: "var(--chart-3)", status: "على المسار" as ProjectStatus, progress: 81, desc: "تحديث موقع azmsmart.sa بهوية بصرية جديدة ونظام إدارة محتوى وصفحات محلية." },
+  { name: "إعادة تصميم الموقع", key: "WEB", category: "التسويق", color: "var(--chart-3)", status: "على المسار" as ProjectStatus, progress: 81, desc: "تحديث موقع rvios.com بهوية بصرية جديدة ونظام إدارة محتوى وصفحات محلية." },
   { name: "مستودع البيانات", key: "DATA", category: "البيانات", color: "var(--chart-4)", status: "متأخر" as ProjectStatus, progress: 34, desc: "دمج تحليلات المنتج في مستودع بيانات منظّم مع نماذج dbt." },
   { name: "تجربة الإعداد الجديدة", key: "ONB", category: "المنتج", color: "var(--chart-5)", status: "على المسار" as ProjectStatus, progress: 55, desc: "إعادة تصميم تدفق التفعيل لرفع معدل الاحتفاظ بالمستخدمين." },
   { name: "الامتثال لمعيار ISO 27001", key: "SEC", category: "الأمن", color: "var(--chart-1)", status: "مكتمل" as ProjectStatus, progress: 100, desc: "الحصول على شهادة ISO 27001 مع ضوابط مدققة وسياسات ومراقبة." },

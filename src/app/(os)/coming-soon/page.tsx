@@ -95,7 +95,7 @@ export default function ComingSoonPage() {
           className="flex items-center gap-2 font-semibold"
         >
           <BrandMark />
-          <span className="tracking-tight">عزم سمارت</span>
+          <span className="tracking-tight">RVIOS OS</span>
         </Link>
         <Badge
           variant="secondary"
@@ -118,7 +118,7 @@ export default function ComingSoonPage() {
             className="mt-8 gap-1.5 bg-sky-500/10 text-sky-600 dark:text-sky-400"
           >
             <IconSparkles className="size-3.5" />
-            عزم سمارت 2.0 — مساحة عمل جديدة كلياً
+            RVIOS OS 2.0 — مساحة عمل جديدة كلياً
           </Badge>
 
           <h1 className="mt-6 text-balance text-4xl font-semibold tracking-tight sm:text-5xl">
@@ -155,7 +155,7 @@ export default function ComingSoonPage() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="ahmed@azmsmart.sa"
+              placeholder="ahmed@rvios.com"
               aria-label="البريد الإلكتروني"
               dir="ltr"
               className="h-11 flex-1"
@@ -200,7 +200,7 @@ export default function ComingSoonPage() {
 
       {/* التذييل */}
       <footer className="px-6 py-6 text-center text-sm text-muted-foreground">
-        © 2026 عزم سمارت. جميع الحقوق محفوظة.
+        © 2026 RVIOS OS. جميع الحقوق محفوظة.
       </footer>
     </div>
   );

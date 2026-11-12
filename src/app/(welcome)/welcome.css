@@ -226,7 +226,7 @@ html[lang="en"] { --display: var(--font-yapari), system-ui, sans-serif; --headin
   .steps h3 { font-family: var(--heading); font-weight: var(--hw); font-size: clamp(26px, 2.2vw, 32px); line-height: 1.2; }
   .steps p { margin-top: 10px; font-size: 15px; opacity: 0.66; }
 
-  /* ——— لوحة AzmSmart ——— */
+  /* ——— لوحة RVIOS OS ——— */
   .dash { display: grid; grid-template-columns: 58px 1fr; min-height: 420px; border-radius: 18px; overflow: hidden; will-change: transform; }
   .dash aside { border-inline-end: 1px solid var(--color-hair); display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 18px 0; }
   .dash .az { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 9px; background: linear-gradient(180deg, #D8B876, #B08D48); color: #171717; font-weight: 600; font-size: 11px; margin-bottom: 12px; direction: ltr; }

@@ -365,7 +365,7 @@ export default function NotesPage() {
   }
 
   function shareNote(note: Note) {
-    const link = `https://azmsmart.sa/notes/${note.id}`;
+    const link = `https://rvios.com/notes/${note.id}`;
     navigator.clipboard
       ?.writeText(link)
       .then(() => toast.success("تم نسخ الرابط", { description: link }))

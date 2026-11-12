@@ -86,7 +86,7 @@ const seedEmails: Email[] = [
     sender: "بوابة الدفع",
     email: "receipts@payments.sa",
     avatar: "https://api.dicebear.com/9.x/avataaars/svg?seed=32",
-    subject: "إيصال الدفع من عزم سمارت — 9,000 ر.س",
+    subject: "إيصال الدفع من RVIOS OS — 9,000 ر.س",
     preview: "شكراً لدفعتك. إليك إيصال تجديد اشتراكك المؤسسي…",
     body: "شكراً لدفعتك.\n\nإليك إيصال تجديد اشتراكك المؤسسي. خُصم مبلغ 9,000 ر.س من بطاقتك المنتهية بـ 4242 مقابل الباقة السنوية.\n\nيمكنك عرض سجل فواتيرك كاملاً وتنزيله من بوابة الفوترة في أي وقت.\n\n— فريق المدفوعات",
     time: "8:15 ص",
@@ -125,9 +125,9 @@ const seedEmails: Email[] = [
     sender: "GitHub",
     email: "notifications@github.com",
     avatar: "https://api.dicebear.com/9.x/avataaars/svg?seed=45",
-    subject: "‏[azmsmart/platform] 3 طلبات دمج بانتظار المراجعة",
-    preview: "طُلب منك مراجعة طلبات دمج في azmsmart/platform، وأقدمها عمره يومان…",
-    body: "طُلب منك مراجعة طلبات الدمج التالية في azmsmart/platform:\n\n• ‏#482 إضافة حد للطلبات في الواجهة البرمجية العامة\n• ‏#485 إعادة هيكلة خطافات الفوترة\n• ‏#487 إصلاح تباين الوضع الليلي في صفحة الإعدادات\n\nأقدمها ينتظر منذ يومين.",
+    subject: "‏[rvios/platform] 3 طلبات دمج بانتظار المراجعة",
+    preview: "طُلب منك مراجعة طلبات دمج في rvios/platform، وأقدمها عمره يومان…",
+    body: "طُلب منك مراجعة طلبات الدمج التالية في rvios/platform:\n\n• ‏#482 إضافة حد للطلبات في الواجهة البرمجية العامة\n• ‏#485 إعادة هيكلة خطافات الفوترة\n• ‏#487 إصلاح تباين الوضع الليلي في صفحة الإعدادات\n\nأقدمها ينتظر منذ يومين.",
     time: "Yesterday",
     read: true,
     starred: false,
@@ -161,7 +161,7 @@ const seedEmails: Email[] = [
   {
     id: "m8",
     sender: "تنبيهات الأمان",
-    email: "security@azmsmart.sa",
+    email: "security@rvios.com",
     avatar: "https://api.dicebear.com/9.x/avataaars/svg?seed=60",
     subject: "تسجيل دخول جديد من Chrome على macOS",
     preview: "لاحظنا تسجيل دخول جديداً إلى حسابك. إن كنت أنت، فلا حاجة لأي إجراء…",
@@ -186,9 +186,9 @@ const seedEmails: Email[] = [
   {
     id: "m10",
     sender: "نشرة المنتج",
-    email: "digest@azmsmart.sa",
+    email: "digest@rvios.com",
     avatar: "https://api.dicebear.com/9.x/avataaars/svg?seed=52",
-    subject: "جديد هذا الأسبوع في عزم سمارت",
+    subject: "جديد هذا الأسبوع في RVIOS OS",
     preview: "أطلقنا هذا الأسبوع العروض المحفوظة وبحثاً أسرع ومركز إشعارات بتصميم جديد…",
     body: "إليك ما أُطلق هذا الأسبوع:\n\n• العروض المحفوظة — ثبّت عوامل التصفية المفضّلة على أي جدول\n• بحث شامل أسرع بثلاث مرات\n• مركز إشعارات بتصميم جديد\n\nاطّلع على سجل التغييرات الكامل وأخبرنا بما تودّ رؤيته لاحقاً.",
     time: "السبت",
@@ -569,7 +569,7 @@ export default function MailPage() {
                 type="email"
                 value={to}
                 onChange={(e) => setTo(e.target.value)}
-                placeholder="ahmed@azmsmart.sa"
+                placeholder="ahmed@rvios.com"
                 autoFocus
               />
             </div>

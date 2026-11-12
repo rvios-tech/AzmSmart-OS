@@ -28,12 +28,12 @@ function ThemeIcon({ theme }: { theme: Theme }) {
   );
 }
 
-/** شعار عزم سمارت + الاسم */
+/** شعار RVIOS OS + الاسم */
 export function AzmLockup() {
   return (
     <span className="inline-flex items-center gap-3" dir="ltr">
-      <Image src="/brand/azmsmart-mark.svg" alt="" width={32} height={29} className="h-[29px] w-[32px]" priority />
-      <span className="yap text-[15px] tracking-[0.08em]">AzmSmart</span>
+      <Image src="/brand/rvios-mark.svg" alt="" width={44} height={24} className="h-[24px] w-[44px]" priority />
+      <span className="yap text-[15px] tracking-[0.08em]">RVIOS OS</span>
     </span>
   );
 }
@@ -101,7 +101,7 @@ export function Header() {
               : "border border-transparent"
           }`}
         >
-          <a href="#top" aria-label="AzmSmart — أعلى الصفحة" className="shrink-0"><AzmLockup /></a>
+          <a href="#top" aria-label="RVIOS OS — أعلى الصفحة" className="shrink-0"><AzmLockup /></a>
           <nav className="hidden items-center gap-7 lg:flex xl:gap-9" aria-label="أقسام الصفحة">
             {NAV.map((n) => (
               <a key={n.href} href={n.href} className="py-2 text-[14px] opacity-65 transition-opacity duration-300 hover:opacity-100">{n.label}</a>

@@ -19,7 +19,7 @@ import { Input } from "@/components/ui/input";
 export const metadata: Metadata = {
   title: "سنعود بعد قليل",
   description:
-    "يخضع نظام عزم سمارت لصيانة مجدولة وسيعود للعمل خلال وقت قصير.",
+    "يخضع نظام RVIOS OS لصيانة مجدولة وسيعود للعمل خلال وقت قصير.",
 };
 
 const social = [
@@ -48,7 +48,7 @@ export default function MaintenancePage() {
       <header className="flex items-center justify-between px-6 py-5">
         <Link href="/dashboard" className="flex items-center gap-2 font-semibold">
           <BrandMark />
-          <span className="tracking-tight">عزم سمارت</span>
+          <span className="tracking-tight">RVIOS OS</span>
         </Link>
         <Badge
           variant="secondary"
@@ -78,7 +78,7 @@ export default function MaintenancePage() {
             سنعود بعد قليل
           </h1>
           <p className="mx-auto mt-4 max-w-md text-balance text-lg text-muted-foreground">
-            نجري تحسينات سريعة على عزم سمارت، وسنعود للعمل خلال وقت قصير.
+            نجري تحسينات سريعة على RVIOS OS، وسنعود للعمل خلال وقت قصير.
             شكراً لسعة صدركم.
           </p>
 
@@ -86,7 +86,7 @@ export default function MaintenancePage() {
           <form className="mx-auto mt-8 flex max-w-md flex-col gap-2 sm:flex-row">
             <Input
               type="email"
-              placeholder="ahmed@azmsmart.sa"
+              placeholder="ahmed@rvios.com"
               aria-label="البريد الإلكتروني"
               dir="ltr"
               defaultValue=""
@@ -132,7 +132,7 @@ export default function MaintenancePage() {
 
       {/* التذييل */}
       <footer className="px-6 py-6 text-center text-sm text-muted-foreground">
-        © {new Date().getFullYear()} عزم سمارت. جميع الحقوق محفوظة.
+        © {new Date().getFullYear()} RVIOS OS. جميع الحقوق محفوظة.
       </footer>
     </div>
   );
