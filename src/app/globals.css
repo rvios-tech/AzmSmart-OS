@@ -199,3 +199,13 @@ input[type="password"] {
 [data-ltr] {
   unicode-bidi: isolate;
 }
+/* داخل تطبيق RVIOS (`<EmbedMode>`): المحرر وحده بلا إطار اللوحة */
+html[data-embed="1"] [data-slot="sidebar"],
+html[data-embed="1"] [data-slot="sidebar-gap"],
+html[data-embed="1"] [data-slot="sidebar-container"],
+html[data-embed="1"] header.sticky {
+  display: none !important;
+}
+html[data-embed="1"] .app-main {
+  padding: 10px !important;
+}

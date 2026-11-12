@@ -3,6 +3,7 @@ import { Tajawal } from "next/font/google";
 import "../globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ThemeConfigProvider } from "@/components/theme-customizer";
+import { EmbedMode } from "@/components/embed-mode";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/lib/auth/auth-context";
 import { Analytics } from "@/components/analytics";
@@ -38,6 +39,7 @@ export default function RootLayout({
     >
       <body className="min-h-full" suppressHydrationWarning>
         <Analytics />
+        <EmbedMode />
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
