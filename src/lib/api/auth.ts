@@ -13,15 +13,6 @@ export interface AuthCompany {
   workspaceSlug?: string;
 }
 
-/** شركة العرض التجريبي — للقراءة فقط في الخادم (انظر `demo.constant.ts` هناك) */
-export const DEMO_WORKSPACE = "rvios-demo";
-export const isDemoCompany = (c: AuthCompany | null | undefined) => c?.workspaceSlug === DEMO_WORKSPACE;
-
-/** دخول العرض التجريبي — بلا حساب، جلسة قصيرة للمشاهدة فقط */
-export function demo(): Promise<LoginResponse> {
-  return apiFetch<LoginResponse>("/auth/demo", { method: "POST", auth: false });
-}
-
 export interface LoginResponse {
   accessToken: string;
   /** «جهاز موثوق» — يُرسل مع الدخول التالي فلا يُطلب رمز البريد طوال مدته */

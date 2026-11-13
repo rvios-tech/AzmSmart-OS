@@ -19,6 +19,7 @@ import { useIsMac } from "@/hooks/use-platform";
 import { Kbd, KbdGroup } from "@/components/ui/kbd";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { GuideButton } from "@/components/guide/page-guide";
 import { CustomizerButton } from "@/components/theme-customizer";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -192,6 +193,7 @@ export function AppHeader() {
       </Breadcrumb>
 
       <div className="ms-auto flex items-center gap-1.5">
+        <GuideButton />
         <Button
           variant="outline"
           className="hidden h-9 w-56 justify-start gap-2 px-3 text-muted-foreground md:flex"

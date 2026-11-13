@@ -30,8 +30,6 @@ interface AuthContextValue extends AuthState {
   verifyEmailCode: (code: string) => Promise<void>;
   /** يعيد `true` لحساب جديد */
   loginWithGoogle: (credential: string) => Promise<boolean>;
-  /** دخول العرض التجريبي (للقراءة فقط) */
-  enterDemo: () => Promise<void>;
   register: (input: {
     email: string;
     password: string;
@@ -114,7 +112,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       try {
         await authApi.me();
         // جلسة صالحة: تُجدَّد بصمت (جلسات الدعم لا تتجدّد — مدتها القصيرة مقصودة)
-        if (!inSupport() && !authApi.isDemoCompany(cachedCompany)) {
+        if (!inSupport()) {
           authApi
             .refresh()
             .then((r) => setToken(r.accessToken))
@@ -187,16 +185,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     [persist],
   );
 
-  const enterDemo = useCallback(async () => {
-    const res = await authApi.demo();
-    try {
-      window.localStorage.removeItem("azm_active_store");
-    } catch {}
-    persist(res.accessToken, res.user, res.company);
-    window.localStorage.setItem(COMPANIES_KEY, JSON.stringify(res.companies));
-    setCompanies(res.companies);
-  }, [persist]);
-
   const register = useCallback(
     async (input: {
       email: string;
@@ -248,7 +236,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [logout]);
 
   return (
-    <AuthContext.Provider value={{ ...state, companies, switchCompany, login, verifyEmailCode, loginWithGoogle, enterDemo, register, logout }}>
+    <AuthContext.Provider value={{ ...state, companies, switchCompany, login, verifyEmailCode, loginWithGoogle, register, logout }}>
       {children}
     </AuthContext.Provider>
   );
