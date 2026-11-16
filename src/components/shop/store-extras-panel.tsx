@@ -19,7 +19,21 @@ export interface StoreExtras {
   waFloat?: boolean;
   seoTitle?: string;
   seoDescription?: string;
+  /** معرّفات أكواد التتبع — المعرّف وحده، والمتجر يبني كود كل منصة */
+  tracking?: Partial<Record<TrackerKey, string>>;
 }
+
+export type TrackerKey = "meta" | "tiktok" | "snap" | "x" | "ga4" | "gtm" | "gsc";
+
+const TRACKERS: { key: TrackerKey; label: string; placeholder: string; hint: string }[] = [
+  { key: "meta", label: "Meta Pixel (فيسبوك وانستغرام)", placeholder: "123456789012345", hint: "مدير الأحداث ← مصادر البيانات ← معرّف البكسل (أرقام فقط)" },
+  { key: "tiktok", label: "TikTok Pixel", placeholder: "C4ABCDEFGH12345678", hint: "TikTok Ads ← Events ← Web Events ← Pixel ID" },
+  { key: "snap", label: "Snap Pixel", placeholder: "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx", hint: "Snapchat Ads ← Events Manager ← Pixel ID" },
+  { key: "x", label: "X (تويتر) Pixel", placeholder: "o1abc", hint: "X Ads ← Events manager ← Pixel ID" },
+  { key: "ga4", label: "Google Analytics 4", placeholder: "G-XXXXXXXXXX", hint: "Admin ← Data streams ← Measurement ID" },
+  { key: "gtm", label: "Google Tag Manager", placeholder: "GTM-XXXXXXX", hint: "اختياري لمن يدير أكواده من GTM" },
+  { key: "gsc", label: "Google Search Console", placeholder: "الصق وسم التحقق كاملًا أو قيمة content", hint: "اختر طريقة «HTML tag» عند إضافة نطاق متجرك" },
+];
 
 export const POLICIES: { key: string; label: string; hint: string }[] = [
   { key: "shipping", label: "الشحن والتوصيل", hint: "المدن التي توصلون لها، المدة، الرسوم، ومتى يصبح التوصيل مجانيًا." },
@@ -49,6 +63,7 @@ export function StoreExtrasPanel({
     waFloat: initial.waFloat ?? false,
     seoTitle: initial.seoTitle ?? "",
     seoDescription: initial.seoDescription ?? "",
+    tracking: { ...initial.tracking },
   });
   const [policy, setPolicy] = useState("shipping");
   const [saving, setSaving] = useState(false);
@@ -134,6 +149,31 @@ export function StoreExtrasPanel({
             <div className="line-clamp-2 text-xs text-muted-foreground">{x.seoDescription}</div>
           </div>
         )}
+      </section>
+
+      <section className="space-y-2">
+        <Label className="font-semibold">أكواد التتبع الإعلانية</Label>
+        <p className="text-xs text-muted-foreground">
+          الصق معرّف البكسل فقط — المتجر يركّب الكود ويرسل أحداث «مشاهدة، إضافة للسلة، بدء الدفع، شراء» تلقائيًا لقياس إعلاناتك.
+        </p>
+        <div className="grid gap-3">
+          {TRACKERS.map((t) => (
+            <div key={t.key} className="space-y-1">
+              <Label htmlFor={`trk-${t.key}`} className="text-xs">{t.label}</Label>
+              <Input
+                id={`trk-${t.key}`}
+                dir="ltr"
+                className="font-mono text-start text-xs"
+                placeholder={t.placeholder}
+                maxLength={t.key === "gsc" ? 200 : 60}
+                value={x.tracking?.[t.key] ?? ""}
+                disabled={readOnly}
+                onChange={(e) => setX((v) => ({ ...v, tracking: { ...v.tracking, [t.key]: e.target.value } }))}
+              />
+              <p className="text-[11px] text-muted-foreground">{t.hint}</p>
+            </div>
+          ))}
+        </div>
       </section>
 
       <Button className="w-full" disabled={readOnly || saving} onClick={() => void save()}>
