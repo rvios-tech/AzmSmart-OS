@@ -7,7 +7,7 @@ import { IconLoader2, IconPlus, IconTrash, IconTruck } from "@tabler/icons-react
 import { PageHeader } from "@/components/page-header";
 import { RequireStore } from "@/components/require-store";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -18,6 +18,7 @@ import {
   createZone, deleteZone, listZones, updateStore, updateZone, type Store, type Zone,
 } from "@/lib/api/shop";
 import { useStore } from "@/lib/shop/store-context";
+import { REGIONS } from "@/lib/shop/regions";
 
 function ShippingView({ store }: { store: Store }) {
   const { reload } = useStore();
@@ -94,6 +95,27 @@ function ShippingView({ store }: { store: Store }) {
   }
 
   const cur = store.currency;
+  const preset = REGIONS[store.country];
+  const missing = preset ? preset.names.filter((n) => !(zones ?? []).some((z) => z.name.trim() === n)) : [];
+  const [bulk, setBulk] = useState(false);
+
+  /** يضيف المحافظات الناقصة بالرسم العام الحالي — بالتتابع (حدّ المناطق في الخادم يُحترم) */
+  async function addRegions() {
+    setBulk(true);
+    let added = 0;
+    try {
+      for (const n of missing) {
+        const z = await createZone(store.id, { name: n, fee: store.deliveryFee, freeOver: store.deliveryFreeOver });
+        setZones((p) => [...(p ?? []), z]);
+        added++;
+      }
+      toast.success(`أُضيفت ${added} منطقة — عدّل رسم كل منها في الجدول.`);
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : "تعذّرت الإضافة.", { description: added ? `أُضيفت ${added} قبل التوقف.` : undefined });
+    } finally {
+      setBulk(false);
+    }
+  }
 
   return (
     <div className="space-y-6">
@@ -103,6 +125,13 @@ function ShippingView({ store }: { store: Store }) {
         <CardHeader>
           <CardTitle>مناطق التوصيل</CardTitle>
           <CardDescription>لكل منطقة رسمها وحدّ التوصيل المجاني.</CardDescription>
+          {preset && zones && missing.length > 0 && (
+            <CardAction>
+              <Button variant="outline" size="sm" disabled={bulk} onClick={() => void addRegions()}>
+                {bulk ? <IconLoader2 className="size-4 animate-spin" /> : <IconPlus className="size-4" />} أضف {preset.label} ({missing.length})
+              </Button>
+            </CardAction>
+          )}
         </CardHeader>
         <CardContent className="space-y-4 px-0">
           <div className="overflow-x-auto">
