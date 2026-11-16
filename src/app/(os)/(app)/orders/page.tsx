@@ -77,11 +77,11 @@ function OrdersView({ store }: { store: Store }) {
       }
       downloadCsv(`${store.slug}-orders.csv`,
         ["رقم الطلب", "التاريخ", "الحالة", "الدفع", "طريقة الدفع", "العميل", "الجوال", "العنوان", "المنطقة", "المنتجات", "ملاحظة",
-          `المجموع (${store.currency})`, `التوصيل (${store.currency})`, `الإجمالي (${store.currency})`],
+          `المجموع (${store.currency})`, `التوصيل (${store.currency})`, "قسيمة الخصم", `الخصم (${store.currency})`, `الإجمالي (${store.currency})`],
         res.orders.map((o) => [
           o.ref, formatDateTime(o.createdAt), orderStatus(o.status).label, PAY_STATUS[o.payStatus]?.label ?? "",
           PAY_METHOD_LABEL[o.payMethod] ?? o.payMethod, o.custName, o.custPhone, o.custAddress, o.zoneName,
-          o.items.map((i) => `${i.name} × ${i.qty}`).join(" · "), o.note, o.subtotal, o.deliveryFee, o.total,
+          o.items.map((i) => `${i.name} × ${i.qty}`).join(" · "), o.note, o.subtotal, o.deliveryFee, o.couponCode ?? "", o.discount ?? 0, o.total,
         ]));
       if (res.truncated) toast.warning(`صُدّر أحدث ${formatNumber(res.orders.length)} طلب — ضيّق المرشّح لتصدير الباقي.`);
     } catch (err) {

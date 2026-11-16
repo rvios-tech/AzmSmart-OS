@@ -124,6 +124,7 @@ function OrderView({ store }: { store: Store }) {
             <dl className="space-y-2 border-t px-6 pt-4 text-sm">
               <div className="flex justify-between"><dt className="text-muted-foreground">المجموع</dt><dd className="tabular-nums">{money(order.subtotal)}</dd></div>
               <div className="flex justify-between"><dt className="text-muted-foreground">التوصيل{order.zoneName ? ` (${order.zoneName})` : ""}</dt><dd className="tabular-nums">{order.deliveryFee ? money(order.deliveryFee) : "مجاني"}</dd></div>
+              {order.discount > 0 && <div className="flex justify-between text-emerald-600 dark:text-emerald-400"><dt>الخصم{order.couponCode ? <> (<span dir="ltr" className="font-mono">{order.couponCode}</span>)</> : ""}</dt><dd className="tabular-nums">−{money(order.discount)}</dd></div>}
               <div className="flex justify-between text-base font-semibold"><dt>الإجمالي</dt><dd className="tabular-nums">{money(order.total)}</dd></div>
             </dl>
           </CardContent>

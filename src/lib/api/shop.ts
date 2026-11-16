@@ -284,6 +284,9 @@ export interface Order {
   zoneName: string;
   subtotal: number;
   deliveryFee: number;
+  /** قسيمة الخصم المطبّقة ومبلغها */
+  couponCode: string;
+  discount: number;
   total: number;
   createdAt: string;
   items: OrderItem[];
@@ -306,7 +309,7 @@ export const listOrders = (
 
 export type ExportedOrder = Pick<Order,
   "ref" | "createdAt" | "status" | "payMethod" | "payStatus" | "custName" | "custPhone" | "custAddress"
-  | "zoneName" | "note" | "subtotal" | "deliveryFee" | "total"> & { items: { name: string; qty: number }[] };
+  | "zoneName" | "note" | "subtotal" | "deliveryFee" | "total"> & Partial<Pick<Order, "couponCode" | "discount">> & { items: { name: string; qty: number }[] };
 
 /** السجل كاملًا بالمرشّح الحالي (حتى ٥٠٠٠ طلب) — للمدير فأعلى */
 export const exportOrders = (storeId: string, params: { status?: number; q?: string } = {}) =>
@@ -380,6 +383,60 @@ export const updateZone = (
 
 export const deleteZone = (storeId: string, id: string) =>
   apiFetch<{ ok: true }>(`${s(storeId)}/zones/${id}`, { method: "DELETE" });
+
+// ── قسائم الخصم ───────────────────────────────────────────
+/** percent: نسبة (بسقف اختياري) · amount: مبلغ ثابت · ship: توصيل مجاني */
+export type CouponKind = "percent" | "amount" | "ship";
+
+export interface Coupon {
+  id: string;
+  code: string;
+  kind: CouponKind;
+  value: number;
+  minSubtotal: number;
+  maxDiscount: number;
+  /** 0 = بلا حد */
+  usageLimit: number;
+  /** لكل رقم جوال — 0 = بلا حد */
+  perCustomer: number;
+  used: number;
+  startsAt: string | null;
+  endsAt: string | null;
+  active: boolean;
+  note: string;
+  label: string;
+  /** أثرها: الطلبات غير الملغاة بها، ومجموع ما خُصم، وإجمالي تلك الطلبات */
+  orders: number;
+  discounted: number;
+  revenue: number;
+  createdAt: string;
+}
+
+export interface CouponsResponse {
+  coupons: Coupon[];
+  /** المفعّلة معًا في الباقة — null بلا حد */
+  limit: number | null;
+  plan: string;
+  planName: string;
+  currency: string;
+}
+
+export type CouponInput = Partial<Pick<Coupon,
+  "code" | "kind" | "value" | "minSubtotal" | "maxDiscount" | "usageLimit" | "perCustomer" | "active" | "note">> & {
+  startsAt?: string | null;
+  endsAt?: string | null;
+};
+
+export const listCoupons = (storeId: string) => apiFetch<CouponsResponse>(`${s(storeId)}/coupons`);
+
+export const createCoupon = (storeId: string, input: CouponInput) =>
+  apiFetch<Coupon>(`${s(storeId)}/coupons`, { method: "POST", ...json(input) });
+
+export const updateCoupon = (storeId: string, id: string, input: CouponInput) =>
+  apiFetch<Coupon>(`${s(storeId)}/coupons/${id}`, { method: "PATCH", ...json(input) });
+
+export const deleteCoupon = (storeId: string, id: string) =>
+  apiFetch<{ ok: true }>(`${s(storeId)}/coupons/${id}`, { method: "DELETE" });
 
 // ── النظرة العامة والتحليلات ──────────────────────────────
 export interface LowStockItem {
