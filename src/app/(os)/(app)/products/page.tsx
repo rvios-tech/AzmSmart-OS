@@ -4,8 +4,9 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
 import {
-  IconAlertTriangle, IconDotsVertical, IconLoader2, IconPackage, IconPencil, IconPlus, IconSearch, IconTrash,
+  IconAlertTriangle, IconDotsVertical, IconDownload, IconFileImport, IconLoader2, IconPackage, IconPencil, IconPlus, IconSearch, IconTrash,
 } from "@tabler/icons-react";
+import { ProductImport, exportProducts } from "@/components/shop/product-import";
 
 import { PageHeader } from "@/components/page-header";
 import { RequireStore } from "@/components/require-store";
@@ -33,6 +34,8 @@ function ProductsView({ store }: { store: Store }) {
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [importing, setImporting] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -49,7 +52,7 @@ function ProductsView({ store }: { store: Store }) {
     return () => {
       cancelled = true;
     };
-  }, [store.id]);
+  }, [store.id, reloadKey]);
 
   const rows = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -85,6 +88,12 @@ function ProductsView({ store }: { store: Store }) {
   return (
     <div className="space-y-6">
       <PageHeader title="المنتجات" description="كتالوج متجرك.">
+        <Button size="sm" variant="outline" disabled={!data?.products.length} onClick={() => data && exportProducts(store, data.products)}>
+          <IconDownload className="size-4" /> تصدير CSV
+        </Button>
+        <Button size="sm" variant="outline" disabled={!data} onClick={() => setImporting(true)}>
+          <IconFileImport className="size-4" /> استيراد CSV
+        </Button>
         <Button size="sm" asChild disabled={cap ? !cap.canAdd : false}>
           <Link href="/products/new"><IconPlus className="size-4" /> إضافة منتج</Link>
         </Button>
@@ -188,6 +197,8 @@ function ProductsView({ store }: { store: Store }) {
           </div>
         </CardContent>
       </Card>
+
+      <ProductImport store={store} products={data?.products ?? []} open={importing} onOpenChange={setImporting} onDone={() => setReloadKey((k) => k + 1)} />
 
       <DeleteDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)} name={deleting?.name ?? "منتج"}
         onConfirm={() => { if (deleteId) void handleDelete(deleteId); setDeleteId(null); }} />
