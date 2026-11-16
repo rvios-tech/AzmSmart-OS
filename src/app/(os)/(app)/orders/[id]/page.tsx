@@ -5,12 +5,21 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { toast } from "sonner";
 import {
-  IconAlertTriangle, IconArrowRight, IconBrandWhatsapp, IconCheck, IconLoader2, IconX,
+  IconAlertTriangle, IconArrowRight, IconBrandWhatsapp, IconCheck, IconLoader2, IconPrinter, IconReceipt, IconX,
 } from "@tabler/icons-react";
 
 import { PageHeader } from "@/components/page-header";
 import { RequireStore } from "@/components/require-store";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import {
+  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { printInvoice } from "@/lib/shop/print-invoice";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -21,13 +30,15 @@ import {
   advanceOrder, getOrder, setOrderPayment, type Order, type Store,
 } from "@/lib/api/shop";
 import { formatDateTime, formatMoney, formatNumber } from "@/lib/format";
-import { PAY_METHOD_LABEL, PAY_STATUS, orderStatus } from "@/lib/shop/constants";
+import { ORDER_FLOW, ORDER_NEXT, PAY_METHOD_LABEL, PAY_STATUS, orderStatus } from "@/lib/shop/constants";
 
 function OrderView({ store }: { store: Store }) {
   const params = useParams<{ id: string }>();
   const [order, setOrder] = useState<Order | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [cancelOpen, setCancelOpen] = useState(false);
+  const [reason, setReason] = useState("");
 
   useEffect(() => {
     let cancelled = false;
@@ -76,23 +87,72 @@ function OrderView({ store }: { store: Store }) {
 
       <PageHeader title={`الطلب ${order.ref}`} description={formatDateTime(order.createdAt)}>
         <Badge variant="secondary" className={st.tone}>{st.label}</Badge>
-        {order.status === 0 && (
-          <Button size="sm" disabled={busy} onClick={() => void run(() => advanceOrder(store.id, order.id, 1), "أُكّد الطلب")}>
-            <IconCheck className="size-4" /> تأكيد
+        {(ORDER_NEXT[order.status] ?? []).map((n, i) => (
+          <Button key={n.to} size="sm" variant={i === 0 ? "default" : "outline"} disabled={busy}
+            onClick={() => void run(() => advanceOrder(store.id, order.id, n.to), n.done)}>
+            {i === 0 && <IconCheck className="size-4" />} {n.label}
           </Button>
-        )}
-        {order.status === 1 && (
-          <Button size="sm" disabled={busy} onClick={() => void run(() => advanceOrder(store.id, order.id, 2), "اكتمل الطلب")}>
-            <IconCheck className="size-4" /> إكمال
-          </Button>
-        )}
-        {(order.status === 0 || order.status === 1) && (
-          <Button size="sm" variant="outline" className="text-destructive" disabled={busy}
-            onClick={() => { if (window.confirm("إلغاء الطلب يعيد المخزون. متأكد؟")) void run(() => advanceOrder(store.id, order.id, 3), "أُلغي الطلب وأُعيد المخزون"); }}>
+        ))}
+        {order.status !== 2 && order.status !== 3 && (
+          <Button size="sm" variant="outline" className="text-destructive" disabled={busy} onClick={() => { setReason(""); setCancelOpen(true); }}>
             <IconX className="size-4" /> إلغاء
           </Button>
         )}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button size="sm" variant="outline"><IconPrinter className="size-4" /> طباعة</Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onSelect={() => { if (!printInvoice(order, store, "a4")) toast.error("اسمح للمتصفح بفتح النوافذ المنبثقة للطباعة."); }}>
+              <IconReceipt className="size-4" /> فاتورة A4
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => { if (!printInvoice(order, store, "80mm")) toast.error("اسمح للمتصفح بفتح النوافذ المنبثقة للطباعة."); }}>
+              <IconPrinter className="size-4" /> إيصال حراري ٨٠ مم
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </PageHeader>
+
+      {order.status === 3 ? (
+        <div className="rounded-lg border border-rose-500/30 bg-rose-500/5 px-4 py-3 text-sm">
+          <b className="text-rose-600 dark:text-rose-400">أُلغي الطلب</b>
+          {order.cancelReason ? <span className="text-muted-foreground"> — {order.cancelReason}</span> : null}
+        </div>
+      ) : (
+        <ol className="flex items-center gap-1 overflow-x-auto rounded-lg border bg-card px-3 py-3 text-xs" aria-label="مراحل الطلب">
+          {ORDER_FLOW.map((s, i) => {
+            const at = ORDER_FLOW.indexOf(order.status as (typeof ORDER_FLOW)[number]);
+            const reached = i <= at;
+            return (
+              <li key={s} className="flex shrink-0 items-center gap-1">
+                <span className={cn("flex size-6 items-center justify-center rounded-full border text-[11px] font-semibold",
+                  reached ? "border-primary bg-primary text-primary-foreground" : "text-muted-foreground")}>
+                  {reached ? <IconCheck className="size-3.5" /> : formatNumber(i + 1)}
+                </span>
+                <span className={cn("whitespace-nowrap", reached ? "font-medium" : "text-muted-foreground")}>{orderStatus(s).label}</span>
+                {i < ORDER_FLOW.length - 1 && <span className={cn("mx-1 h-px w-6 sm:w-10", i < at ? "bg-primary" : "bg-border")} />}
+              </li>
+            );
+          })}
+        </ol>
+      )}
+
+      <Dialog open={cancelOpen} onOpenChange={setCancelOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>إلغاء الطلب {order.ref}</DialogTitle>
+            <DialogDescription>يعيد الإلغاء المخزون ويعيد استخدام قسيمة الخصم إن وُجدت. السبب يظهر للعميل في صفحة تتبّع طلبه.</DialogDescription>
+          </DialogHeader>
+          <Input value={reason} maxLength={200} onChange={(e) => setReason(e.target.value)} placeholder="مثال: نفد المنتج، أو لم نتمكن من التواصل مع العميل" />
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setCancelOpen(false)}>تراجع</Button>
+            <Button variant="destructive" disabled={busy}
+              onClick={() => { setCancelOpen(false); void run(() => advanceOrder(store.id, order.id, 3, reason.trim()), "أُلغي الطلب وأُعيد المخزون"); }}>
+              تأكيد الإلغاء
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <div className="grid gap-6 lg:grid-cols-3">
         <Card className="lg:col-span-2">

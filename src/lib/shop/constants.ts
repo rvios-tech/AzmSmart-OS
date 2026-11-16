@@ -74,13 +74,36 @@ export const STORE_TEMPLATES: { id: string; name: string; tier: TemplateTier }[]
 ];
 export const templateName = (id: string) => STORE_TEMPLATES.find((t) => t.id === id)?.name ?? id;
 
-/** 0=قيد التأكيد · 1=مؤكد · 2=مكتمل · 3=ملغى */
+/**
+ * مراحل الطلب بترتيبها (الأرقام من الخادم: 4 و5 أُضيفتا لاحقًا):
+ * 0 قيد التأكيد · 1 مؤكد · 4 قيد التجهيز · 5 تم الشحن · 2 مكتمل · 3 ملغى
+ */
 export const ORDER_STATUS = [
   { value: 0, label: "قيد التأكيد", tone: "bg-amber-500/10 text-amber-600 dark:text-amber-400" },
   { value: 1, label: "مؤكد", tone: "bg-sky-500/10 text-sky-600 dark:text-sky-400" },
+  { value: 4, label: "قيد التجهيز", tone: "bg-violet-500/10 text-violet-600 dark:text-violet-400" },
+  { value: 5, label: "تم الشحن", tone: "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400" },
   { value: 2, label: "مكتمل", tone: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" },
   { value: 3, label: "ملغى", tone: "bg-rose-500/10 text-rose-600 dark:text-rose-400" },
 ] as const;
+
+/** المرحلة التالية والبدائل المسموحة (كما في ORDER_NEXT بالخادم) — الإلغاء زر مستقل */
+export const ORDER_NEXT: Record<number, { to: 1 | 2 | 4 | 5; label: string; done: string }[]> = {
+  0: [{ to: 1, label: "تأكيد الطلب", done: "أُكّد الطلب" }],
+  1: [
+    { to: 4, label: "بدء التجهيز", done: "الطلب قيد التجهيز" },
+    { to: 5, label: "تم الشحن", done: "شُحن الطلب" },
+    { to: 2, label: "مكتمل", done: "اكتمل الطلب" },
+  ],
+  4: [
+    { to: 5, label: "تم الشحن", done: "شُحن الطلب" },
+    { to: 2, label: "مكتمل", done: "اكتمل الطلب" },
+  ],
+  5: [{ to: 2, label: "تم التسليم", done: "اكتمل الطلب" }],
+};
+
+/** المسار المعروض للتاجر — الإلغاء خارجه */
+export const ORDER_FLOW = [0, 1, 4, 5, 2] as const;
 
 /** 0=عند الاستلام · 1=بانتظار التحويل · 2=إيصال للمراجعة · 3=مدفوع */
 export const PAY_STATUS = [

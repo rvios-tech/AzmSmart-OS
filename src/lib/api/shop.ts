@@ -257,7 +257,8 @@ export const deleteProduct = (storeId: string, id: string) =>
 
 // ── الطلبات والعملاء والتوصيل ─────────────────────────────
 /** 0=قيد التأكيد · 1=مؤكد · 2=مكتمل · 3=ملغى */
-export type OrderStatus = 0 | 1 | 2 | 3;
+/** 0 قيد التأكيد · 1 مؤكد · 4 قيد التجهيز · 5 تم الشحن · 2 مكتمل · 3 ملغى */
+export type OrderStatus = 0 | 1 | 2 | 3 | 4 | 5;
 
 export interface OrderItem {
   id: string;
@@ -287,6 +288,8 @@ export interface Order {
   /** قسيمة الخصم المطبّقة ومبلغها */
   couponCode: string;
   discount: number;
+  /** سبب الإلغاء — يراه العميل في تتبّع طلبه */
+  cancelReason?: string;
   total: number;
   createdAt: string;
   items: OrderItem[];
@@ -327,10 +330,10 @@ function orderQuery(params: { status?: number; page?: number; q?: string }) {
 export const getOrder = (storeId: string, id: string) =>
   apiFetch<Order>(`${s(storeId)}/orders/${id}`);
 
-export const advanceOrder = (storeId: string, id: string, status: 1 | 2 | 3) =>
+export const advanceOrder = (storeId: string, id: string, status: 1 | 2 | 3 | 4 | 5, reason?: string) =>
   apiFetch<Order>(`${s(storeId)}/orders/${id}`, {
     method: "PATCH",
-    ...json({ status }),
+    ...json({ status, ...(reason ? { reason } : {}) }),
   });
 
 export const setOrderPayment = (storeId: string, id: string, paid: boolean) =>
