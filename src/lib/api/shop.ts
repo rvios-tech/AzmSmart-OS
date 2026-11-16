@@ -387,6 +387,11 @@ export const updateZone = (
 export const deleteZone = (storeId: string, id: string) =>
   apiFetch<{ ok: true }>(`${s(storeId)}/zones/${id}`, { method: "DELETE" });
 
+// ── جاهزية المتجر ─────────────────────────────────────────
+export interface ReadinessTask { key: string; title: string; hint: string; done: boolean; link: string }
+export interface Readiness { percent: number; done: number; total: number; next: string | null; tasks: ReadinessTask[] }
+export const getReadiness = (storeId: string) => apiFetch<Readiness>(`${s(storeId)}/readiness`);
+
 // ── قسائم الخصم ───────────────────────────────────────────
 /** percent: نسبة (بسقف اختياري) · amount: مبلغ ثابت · ship: توصيل مجاني */
 export type CouponKind = "percent" | "amount" | "ship";

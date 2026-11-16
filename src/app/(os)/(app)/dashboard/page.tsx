@@ -13,6 +13,7 @@ import {
 
 import { PageHeader } from "@/components/page-header";
 import { RequireStore } from "@/components/require-store";
+import { ReadinessCard } from "@/components/shop/readiness-card";
 import { MetricCard } from "@/components/metric-card";
 import { SeriesChart } from "@/components/charts/series-chart";
 import { Badge } from "@/components/ui/badge";
@@ -65,6 +66,8 @@ function OverviewView({ store }: { store: Store }) {
           <Link href="/products/new">إضافة منتج</Link>
         </Button>
       </PageHeader>
+
+      <ReadinessCard storeId={store.id} />
 
       {error && (
         <Card>
