@@ -336,6 +336,16 @@ export const advanceOrder = (storeId: string, id: string, status: 1 | 2 | 3 | 4 
     ...json({ status, ...(reason ? { reason } : {}) }),
   });
 
+/** طلب يدوي (هاتف، واتساب، المحل) — نفس محرك طلب المتجر */
+export interface ManualOrderInput {
+  lines: { id: string; variantId?: string; qty: number }[];
+  name?: string; phone?: string; address?: string; note?: string;
+  zoneId?: string; payMethod?: string; coupon?: string;
+  deliveryFee?: number; extraDiscount?: number; paid?: boolean; confirm?: boolean;
+}
+export const createManualOrder = (storeId: string, input: ManualOrderInput) =>
+  apiFetch<Order>(`${s(storeId)}/orders`, { method: "POST", ...json(input) });
+
 export const setOrderPayment = (storeId: string, id: string, paid: boolean) =>
   apiFetch<{ ok: true; payStatus: number }>(`${s(storeId)}/orders/${id}/payment`, {
     method: "PATCH",

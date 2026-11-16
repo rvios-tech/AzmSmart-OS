@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
-import { IconAlertTriangle, IconDownload, IconLoader2, IconSearch, IconShoppingCart } from "@tabler/icons-react";
+import { IconAlertTriangle, IconDownload, IconLoader2, IconPlus, IconSearch, IconShoppingCart } from "@tabler/icons-react";
 
 import { PageHeader } from "@/components/page-header";
 import { RequireStore } from "@/components/require-store";
@@ -96,6 +96,9 @@ function OrdersView({ store }: { store: Store }) {
   return (
     <div className="space-y-6">
       <PageHeader title="الطلبات" description="طلبات عملائك — تُسجَّل هنا قبل أن يفتح العميل واتساب.">
+        <Button asChild>
+          <Link href="/orders/new"><IconPlus className="size-4" /> طلب يدوي</Link>
+        </Button>
         {(ctx?.role ?? 9) <= EXPORT_ROLE && (
           <Button variant="outline" onClick={onExport} disabled={exporting}>
             {exporting ? <IconLoader2 className="size-4 animate-spin" /> : <IconDownload className="size-4" />} تصدير CSV
