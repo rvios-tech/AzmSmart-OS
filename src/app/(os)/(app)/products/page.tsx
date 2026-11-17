@@ -76,6 +76,7 @@ function ProductsView({ store }: { store: Store }) {
   async function handleDelete(id: string) {
     try {
       await deleteProduct(store.id, id);
+      toast.success("نُقل المنتج إلى سلة المحذوفات", { description: "تستعيده من «سلة المحذوفات» خلال ٣٠ يومًا." });
       setData((d) => d && { ...d, products: d.products.filter((p) => p.id !== id), capacity: { ...d.capacity, used: d.capacity.used - 1, canAdd: true } });
     } catch (err) {
       toast.error(err instanceof ApiError ? err.message : "تعذّر حذف المنتج.");
@@ -201,6 +202,7 @@ function ProductsView({ store }: { store: Store }) {
       <ProductImport store={store} products={data?.products ?? []} open={importing} onOpenChange={setImporting} onDone={() => setReloadKey((k) => k + 1)} />
 
       <DeleteDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)} name={deleting?.name ?? "منتج"}
+        description={`يُنقل «${deleting?.name ?? "المنتج"}» إلى سلة المحذوفات ويختفي من متجرك — تستعيده كما كان خلال ٣٠ يومًا.`}
         onConfirm={() => { if (deleteId) void handleDelete(deleteId); setDeleteId(null); }} />
     </div>
   );

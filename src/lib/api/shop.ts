@@ -400,6 +400,15 @@ export const updateZone = (
 export const deleteZone = (storeId: string, id: string) =>
   apiFetch<{ ok: true }>(`${s(storeId)}/zones/${id}`, { method: "DELETE" });
 
+// ── سلة المحذوفات ─────────────────────────────────────────
+export interface TrashItem { id: string; kind: "product"; refId: string; name: string; image: string; deletedAt: string; expiresAt: string }
+export const listTrash = (storeId: string) => apiFetch<TrashItem[]>(`${s(storeId)}/trash`);
+export const restoreTrash = (storeId: string, id: string) =>
+  apiFetch<{ ok: true; productId: string }>(`${s(storeId)}/trash/${id}/restore`, { method: "POST" });
+export const purgeTrash = (storeId: string, id: string) =>
+  apiFetch<{ ok: true }>(`${s(storeId)}/trash/${id}`, { method: "DELETE" });
+export const emptyTrash = (storeId: string) => apiFetch<{ ok: true; deleted: number }>(`${s(storeId)}/trash`, { method: "DELETE" });
+
 // ── أقسام الرئيسية ────────────────────────────────────────
 export type SectionSource = "best" | "new" | "sale" | "category" | "brand" | "manual";
 export interface Section {
