@@ -146,6 +146,23 @@ export async function uploadFile<T>(path: string, file: File): Promise<T> {
   return body as T;
 }
 
+/**
+ * يجلب ملفًا خاصًا (وثيقة توثيق) بالرمز ويعيده رابطًا محليًا `blob:` — الملفات الخاصة لا رابط
+ * عامًا لها، فلا يصلح `<img src>` المباشر. على المستدعي `URL.revokeObjectURL` عند الانتهاء.
+ */
+export async function fetchBlobUrl(path: string): Promise<string> {
+  const token = getToken();
+  let res: Response;
+  try {
+    res = await fetch(`${API_BASE_URL}${path}`, { headers: token ? { Authorization: `Bearer ${token}` } : undefined, cache: "no-store" });
+  } catch {
+    throw new ApiError(0, "تعذّر الاتصال بالخادم.");
+  }
+  notifyIfExpired(res, token, path);
+  if (!res.ok) throw new ApiError(res.status, `تعذّر فتح الملف (${res.status})`);
+  return URL.createObjectURL(await res.blob());
+}
+
 /** حدث من بثّ SSE: اسمه وبياناته (JSON) */
 export interface SseEvent<T = unknown> {
   event: string;

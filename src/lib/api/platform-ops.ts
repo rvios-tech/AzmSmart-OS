@@ -132,3 +132,23 @@ export interface SupportSession {
 export const openStoreSupport = (storeId: string) =>
   apiFetch<SupportSession>(`/platform/shop-stores/${storeId}/support-session`, { method: "POST" });
 export const openSiteSupport = () => apiFetch<SupportSession>("/platform/site/support-session", { method: "POST" });
+
+// ── طلبات توثيق المتاجر ──────────────────────────────────
+export interface KycRequest {
+  id: string;
+  storeId: string;
+  kind: "person" | "business";
+  legalName: string;
+  crNumber: string;
+  status: 0 | 1 | 2 | 3;
+  reviewNote: string;
+  submittedAt: string | null;
+  reviewedAt: string | null;
+  store: { id: string; name: string; slug: string; verified: boolean; organization: { name: string } };
+  docs: { id: string; kind: "id_front" | "id_back" | "selfie" | "cr"; size: number }[];
+}
+export const listKycRequests = (status: number) =>
+  apiFetch<{ requests: KycRequest[]; counts: Record<number, number> }>(`/platform/kyc?status=${status}`);
+export const decideKyc = (id: string, approve: boolean, note?: string) =>
+  apiFetch<{ ok: true }>(`/platform/kyc/${id}/decide`, { method: "POST", body: JSON.stringify({ approve, note }) });
+export const platformKycDocPath = (id: string, docId: string) => `/platform/kyc/${id}/docs/${docId}`;

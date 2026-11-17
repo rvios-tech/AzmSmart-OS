@@ -1,4 +1,4 @@
-import { apiFetch } from "./client";
+import { apiFetch, uploadFile } from "./client";
 
 // ---------------------------------------------------------------------------
 // منصة المتاجر — طبقة الاتصال بمسارات `/shop/*` في الباكند الموحّد.
@@ -97,6 +97,31 @@ export interface SlugCheck {
 }
 
 const s = (id: string) => `/shop/stores/${id}`;
+
+// ── توثيق المتجر ──────────────────────────────────────────
+/** 0 مسودة · 1 قيد المراجعة · 2 موثَّق · 3 مرفوض */
+export type KycStatus = 0 | 1 | 2 | 3;
+export type KycDocKind = "id_front" | "id_back" | "selfie" | "cr";
+export interface KycDoc { id: string; kind: KycDocKind; size: number; createdAt?: string }
+export interface Kyc {
+  status: KycStatus | null;
+  verified: boolean;
+  kind: "person" | "business";
+  legalName: string;
+  crNumber: string;
+  reviewNote: string;
+  docs: KycDoc[];
+  submittedAt: string | null;
+  reviewedAt: string | null;
+  keepDays?: number;
+}
+export const getKyc = (storeId: string) => apiFetch<Kyc>(`${s(storeId)}/kyc`);
+export const saveKyc = (storeId: string, input: { kind: "person" | "business"; legalName: string; crNumber?: string }) =>
+  apiFetch<Kyc>(`${s(storeId)}/kyc`, { method: "PUT", ...json(input) });
+export const uploadKycDoc = (storeId: string, kind: KycDocKind, file: File) => uploadFile<Kyc>(`${s(storeId)}/kyc/docs?kind=${kind}`, file);
+export const removeKycDoc = (storeId: string, docId: string) => apiFetch<Kyc>(`${s(storeId)}/kyc/docs/${docId}`, { method: "DELETE" });
+export const submitKyc = (storeId: string) => apiFetch<Kyc>(`${s(storeId)}/kyc/submit`, { method: "POST" });
+export const kycDocPath = (storeId: string, docId: string) => `${s(storeId)}/kyc/docs/${docId}`;
 const json = (body: unknown) => ({ body: JSON.stringify(body) });
 
 // ── المتاجر ───────────────────────────────────────────────

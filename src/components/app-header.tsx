@@ -71,6 +71,7 @@ const CRUMB_LABELS: Record<string, string> = {
   sections: "أقسام الرئيسية",
   trash: "سلة المحذوفات",
   carts: "السلات المتروكة",
+  verification: "التوثيق",
   shipping: "الشحن",
   reviews: "التقييمات",
   invoices: "الفواتير",

@@ -44,6 +44,7 @@ import {
   IconLayoutGrid,
   IconTrash,
   IconShoppingCartX,
+  IconRosetteDiscountCheck,
   IconShoppingBag,
   IconShieldLock,
   IconLifebuoy,
@@ -103,6 +104,7 @@ export const navGroups: NavGroup[] = [
       { title: "الشركات", url: "/platform/companies", icon: IconBuildingSkyscraper },
       { title: "التنبيهات", url: "/platform/alerts", icon: IconBell },
       { title: "طلبات المتاجر", url: "/platform/requests", icon: IconInbox },
+      { title: "طلبات التوثيق", url: "/platform/verification", icon: IconRosetteDiscountCheck },
       { title: "طلبات التصميم الخاص", url: "/platform/leads", icon: IconPalette },
       { title: "المتاجر", url: "/platform/stores", icon: IconShoppingBag },
       { title: "اشتراكات المتاجر", url: "/platform/subscriptions", icon: IconCalendarDollar },
@@ -156,6 +158,7 @@ export const navGroups: NavGroup[] = [
       { title: "شكل المتجر", url: "/store/appearance", icon: IconPalette },
       { title: "أقسام الرئيسية", url: "/sections", icon: IconLayoutGrid },
       { title: "الاشتراك", url: "/store/plan", icon: IconTag },
+      { title: "توثيق المتجر", url: "/store/verification", icon: IconRosetteDiscountCheck },
     ],
   },
   {
