@@ -50,6 +50,8 @@ export interface Store {
   currency: string;
   deliveryFee: number;
   deliveryFreeOver: number;
+  /** برنامج المكافآت: ٪ من الطلب المكتمل لرصيد العميل (0 متوقف) */
+  loyaltyRate: number;
   deliveryNote: string;
   payMethods: string;
   payNote: string;
@@ -83,7 +85,7 @@ export type UpdateStoreInput = Partial<
     | "name" | "tagline" | "about" | "city" | "address" | "hours" | "logo"
     | "banner" | "showcase" | "sector" | "color" | "colorDeep" | "theme"
     | "layout" | "country" | "whatsapp" | "slug" | "deliveryFee"
-    | "deliveryFreeOver" | "deliveryNote" | "payNote" | "template"
+    | "deliveryFreeOver" | "deliveryNote" | "payNote" | "template" | "loyaltyRate"
   > & { payMethods: string[]; /** نصّ فارغ يحذف النطاق */ customDomain: string }
 >;
 
@@ -345,6 +347,8 @@ export interface ManualOrderInput {
   name?: string; phone?: string; address?: string; note?: string;
   zoneId?: string; payMethod?: string; coupon?: string;
   deliveryFee?: number; extraDiscount?: number; paid?: boolean; confirm?: boolean;
+  /** يُخصم من رصيد مكافآت صاحب الجوال */
+  pointsUsed?: number;
 }
 export const createManualOrder = (storeId: string, input: ManualOrderInput) =>
   apiFetch<Order>(`${s(storeId)}/orders`, { method: "POST", ...json(input) });
@@ -365,7 +369,25 @@ export interface StoreCustomer {
   ordersCount: number;
   spent: number;
   lastOrder: string | null;
+  /** رصيد المكافآت بعملة المتجر */
+  points: number;
 }
+
+export interface PointsTx {
+  id: string;
+  amount: number;
+  /** earn · redeem · revoke · adjust */
+  kind: string;
+  note: string;
+  orderId: string | null;
+  createdAt: string;
+}
+export const getCustomerPoints = (storeId: string, customerId: string) =>
+  apiFetch<{ customer: { id: string; name: string; phone: string; points: number }; history: PointsTx[] }>(
+    `${s(storeId)}/customers/${customerId}/points`,
+  );
+export const adjustCustomerPoints = (storeId: string, customerId: string, amount: number, note?: string) =>
+  apiFetch<{ points: number }>(`${s(storeId)}/customers/${customerId}/points`, { method: "POST", ...json({ amount, note }) });
 
 export const listStoreCustomers = (storeId: string) =>
   apiFetch<{ customers: StoreCustomer[]; total: number; returning: number }>(

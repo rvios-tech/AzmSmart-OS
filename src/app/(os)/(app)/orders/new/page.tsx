@@ -16,7 +16,7 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ApiError } from "@/lib/api/client";
-import { createManualOrder, listProducts, listZones, type Product, type Store, type Zone } from "@/lib/api/shop";
+import { createManualOrder, listProducts, listStoreCustomers, listZones, type Product, type Store, type StoreCustomer, type Zone } from "@/lib/api/shop";
 import { formatMoney, formatNumber } from "@/lib/format";
 import { PAY_METHOD_LABEL } from "@/lib/shop/constants";
 
@@ -50,11 +50,14 @@ function NewOrderView({ store }: { store: Store }) {
   const [payMethod, setPayMethod] = useState("cod");
   const [paid, setPaid] = useState(false);
   const [confirm, setConfirm] = useState(true);
+  const [customers, setCustomers] = useState<StoreCustomer[]>([]);
+  const [usePoints, setUsePoints] = useState("");
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     void listProducts(store.id).then((r) => setProducts(r.products)).catch(() => setProducts([]));
     void listZones(store.id).then((r) => setZones(r.zones)).catch(() => {});
+    void listStoreCustomers(store.id).then((r) => setCustomers(r.customers)).catch(() => {});
   }, [store.id]);
 
   const found = useMemo(() => {
@@ -68,7 +71,12 @@ function NewOrderView({ store }: { store: Store }) {
   const zone = zones.find((z) => z.id === zoneId);
   const autoFee = zone ? (zone.freeOver && subtotal >= zone.freeOver ? 0 : zone.fee) : store.deliveryFreeOver && subtotal >= store.deliveryFreeOver ? 0 : store.deliveryFee;
   const fee = delivery.trim() === "" ? autoFee : int(delivery);
-  const total = Math.max(0, subtotal + fee - int(discount));
+  // صاحب الجوال من عملاء المتجر — آخر ٩ أرقام تكفي للمطابقة مع رقم مكتوب بلا رمز الدولة
+  const digits = phone.replace(/\D/g, "");
+  const known = digits.length >= 7 ? customers.find((c) => c.phone.replace(/\D/g, "").endsWith(digits.slice(-9))) : undefined;
+  const balance = known?.points ?? 0;
+  const points = Math.min(balance, int(usePoints), Math.max(0, subtotal + fee - int(discount)));
+  const total = Math.max(0, subtotal + fee - int(discount) - points);
 
   function add(p: Product) {
     const variantId = p.hasVariants ? p.variants.find((v) => v.live && v.qty > 0)?.id ?? p.variants[0]?.id ?? null : null;
@@ -91,6 +99,7 @@ function NewOrderView({ store }: { store: Store }) {
         ...(delivery.trim() !== "" ? { deliveryFee: int(delivery) } : {}),
         ...(int(discount) ? { extraDiscount: int(discount) } : {}),
         ...(coupon.trim() ? { coupon: coupon.trim() } : {}),
+        ...(points > 0 ? { pointsUsed: points } : {}),
         payMethod, paid, confirm,
       });
       toast.success(`سُجّل الطلب ${o.ref}`, { description: `الإجمالي ${money(o.total)}` });
@@ -168,7 +177,10 @@ function NewOrderView({ store }: { store: Store }) {
             <CardHeader><CardTitle>العميل والتوصيل</CardTitle></CardHeader>
             <CardContent className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2"><Label htmlFor="n">الاسم</Label><Input id="n" value={name} onChange={(e) => setName(e.target.value)} maxLength={60} /></div>
-              <div className="space-y-2"><Label htmlFor="p">الجوال</Label><Input id="p" dir="ltr" inputMode="tel" value={phone} onChange={(e) => setPhone(e.target.value)} maxLength={20} /></div>
+              <div className="space-y-2">
+                <Label htmlFor="p">الجوال</Label><Input id="p" dir="ltr" inputMode="tel" value={phone} onChange={(e) => setPhone(e.target.value)} maxLength={20} />
+                {known && <p className="text-xs text-muted-foreground">عميل سابق: {known.name || "بلا اسم"} · {formatNumber(known.ordersCount)} طلب{balance > 0 ? ` · رصيد ${money(balance)}` : ""}</p>}
+              </div>
               <div className="space-y-2 sm:col-span-2"><Label htmlFor="a">العنوان</Label><Input id="a" value={address} onChange={(e) => setAddress(e.target.value)} maxLength={200} /></div>
               <div className="space-y-2">
                 <Label>منطقة التوصيل</Label>
@@ -200,12 +212,22 @@ function NewOrderView({ store }: { store: Store }) {
               <div className="space-y-2"><Label htmlFor="c">رمز خصم</Label><Input id="c" dir="ltr" className="font-mono uppercase" value={coupon} onChange={(e) => setCoupon(e.target.value)} placeholder="اختياري" /></div>
               <div className="space-y-2"><Label htmlFor="x">خصم يدوي</Label><Input id="x" type="number" min={0} value={discount} onChange={(e) => setDiscount(e.target.value)} placeholder="0" /></div>
             </div>
+            {balance > 0 && (
+              <div className="space-y-2 rounded-md border border-primary/30 bg-primary/5 p-3">
+                <Label htmlFor="pt">من رصيد المكافآت (متاح {money(balance)})</Label>
+                <div className="flex gap-2">
+                  <Input id="pt" type="number" min={0} max={balance} value={usePoints} onChange={(e) => setUsePoints(e.target.value)} placeholder="0" />
+                  <Button type="button" variant="outline" onClick={() => setUsePoints(String(Math.min(balance, Math.max(0, subtotal + fee - int(discount)))))}>الكل</Button>
+                </div>
+              </div>
+            )}
             <label className="flex items-center justify-between gap-3 text-sm"><span>استُلم الدفع</span><Switch checked={paid} onCheckedChange={setPaid} /></label>
             <label className="flex items-center justify-between gap-3 text-sm"><span>الطلب مؤكد</span><Switch checked={confirm} onCheckedChange={setConfirm} /></label>
             <dl className="space-y-1.5 border-t pt-3 text-sm">
               <div className="flex justify-between"><dt className="text-muted-foreground">المجموع</dt><dd className="tabular-nums">{money(subtotal)}</dd></div>
               <div className="flex justify-between"><dt className="text-muted-foreground">التوصيل</dt><dd className="tabular-nums">{fee ? money(fee) : "مجاني"}</dd></div>
               {int(discount) > 0 && <div className="flex justify-between text-emerald-600"><dt>خصم يدوي</dt><dd className="tabular-nums">−{money(int(discount))}</dd></div>}
+              {points > 0 && <div className="flex justify-between text-emerald-600"><dt>من رصيد المكافآت</dt><dd className="tabular-nums">−{money(points)}</dd></div>}
               <div className="flex justify-between text-base font-semibold"><dt>الإجمالي</dt><dd className="tabular-nums">{money(total)}</dd></div>
               {coupon.trim() && <p className="text-xs text-muted-foreground">خصم الرمز يُحسب عند الحفظ.</p>}
             </dl>
