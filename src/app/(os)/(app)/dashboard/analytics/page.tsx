@@ -89,6 +89,20 @@ function AnalyticsView({ store }: { store: Store }) {
             <MetricCard label="نسبة التحويل" value={formatPercent(data.totals.conversion)} hint="طلبات ÷ زوّار" />
           </div>
 
+          {data.profit && (
+            data.profit.coverage > 0 ? (
+              <div className="grid gap-4 sm:grid-cols-3">
+                <MetricCard label="ربح المنتجات" value={money(data.profit.amount)} hint="قبل التوصيل والخصومات" tone={data.profit.amount >= 0 ? "good" : "warn"} />
+                <MetricCard label="هامش الربح" value={formatPercent(data.profit.margin)} />
+                <MetricCard label="تغطية التكلفة" value={formatPercent(data.profit.coverage)} hint={data.profit.coverage < 100 ? "أضف سعر التكلفة لبقية المنتجات لربح أدق" : "كل المبيعات معروفة التكلفة"} />
+              </div>
+            ) : (
+              <p className="rounded-lg border border-dashed px-4 py-3 text-sm text-muted-foreground">
+                أضف «سعر التكلفة» في منتجاتك لترى ربحك الفعلي وهامشه هنا — لا يراه العملاء.
+              </p>
+            )
+          )}
+
           <div className="grid gap-4 lg:grid-cols-2">
             <Card>
               <CardHeader>
@@ -141,7 +155,10 @@ function AnalyticsView({ store }: { store: Store }) {
                       <p className="truncate text-sm font-medium">{p.name}</p>
                       <p className="text-xs text-muted-foreground">{formatNumber(p.qty)} قطعة</p>
                     </div>
-                    <span className="text-sm font-medium tabular-nums">{money(p.revenue)}</span>
+                    <span className="text-end">
+                      <span className="block text-sm font-medium tabular-nums">{money(p.revenue)}</span>
+                      {p.profit != null && <span className="block text-xs text-emerald-600 tabular-nums">ربح {money(p.profit)}</span>}
+                    </span>
                   </div>
                 ))}
               </CardContent>

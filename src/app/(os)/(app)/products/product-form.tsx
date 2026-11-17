@@ -1,5 +1,6 @@
 "use client";
 
+import { formatNumber } from "@/lib/format";
 import { useEffect, useState } from "react";
 import { IconLoader2, IconPlus, IconSparkles, IconTrash } from "@tabler/icons-react";
 import { toast } from "sonner";
@@ -61,6 +62,7 @@ export function ProductForm({
   const [categoryId, setCategoryId] = useState<string>(initial?.categoryId ?? NONE);
   const [price, setPrice] = useState(String(initial?.price ?? ""));
   const [oldPrice, setOldPrice] = useState(initial?.oldPrice ? String(initial.oldPrice) : "");
+  const [costPrice, setCostPrice] = useState(initial?.costPrice ? String(initial.costPrice) : "");
   const [qty, setQty] = useState(String(initial?.qty ?? 0));
   const [lowStock, setLowStock] = useState(String(initial?.lowStock ?? 0));
   const [live, setLive] = useState(initial?.live ?? true);
@@ -101,6 +103,7 @@ export function ProductForm({
       categoryId: categoryId === NONE ? null : categoryId,
       price: int(price),
       oldPrice: int(oldPrice),
+      costPrice: int(costPrice),
       lowStock: int(lowStock),
       live,
       images,
@@ -281,6 +284,15 @@ export function ProductForm({
             <div className="space-y-2">
               <Label htmlFor="old">السعر قبل الخصم ({money})</Label>
               <Input id="old" type="number" min={0} value={oldPrice} onChange={(e) => setOldPrice(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="cost">سعر التكلفة ({money}) — لا يراه العملاء</Label>
+              <Input id="cost" type="number" min={0} value={costPrice} onChange={(e) => setCostPrice(e.target.value)} placeholder="اختياري" />
+              {Number(costPrice) > 0 && Number(price) > 0 && (
+                <p className={`text-xs ${Number(price) > Number(costPrice) ? "text-emerald-600" : "text-destructive"}`}>
+                  الربح {formatNumber(Number(price) - Number(costPrice))} للقطعة ({formatNumber(Math.round(((Number(price) - Number(costPrice)) / Number(price)) * 100))}٪)
+                </p>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="qty">الكمية</Label>

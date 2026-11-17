@@ -170,6 +170,7 @@ export interface Product {
   brand: string;
   price: number;
   oldPrice: number | null;
+  costPrice?: number | null;
   qty: number;
   lowStock: number;
   image: string;
@@ -195,6 +196,8 @@ export interface ProductInput {
   opt2Name?: string;
   price?: number;
   oldPrice?: number;
+  /** سعر التكلفة — خاص بالتاجر، ٠ يمحوه */
+  costPrice?: number;
   qty?: number;
   lowStock?: number;
   live?: boolean;
@@ -508,7 +511,11 @@ export interface Analytics {
     name: string;
     qty: number;
     revenue: number;
+    /** null حين لا تكلفة معروفة لأسطره */
+    profit?: number | null;
   }>;
+  /** ربح المنتجات من الأسطر معروفة التكلفة، وهامشه، ونسبة المبيعات التي تغطيها التكلفة */
+  profit?: { amount: number; margin: number; coverage: number };
   customers: { buyers: number; returning: number; newBuyers: number };
   lowStock: LowStockItem[];
 }
