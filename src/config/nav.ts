@@ -165,6 +165,7 @@ export const navGroups: NavGroup[] = [
         icon: IconReportAnalytics,
         items: [
           { title: "التحليلات", url: "/dashboard/analytics" },
+          { title: "التقارير المفصّلة", url: "/reports/insights" },
           { title: "المبيعات والتصدير", url: "/reports" },
           { title: "الزوار", url: "/reports/visitors" },
         ],

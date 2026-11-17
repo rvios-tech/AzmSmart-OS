@@ -662,6 +662,27 @@ export const deleteCarrier = (storeId: string, id: string) => apiFetch<{ ok: tru
 export const setOrderShipping = (storeId: string, orderId: string, input: { carrierId?: string | null; trackingNo?: string }) =>
   apiFetch<{ carrierName: string; trackingNo: string; trackUrl: string }>(`${s(storeId)}/orders/${orderId}/shipping`, { method: "PATCH", ...json(input) });
 
+export interface StoreReport {
+  range: { from: string; to: string; days: number; previousFrom: string };
+  sales: {
+    revenue: number; orders: number; averageOrder: number; products: number; delivery: number; discounts: number; walletPaid: number;
+    conversion: number; visitors: number; change: { revenue: number | null; orders: number | null }; previous: { revenue: number; orders: number };
+    series: Array<{ day: string; revenue: number; orders: number }>; byPayMethod: Record<string, { orders: number; revenue: number }>;
+  };
+  orders: { total: number; byStatus: Record<number, number>; hours: number[]; weekdays: number[]; bySource: Record<string, number>; cancelRate: number; returnRate: number; pending: number };
+  products: {
+    top: Array<{ productId: string | null; name: string; qty: number; revenue: number; profit?: number | null }>;
+    unsold: Array<{ id: string; name: string; qty: number; price: number }>;
+    byCategory: Array<{ id: string; name: string; qty: number; revenue: number }>;
+    unitsSold: number;
+  };
+  customers: { buyers: number; newBuyers: number; returningBuyers: number; previousBuyers: number; top: Array<{ id: string; name: string; phone: string; orders: number; spent: number }>; byZone: Record<string, { orders: number; revenue: number }> };
+  coupons: { rows: Array<{ code: string; uses: number; discount: number; revenue: number }>; ordersWithCoupon: number };
+  inventory: { products: number; live: number; outOfStock: number; low: Array<{ id: string; name: string; qty: number }>; units: number; value: number; costValue?: number; costCoverage: number };
+}
+export const getReport = (storeId: string, from: string, to: string) =>
+  apiFetch<StoreReport>(`${s(storeId)}/reports?from=${from}&to=${to}`);
+
 export interface VisitorsReport {
   range: { days: number; from: string; to: string };
   totals: { visitors: number; views: number; avgDaily: number; pagesPerVisit: number };
