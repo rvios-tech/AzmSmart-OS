@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { IconChevronLeft } from "@tabler/icons-react";
@@ -79,12 +80,52 @@ function NavEntry({ item, pathname }: { item: NavItem; pathname: string }) {
   const closeMobile = () => setOpenMobile(false);
 
   // Collapsible parent with children.
-  if (item.items?.length) {
-    const childActive = item.items.some((c) => pathname === c.url);
+  if (item.items?.length) return <NavParent item={item} pathname={pathname} onNavigate={closeMobile} />;
+
+  // Flat link item.
+  const active =
+    pathname === item.url ||
+    (item.url !== "/dashboard" && !!item.url && pathname.startsWith(`${item.url}/`));
+  return (
+    <SidebarMenuItem>
+      <SidebarMenuButton asChild isActive={active} tooltip={item.title}>
+        <Link href={item.url ?? "#"} onClick={closeMobile}>
+          {item.icon && <item.icon className="size-4" />}
+          <span>{item.title}</span>
+        </Link>
+      </SidebarMenuButton>
+      {item.badge && (
+        <SidebarMenuBadge className={badgeClass(item.badge)}>
+          {item.badge}
+        </SidebarMenuBadge>
+      )}
+    </SidebarMenuItem>
+  );
+}
+
+/** أدقّ صفحة فرعية تطابق المسار: /orders/123 ← «كل الطلبات»، و/products/new ← «إضافة منتج» لا «المنتجات» */
+function activeChild(item: NavItem, pathname: string) {
+  return (item.items ?? [])
+    .filter((c) => pathname === c.url || (c.url !== "/dashboard" && pathname.startsWith(`${c.url}/`)))
+    .sort((a, b) => b.url.length - a.url.length)[0]?.url;
+}
+
+function NavParent({ item, pathname, onNavigate }: { item: NavItem; pathname: string; onNavigate: () => void }) {
+  const current = activeChild(item, pathname);
+  const [open, setOpen] = useState(!!current);
+  // الدخول إلى صفحة من المجموعة (من رابط أو بحث) يفتحها — يُضبط أثناء الرسم لا في تأثير
+  const [seen, setSeen] = useState(current);
+  if (current !== seen) {
+    setSeen(current);
+    if (current) setOpen(true);
+  }
+  {
+    const childActive = !!current;
     return (
       <Collapsible
         asChild
-        defaultOpen={childActive}
+        open={open}
+        onOpenChange={setOpen}
         className="group/collapsible"
       >
         <SidebarMenuItem>
@@ -107,10 +148,10 @@ function NavEntry({ item, pathname }: { item: NavItem; pathname: string }) {
           </CollapsibleTrigger>
           <CollapsibleContent className="overflow-hidden [--tw-animation-duration:260ms] data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down">
             <SidebarMenuSub>
-              {item.items.map((sub) => (
+              {(item.items ?? []).map((sub) => (
                 <SidebarMenuSubItem key={sub.title}>
-                  <SidebarMenuSubButton asChild isActive={pathname === sub.url}>
-                    <Link href={sub.url} onClick={closeMobile}>
+                  <SidebarMenuSubButton asChild isActive={current === sub.url}>
+                    <Link href={sub.url} onClick={onNavigate}>
                       {sub.title}
                     </Link>
                   </SidebarMenuSubButton>
@@ -122,24 +163,4 @@ function NavEntry({ item, pathname }: { item: NavItem; pathname: string }) {
       </Collapsible>
     );
   }
-
-  // Flat link item.
-  const active =
-    pathname === item.url ||
-    (item.url !== "/dashboard" && !!item.url && pathname.startsWith(item.url));
-  return (
-    <SidebarMenuItem>
-      <SidebarMenuButton asChild isActive={active} tooltip={item.title}>
-        <Link href={item.url ?? "#"} onClick={closeMobile}>
-          {item.icon && <item.icon className="size-4" />}
-          <span>{item.title}</span>
-        </Link>
-      </SidebarMenuButton>
-      {item.badge && (
-        <SidebarMenuBadge className={badgeClass(item.badge)}>
-          {item.badge}
-        </SidebarMenuBadge>
-      )}
-    </SidebarMenuItem>
-  );
 }
