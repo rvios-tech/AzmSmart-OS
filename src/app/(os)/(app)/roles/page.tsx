@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { IconCheck, IconMinus } from "@tabler/icons-react";
 
 import { PageHeader } from "@/components/page-header";
@@ -11,7 +12,7 @@ import {
 } from "@/components/ui/table";
 import { listTeamMembers } from "@/lib/api/workspace";
 import { formatNumber } from "@/lib/format";
-import { ROLE_LABELS } from "@/lib/workspace/roles";
+import { ROLE_LABELS, SHOP_SECTIONS } from "@/lib/workspace/roles";
 import { useWorkspace } from "@/lib/workspace/workspace-context";
 
 /**
@@ -95,6 +96,24 @@ export default function RolesPage() {
               ))}
             </TableBody>
           </Table>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>أقسام المتجر لكل موظف</CardTitle>
+          <CardDescription>
+            فوق الدور: تحدّد لكل عضو دون «مدير» ما يراه من المتجر، فيرى موظف الطلبات طلباته ولا يرى الأرباح. تُضبط من{" "}
+            <Link href="/team" className="text-primary underline-offset-4 hover:underline">صفحة الفريق</Link>، وتسري فورًا.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+          {SHOP_SECTIONS.map((s) => (
+            <div key={s.key} className="rounded-lg border p-3">
+              <p className="font-medium">{s.label}</p>
+              <p className="text-xs text-muted-foreground">{s.hint}</p>
+            </div>
+          ))}
         </CardContent>
       </Card>
     </div>

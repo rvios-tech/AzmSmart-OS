@@ -2,7 +2,8 @@
 
 import { useMemo } from "react";
 
-import { navGroups, type NavGroup } from "@/config/nav";
+import { navGroups, type NavGroup, type NavItem } from "@/config/nav";
+import { sectionOfUrl } from "./roles";
 import { useWorkspace } from "./workspace-context";
 
 /**
@@ -10,7 +11,8 @@ import { useWorkspace } from "./workspace-context";
  * المنصة، مدير الموقع، موظف). مساحة العمل العامة والتطبيقات والحساب للجميع.
  */
 export function useNavGroups(): NavGroup[] {
-  const { isPlatform, isSite, showStore } = useWorkspace();
+  const { isPlatform, isSite, showStore, ctx } = useWorkspace();
+  const sections = ctx?.sections ?? null;
   return useMemo(
     () =>
       navGroups.filter((g) => {
@@ -28,7 +30,15 @@ export function useNavGroups(): NavGroup[] {
           default:
             return true;
         }
-      }),
-    [isPlatform, isSite, showStore],
+      })
+        // الموظف يرى أقسام المتجر الممنوحة له فقط — والمنع الفعلي في الخادم
+        .map((g) => (sections && g.audience === "store" ? { ...g, items: g.items.filter((i) => allowed(i, sections)) } : g)),
+    [isPlatform, isSite, showStore, sections],
   );
+}
+
+function allowed(item: NavItem, sections: string[]): boolean {
+  const urls = [item.url, ...(item.items ?? []).map((x) => x.url)].filter((u): u is string => !!u);
+  const s = urls.map(sectionOfUrl).find(Boolean);
+  return !s || sections.includes(s);
 }

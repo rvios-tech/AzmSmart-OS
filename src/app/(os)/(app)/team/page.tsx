@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { IconLoader2, IconSearch, IconUserPlus, IconUsers } from "@tabler/icons-react";
+import { IconChevronDown, IconLoader2, IconSearch, IconUserPlus, IconUsers } from "@tabler/icons-react";
 
 import { PageHeader } from "@/components/page-header";
 import { MetricCard } from "@/components/metric-card";
@@ -10,6 +10,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog";
@@ -26,8 +28,48 @@ import {
   addTeamMember, listTeamMembers, updateTeamMember, type TeamMember,
 } from "@/lib/api/workspace";
 import { formatDateShort, formatNumber } from "@/lib/format";
-import { ROLE_LABELS } from "@/lib/workspace/roles";
+import { ROLE_LABELS, SHOP_SECTIONS } from "@/lib/workspace/roles";
 import { useWorkspace } from "@/lib/workspace/workspace-context";
+
+const ALL = SHOP_SECTIONS.map((s) => s.key as string);
+const sectionsLabel = (v: string[] | null) =>
+  !v || v.length === ALL.length ? "كل الأقسام" : v.length === 0 ? "لا أقسام" : SHOP_SECTIONS.filter((s) => v.includes(s.key)).map((s) => s.label).join("، ");
+
+/** اختيار أقسام المتجر للموظف — كلها تعني بلا قيد */
+function SectionsChecks({ value, onChange }: { value: string[]; onChange: (v: string[]) => void }) {
+  return (
+    <div className="space-y-2.5">
+      {SHOP_SECTIONS.map((s) => (
+        <label key={s.key} className="flex cursor-pointer items-start gap-2.5 text-sm">
+          <Checkbox className="mt-0.5" checked={value.includes(s.key)}
+            onCheckedChange={(c) => onChange(c ? [...value, s.key] : value.filter((x) => x !== s.key))} />
+          <span><b className="font-medium">{s.label}</b><span className="block text-xs text-muted-foreground">{s.hint}</span></span>
+        </label>
+      ))}
+    </div>
+  );
+}
+
+function SectionsCell({ m, editable, onSave }: { m: TeamMember; editable: boolean; onSave: (v: string[] | null) => Promise<void> }) {
+  const [open, setOpen] = useState(false);
+  const [draft, setDraft] = useState<string[]>(m.sections ?? ALL);
+  if (m.role <= 2) return <span className="text-xs text-muted-foreground">كل الأقسام (مدير)</span>;
+  if (!editable) return <span className="text-sm">{sectionsLabel(m.sections)}</span>;
+  return (
+    <Popover open={open} onOpenChange={(o) => { setOpen(o); if (o) setDraft(m.sections ?? ALL); }}>
+      <PopoverTrigger asChild>
+        <Button size="sm" variant="outline" className="max-w-56 justify-between gap-2">
+          <span className="truncate">{sectionsLabel(m.sections)}</span><IconChevronDown className="size-3.5 shrink-0 opacity-60" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent align="start" className="w-80 space-y-4">
+        <p className="text-sm font-medium">ما يراه {m.user.displayName} في المتجر</p>
+        <SectionsChecks value={draft} onChange={setDraft} />
+        <Button size="sm" className="w-full" onClick={() => void onSave(draft.length === ALL.length ? null : draft).then(() => setOpen(false))}>حفظ</Button>
+      </PopoverContent>
+    </Popover>
+  );
+}
 
 export default function TeamPage() {
   const { ctx } = useWorkspace();
@@ -42,6 +84,7 @@ export default function TeamPage() {
   const [open, setOpen] = useState(false);
   const [adding, setAdding] = useState(false);
   const [form, setForm] = useState({ displayName: "", email: "", password: "", role: "8" });
+  const [formSections, setFormSections] = useState<string[]>(ALL);
 
   const load = useCallback(async () => {
     try {
@@ -69,7 +112,7 @@ export default function TeamPage() {
 
   const active = (members ?? []).filter((m) => m.isActive).length;
 
-  async function patch(m: TeamMember, input: { role?: number; isActive?: boolean }, ok: string) {
+  async function patch(m: TeamMember, input: { role?: number; isActive?: boolean; sections?: string[] | null }, ok: string) {
     setBusy(m.id);
     try {
       await updateTeamMember(m.id, input);
@@ -91,10 +134,12 @@ export default function TeamPage() {
         displayName: form.displayName.trim(),
         password: form.password || undefined,
         role: Number(form.role),
+        ...(Number(form.role) > 2 && formSections.length < ALL.length ? { sections: formSections } : {}),
       });
       toast.success("أُضيف العضو");
       setOpen(false);
       setForm({ displayName: "", email: "", password: "", role: "8" });
+      setFormSections(ALL);
       await load();
     } catch (err) {
       toast.error(err instanceof ApiError ? err.message : "تعذّرت الإضافة.");
@@ -111,7 +156,7 @@ export default function TeamPage() {
             <DialogTrigger asChild>
               <Button><IconUserPlus className="size-4" /> إضافة عضو</Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="max-h-[90svh] overflow-y-auto">
               <form onSubmit={add}>
                 <DialogHeader><DialogTitle>إضافة عضو</DialogTitle></DialogHeader>
                 <div className="space-y-4 py-4">
@@ -140,6 +185,13 @@ export default function TeamPage() {
                       </SelectContent>
                     </Select>
                   </div>
+                  {Number(form.role) > 2 && (
+                    <div className="space-y-2">
+                      <Label>أقسام المتجر</Label>
+                      <SectionsChecks value={formSections} onChange={setFormSections} />
+                      <p className="text-xs text-muted-foreground">الإعدادات والاشتراك للمدير فما فوق دائمًا. يمكنك تغيير الأقسام لاحقًا من الجدول.</p>
+                    </div>
+                  )}
                 </div>
                 <DialogFooter>
                   <Button type="submit" disabled={adding}>{adding && <IconLoader2 className="size-4 animate-spin" />} إضافة</Button>
@@ -177,13 +229,14 @@ export default function TeamPage() {
               <TableRow>
                 <TableHead className="ps-6">العضو</TableHead>
                 <TableHead>الدور</TableHead>
+                <TableHead>أقسام المتجر</TableHead>
                 <TableHead>آخر دخول</TableHead>
                 <TableHead>الحالة</TableHead>
                 <TableHead className="pe-6" />
               </TableRow>
             </TableHeader>
             <TableBody>
-              {!members && <TableRow><TableCell colSpan={5} className="py-12 text-center"><IconLoader2 className="mx-auto size-5 animate-spin" /></TableCell></TableRow>}
+              {!members && <TableRow><TableCell colSpan={6} className="py-12 text-center"><IconLoader2 className="mx-auto size-5 animate-spin" /></TableCell></TableRow>}
               {rows.map((m) => {
                 const editable = canManage && m.role !== 0 && (m.role > myRole || myRole === 0);
                 return (
@@ -213,6 +266,10 @@ export default function TeamPage() {
                         <Badge variant="secondary">{ROLE_LABELS[m.role]}</Badge>
                       )}
                     </TableCell>
+                    <TableCell>
+                      <SectionsCell key={`${m.id}-${m.role}-${(m.sections ?? []).join()}`} m={m} editable={editable}
+                        onSave={(v) => patch(m, { sections: v }, "حُفظت أقسام العضو")} />
+                    </TableCell>
                     <TableCell className="text-muted-foreground tabular-nums">
                       {m.user.lastLoginAt ? formatDateShort(m.user.lastLoginAt) : "—"}
                     </TableCell>
@@ -233,7 +290,7 @@ export default function TeamPage() {
                 );
               })}
               {members && rows.length === 0 && (
-                <TableRow><TableCell colSpan={5} className="py-12 text-center text-muted-foreground"><IconUsers className="mx-auto mb-2 size-6 opacity-50" />لا أعضاء مطابقون.</TableCell></TableRow>
+                <TableRow><TableCell colSpan={6} className="py-12 text-center text-muted-foreground"><IconUsers className="mx-auto mb-2 size-6 opacity-50" />لا أعضاء مطابقون.</TableCell></TableRow>
               )}
             </TableBody>
           </Table>

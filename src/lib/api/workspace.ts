@@ -18,6 +18,8 @@ export interface WorkspaceContext {
   storeCount: number;
   /** جلسة دعم من فريق المنصة داخل هذه الشركة */
   support?: boolean;
+  /** أقسام المتجر المتاحة لي — null = كلها */
+  sections?: string[] | null;
 }
 
 export function getWorkspaceContext(): Promise<WorkspaceContext> {
@@ -34,6 +36,8 @@ export interface TeamMember {
   isActive: boolean;
   joinedAt: string | null;
   createdAt: string;
+  /** أقسام المتجر — null = كلها (والمدير فما فوق كلها دائمًا) */
+  sections: string[] | null;
   user: {
     id: string;
     displayName: string;
@@ -82,11 +86,12 @@ export function addTeamMember(input: {
   displayName: string;
   password?: string;
   role: number;
+  sections?: string[];
 }): Promise<{ id: string }> {
   return apiFetch("/team/members", { method: "POST", body: JSON.stringify(input) });
 }
 
-export function updateTeamMember(id: string, input: { role?: number; isActive?: boolean }): Promise<{ ok: true }> {
+export function updateTeamMember(id: string, input: { role?: number; isActive?: boolean; sections?: string[] | null }): Promise<{ ok: true }> {
   return apiFetch(`/team/members/${id}`, { method: "PATCH", body: JSON.stringify(input) });
 }
 
