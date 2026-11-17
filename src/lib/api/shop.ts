@@ -400,6 +400,17 @@ export const updateZone = (
 export const deleteZone = (storeId: string, id: string) =>
   apiFetch<{ ok: true }>(`${s(storeId)}/zones/${id}`, { method: "DELETE" });
 
+// ── السلات المتروكة ───────────────────────────────────────
+export interface AbandonedCart {
+  id: string; phone: string; name: string; subtotal: number; status: 0 | 1;
+  items: { productId: string; name: string; qty: number; price: number }[];
+  recoveredOrderId: string | null; remindedAt: string | null; updatedAt: string; wa: string;
+}
+export interface CartsResponse { carts: AbandonedCart[]; stats: { open: number; recovered: number; openValue: number; rate: number } }
+export const listCarts = (storeId: string, recovered = false) => apiFetch<CartsResponse>(`${s(storeId)}/carts${recovered ? "?status=1" : ""}`);
+export const markCartReminded = (storeId: string, id: string) => apiFetch<{ ok: true }>(`${s(storeId)}/carts/${id}/reminded`, { method: "POST" });
+export const deleteCart = (storeId: string, id: string) => apiFetch<{ ok: true }>(`${s(storeId)}/carts/${id}`, { method: "DELETE" });
+
 // ── سلة المحذوفات ─────────────────────────────────────────
 export interface TrashItem { id: string; kind: "product"; refId: string; name: string; image: string; deletedAt: string; expiresAt: string }
 export const listTrash = (storeId: string) => apiFetch<TrashItem[]>(`${s(storeId)}/trash`);
