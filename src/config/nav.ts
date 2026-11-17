@@ -97,6 +97,7 @@ export const navGroups: NavGroup[] = [
       { title: "التنبيهات", url: "/platform/alerts", icon: IconBell },
       { title: "طلبات المتاجر", url: "/platform/requests", icon: IconInbox },
       { title: "طلبات التوثيق", url: "/platform/verification", icon: IconRosetteDiscountCheck },
+      { title: "تذاكر الدعم", url: "/platform/support", icon: IconLifebuoy },
       { title: "طلبات التصميم الخاص", url: "/platform/leads", icon: IconPalette },
       { title: "المتاجر", url: "/platform/stores", icon: IconShoppingBag },
       { title: "اشتراكات المتاجر", url: "/platform/subscriptions", icon: IconCalendarDollar },
@@ -188,6 +189,7 @@ export const navGroups: NavGroup[] = [
       { title: "شكل المتجر", url: "/store/appearance", icon: IconPalette },
       { title: "الاشتراك", url: "/store/plan", icon: IconTag },
       { title: "توثيق المتجر", url: "/store/verification", icon: IconRosetteDiscountCheck },
+      { title: "الدعم الفني", url: "/support", icon: IconLifebuoy },
     ],
   },
   {
@@ -242,7 +244,6 @@ export const navGroups: NavGroup[] = [
     items: [
       { title: "الأسعار", url: "/pricing", icon: IconTag },
       { title: "نتائج البحث", url: "/search", icon: IconSearch },
-      { title: "الدعم الفني", url: "/support", icon: IconLifebuoy },
       { title: "مركز المساعدة", url: "/help", icon: IconHelpCircle },
       {
         title: "المصادقة",

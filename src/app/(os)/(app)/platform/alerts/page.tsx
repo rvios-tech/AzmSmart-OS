@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import {
-  IconBell, IconBuildingStore, IconRosetteDiscountCheck, IconChecks, IconLoader2, IconMail, IconPalette, IconReceipt,
+  IconBell, IconBuildingStore, IconRosetteDiscountCheck, IconLifebuoy, IconChecks, IconLoader2, IconMail, IconPalette, IconReceipt,
 } from "@tabler/icons-react";
 
 import { PageHeader } from "@/components/page-header";
@@ -22,6 +22,7 @@ const ICON: Record<string, typeof IconBell> = {
   custom_store: IconPalette,
   contact: IconMail,
   kyc: IconRosetteDiscountCheck,
+  support: IconLifebuoy,
 };
 
 /** صندوق تنبيهات الفريق المشترك — ما يُعالَج هنا يُعلَّم للجميع وفي تطبيق RVOS. */

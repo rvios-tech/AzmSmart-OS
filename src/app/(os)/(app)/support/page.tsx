@@ -1,503 +1,127 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import Link from "next/link";
+import { Suspense, useCallback, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
-import {
-  IconPlus,
-  IconSearch,
-  IconTicket,
-  IconClockPause,
-  IconCircleCheck,
-  IconClockHour4,
-  IconInbox,
-  IconDotsVertical,
-  IconEye,
-  IconUserPlus,
-  IconCircleCheckFilled,
-} from "@tabler/icons-react";
+import { IconLifebuoy, IconLoader2, IconPlus } from "@tabler/icons-react";
 
 import { PageHeader } from "@/components/page-header";
+import { TicketThread } from "@/components/support/ticket-thread";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ApiError } from "@/lib/api/client";
+import { listStores, type Store } from "@/lib/api/shop";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { currentUser } from "@/data";
-import {
-  tickets as seedTickets,
-  type Ticket,
-  type TicketPriority,
-  type TicketStatus,
-} from "./tickets-data";
-import { formatDateShort, formatNumber } from "@/lib/format";
+  closeTicket, createTicket, getTicket, listTickets, replyTicket, TICKET_CATEGORY, TICKET_PRIORITY, TICKET_STATUS, type Ticket,
+} from "@/lib/api/support";
+import { formatRelativeTime } from "@/lib/format";
+import { cn } from "@/lib/utils";
 
-const TODAY = "2026-07-17";
-
-const priorityStyles: Record<TicketPriority, string> = {
-  "منخفضة": "bg-slate-500/10 text-slate-600 dark:text-slate-400",
-  "متوسطة": "bg-sky-500/10 text-sky-600 dark:text-sky-400",
-  "عالية": "bg-amber-500/10 text-amber-600 dark:text-amber-400",
-  "عاجلة": "bg-rose-500/10 text-rose-600 dark:text-rose-400",
-};
-
-const statusStyles: Record<TicketStatus, string> = {
-  "مفتوحة": "bg-blue-500/10 text-blue-600 dark:text-blue-400",
-  "معلّقة": "bg-amber-500/10 text-amber-600 dark:text-amber-400",
-  "تم حلّها": "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
-  "مغلقة": "bg-slate-500/10 text-slate-600 dark:text-slate-400",
-};
-
-function formatDate(iso: string) {
-  return formatDateShort(iso);
-}
-
-function StatTile({
-  label,
-  value,
-  hint,
-  icon: Icon,
-}: {
-  label: string;
-  value: string;
-  hint: string;
-  icon: React.ComponentType<{ className?: string }>;
-}) {
-  return (
-    <Card>
-      <CardContent className="space-y-2.5">
-        <div className="flex items-center justify-between">
-          <p className="text-sm font-medium text-muted-foreground">{label}</p>
-          <span className="flex size-8 items-center justify-center rounded-md bg-muted text-muted-foreground">
-            <Icon className="size-4" />
-          </span>
-        </div>
-        <p className="text-3xl font-semibold tracking-tight tabular-nums">
-          {value}
-        </p>
-        <p className="text-xs text-muted-foreground">{hint}</p>
-      </CardContent>
-    </Card>
-  );
-}
-
-const TABS: { value: string; label: string }[] = [
-  { value: "all", label: "الكل" },
-  { value: "مفتوحة", label: "مفتوحة" },
-  { value: "معلّقة", label: "معلّقة" },
-  { value: "تم حلّها", label: "تم حلّها" },
-];
-
-export default function SupportPage() {
-  const [rows, setRows] = useState<Ticket[]>(seedTickets);
-  const [tab, setTab] = useState("all");
-  const [search, setSearch] = useState("");
+/** الدعم الفني: تذاكر شركتك مع فريق RVIOS */
+function SupportPageInner() {
+  const params = useSearchParams();
+  const [tickets, setTickets] = useState<Ticket[] | null>(null);
+  const [current, setCurrent] = useState<Ticket | null>(null);
+  const [stores, setStores] = useState<Store[]>([]);
   const [open, setOpen] = useState(false);
-  const [newSeq, setNewSeq] = useState(0);
+  const [form, setForm] = useState({ subject: "", category: "store", priority: "0", body: "", storeId: "none" });
+  const [busy, setBusy] = useState(false);
 
-  const stats = useMemo(() => {
-    const openCount = rows.filter((t) => t.status === "مفتوحة").length;
-    const pendingCount = rows.filter((t) => t.status === "معلّقة").length;
-    const resolvedToday = rows.filter(
-      (t) => t.status === "تم حلّها" && t.updated === TODAY
-    ).length;
-    return { openCount, pendingCount, resolvedToday };
-  }, [rows]);
+  const load = useCallback(() => listTickets().then(setTickets, () => setTickets([])), []);
+  const show = useCallback((id: string) => getTicket(id).then(setCurrent, (e) => toast.error(e instanceof ApiError ? e.message : "تعذّر فتح التذكرة.")), []);
+  useEffect(() => {
+    void listTickets().then(setTickets, () => setTickets([]));
+    void listStores().then((r) => setStores(r.stores), () => {});
+    const t = params.get("t");
+    if (t) void getTicket(t).then(setCurrent, () => {});
+  }, [params]);
 
-  const filtered = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    return rows.filter((t) => {
-      const matchesTab = tab === "all" || t.status === tab;
-      const matchesSearch =
-        !q ||
-        t.subject.toLowerCase().includes(q) ||
-        t.requester.toLowerCase().includes(q) ||
-        t.id.toLowerCase().includes(q);
-      return matchesTab && matchesSearch;
-    });
-  }, [rows, tab, search]);
-
-  function handleCreate(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const data = new FormData(e.currentTarget);
-    const subject = (data.get("subject") as string)?.trim() || "طلب جديد";
-    const priority = (data.get("priority") as TicketPriority) || "متوسطة";
-    const category = (data.get("category") as string) || "عام";
-    const description = (data.get("description") as string)?.trim() || "";
-    const seq = newSeq + 1;
-    setNewSeq(seq);
-    const id = `TKT-${2058 + newSeq}`;
-
-    const ticket: Ticket = {
-      id,
-      subject,
-      requester: currentUser.name,
-      requesterEmail: currentUser.email,
-      requesterAvatar: currentUser.avatar,
-      company: "RVIOS OS",
-      priority,
-      status: "مفتوحة",
-      category,
-      assignee: "غير مُسند",
-      assigneeAvatar: "",
-      created: TODAY,
-      updated: TODAY,
-      tags: [category.toLowerCase()],
-      messages: description
-        ? [
-            {
-              id: `${id}-M1`,
-              author: currentUser.name,
-              avatar: currentUser.avatar,
-              role: "requester",
-              time: "الآن",
-              body: description,
-            },
-          ]
-        : [],
-    };
-
-    setRows((prev) => [ticket, ...prev]);
-    setOpen(false);
-    setTab("all");
-    toast.success("تم إنشاء التذكرة", {
-      description: `${id} · أُضيفت «${subject}» إلى قائمة الانتظار.`,
-    });
+  async function create() {
+    setBusy(true);
+    try {
+      const t = await createTicket({ subject: form.subject.trim(), category: form.category, priority: Number(form.priority), body: form.body.trim(), ...(form.storeId !== "none" ? { storeId: form.storeId } : {}) });
+      toast.success(`فُتحت التذكرة ${t.ref} — يصلك إشعار حين يردّ الفريق`);
+      setOpen(false);
+      setForm({ subject: "", category: "store", priority: "0", body: "", storeId: "none" });
+      await load();
+      await show(t.id);
+    } catch (e) {
+      toast.error(e instanceof ApiError ? e.message : "تعذّر فتح التذكرة.");
+    } finally {
+      setBusy(false);
+    }
   }
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        title="الدعم الفني"
-        description="تابع محادثات العملاء وصنّفها وأغلقها."
-      >
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <IconPlus className="size-4" /> تذكرة جديدة
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <form onSubmit={handleCreate}>
-              <DialogHeader>
-                <DialogTitle>تذكرة جديدة</DialogTitle>
-                <DialogDescription>
-                  افتح محادثة دعم نيابة عن أحد العملاء.
-                </DialogDescription>
-              </DialogHeader>
-              <div className="grid gap-4 py-4">
-                <div className="space-y-2">
-                  <Label htmlFor="subject">الموضوع</Label>
-                  <Input
-                    id="subject"
-                    name="subject"
-                    placeholder="صف المشكلة باختصار"
-                    required
-                  />
-                </div>
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div className="space-y-2">
-                    <Label htmlFor="priority">الأولوية</Label>
-                    <Select name="priority" defaultValue="متوسطة">
-                      <SelectTrigger id="priority" className="w-full">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="منخفضة">منخفضة</SelectItem>
-                        <SelectItem value="متوسطة">متوسطة</SelectItem>
-                        <SelectItem value="عالية">عالية</SelectItem>
-                        <SelectItem value="عاجلة">عاجلة</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="category">الفئة</Label>
-                    <Select name="category" defaultValue="خلل تقني">
-                      <SelectTrigger id="category" className="w-full">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="خلل تقني">خلل تقني</SelectItem>
-                        <SelectItem value="الفوترة">الفوترة</SelectItem>
-                        <SelectItem value="استفسار">استفسار</SelectItem>
-                        <SelectItem value="طلب ميزة">
-                          طلب ميزة
-                        </SelectItem>
-                        <SelectItem value="الحساب">الحساب</SelectItem>
-                        <SelectItem value="API">API</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="description">الوصف</Label>
-                  <Textarea
-                    id="description"
-                    name="description"
-                    placeholder="أضف أي تفاصيل تساعد فريقك…"
-                    rows={4}
-                  />
-                </div>
-              </div>
-              <DialogFooter>
-                <DialogClose asChild>
-                  <Button type="button" variant="outline">
-                    إلغاء
-                  </Button>
-                </DialogClose>
-                <Button type="submit">
-                  <IconPlus className="size-4" /> إنشاء تذكرة
-                </Button>
-              </DialogFooter>
-            </form>
-          </DialogContent>
-        </Dialog>
+      <PageHeader title="الدعم الفني" description="تواصل مع فريق RVIOS بتذكرة لكل مشكلة — تتابع الردود هنا ويصلك إشعار بكل ردّ.">
+        <Button onClick={() => setOpen(true)}><IconPlus className="size-4" /> تذكرة جديدة</Button>
       </PageHeader>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatTile
-          label="تذاكر مفتوحة"
-          value={formatNumber(stats.openCount)}
-          hint="بانتظار أول إجراء"
-          icon={IconInbox}
-        />
-        <StatTile
-          label="معلّق"
-          value={formatNumber(stats.pendingCount)}
-          hint="بانتظار رد العميل"
-          icon={IconClockPause}
-        />
-        <StatTile
-          label="تم حلّها اليوم"
-          value={formatNumber(stats.resolvedToday)}
-          hint="أُغلقت خلال 24 ساعة"
-          icon={IconCircleCheck}
-        />
-        <StatTile
-          label="متوسط زمن الرد"
-          value="1.8h"
-          hint="أول رد هذا الأسبوع"
-          icon={IconClockHour4}
-        />
+      <div className="grid gap-4 lg:grid-cols-5">
+        <Card className="lg:col-span-2">
+          <CardContent className="space-y-2 px-3">
+            {!tickets && <div className="flex h-24 items-center justify-center"><IconLoader2 className="size-4 animate-spin" /></div>}
+            {tickets?.length === 0 && <p className="py-10 text-center text-sm text-muted-foreground"><IconLifebuoy className="mx-auto mb-2 size-7 opacity-50" />لا تذاكر بعد — افتح تذكرة لأي سؤال أو مشكلة.</p>}
+            {tickets?.map((t) => (
+              <button key={t.id} type="button" onClick={() => void show(t.id)}
+                className={cn("w-full space-y-1 rounded-lg border p-3 text-start transition-colors hover:bg-muted", current?.id === t.id && "border-primary bg-primary/5")}>
+                <div className="flex items-center gap-2">
+                  <b className="flex-1 truncate text-sm">{t.subject}</b>
+                  <Badge variant="secondary" className={TICKET_STATUS[t.status].tone}>{TICKET_STATUS[t.status].label}</Badge>
+                </div>
+                <p className="text-xs text-muted-foreground"><span dir="ltr" className="font-mono">{t.ref}</span> · {TICKET_CATEGORY[t.category] ?? t.category}{t.store ? ` · ${t.store.name}` : ""} · {formatRelativeTime(t.lastMessageAt)}</p>
+              </button>
+            ))}
+          </CardContent>
+        </Card>
+        <Card className="min-h-[28rem] lg:col-span-3">
+          <CardContent className="h-full">
+            {current ? (
+              <TicketThread ticket={current}
+                onReply={async (body) => { const t = await replyTicket(current.id, body); setCurrent(t); void load(); return t; }}
+                actions={current.status !== 2 && <Button size="sm" variant="outline" onClick={() => void closeTicket(current.id).then((t) => { setCurrent(t); void load(); })}>إغلاق — حُلّت</Button>} />
+            ) : <p className="flex h-full min-h-60 items-center justify-center text-sm text-muted-foreground">اختر تذكرة لعرض المحادثة.</p>}
+          </CardContent>
+        </Card>
       </div>
 
-      <Card>
-        <CardContent className="space-y-4 px-0">
-          <div className="flex flex-col gap-3 px-6 lg:flex-row lg:items-center lg:justify-between">
-            <Tabs value={tab} onValueChange={setTab}>
-              <TabsList>
-                {TABS.map((t) => (
-                  <TabsTrigger key={t.value} value={t.value}>
-                    {t.label}
-                  </TabsTrigger>
-                ))}
-              </TabsList>
-            </Tabs>
-            <div className="relative w-full sm:max-w-xs">
-              <IconSearch className="absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="ابحث في التذاكر…"
-                className="ps-9"
-              />
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="max-h-[90svh] overflow-y-auto">
+          <DialogHeader><DialogTitle>تذكرة جديدة</DialogTitle><DialogDescription>صف المشكلة بخطواتها — كلما كانت أوضح كان الحل أسرع.</DialogDescription></DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2"><Label htmlFor="ts">الموضوع</Label><Input id="ts" maxLength={120} value={form.subject} onChange={(e) => setForm({ ...form, subject: e.target.value })} /></div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2"><Label>النوع</Label>
+                <Select value={form.category} onValueChange={(v) => setForm({ ...form, category: v })}><SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+                  <SelectContent>{Object.entries(TICKET_CATEGORY).map(([k, v]) => <SelectItem key={k} value={k}>{v}</SelectItem>)}</SelectContent></Select></div>
+              <div className="space-y-2"><Label>الأولوية</Label>
+                <Select value={form.priority} onValueChange={(v) => setForm({ ...form, priority: v })}><SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+                  <SelectContent>{TICKET_PRIORITY.map((p, i) => <SelectItem key={p} value={String(i)}>{p}</SelectItem>)}</SelectContent></Select></div>
             </div>
+            {stores.length > 0 && (
+              <div className="space-y-2"><Label>المتجر</Label>
+                <Select value={form.storeId} onValueChange={(v) => setForm({ ...form, storeId: v })}><SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+                  <SelectContent><SelectItem value="none">عام</SelectItem>{stores.map((s) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}</SelectContent></Select></div>
+            )}
+            <div className="space-y-2"><Label htmlFor="tb">التفاصيل</Label><Textarea id="tb" rows={5} maxLength={4000} value={form.body} onChange={(e) => setForm({ ...form, body: e.target.value })} /></div>
           </div>
-
-          <div className="overflow-x-auto">
-            <Table className="min-w-[920px]">
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="ps-6">التذكرة</TableHead>
-                  <TableHead>مُقدّم الطلب</TableHead>
-                  <TableHead>الأولوية</TableHead>
-                  <TableHead>الحالة</TableHead>
-                  <TableHead>المسؤول</TableHead>
-                  <TableHead>آخر تحديث</TableHead>
-                  <TableHead className="w-10 pe-6" />
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filtered.map((t) => (
-                  <TableRow key={t.id}>
-                    <TableCell className="ps-6">
-                      <div className="min-w-0">
-                        <Link
-                          href={`/support/${t.id}`}
-                          className="font-medium hover:underline"
-                        >
-                          {t.subject}
-                        </Link>
-                        <p className="text-xs text-muted-foreground tabular-nums">
-                          {t.id} · {t.category}
-                        </p>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2.5">
-                        <Avatar className="size-8">
-                          <AvatarImage
-                            src={t.requesterAvatar}
-                            alt={t.requester}
-                          />
-                          <AvatarFallback>
-                            {t.requester.slice(0, 2)}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="min-w-0">
-                          <p className="truncate text-sm font-medium">
-                            {t.requester}
-                          </p>
-                          <p className="truncate text-xs text-muted-foreground">
-                            {t.company}
-                          </p>
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant="secondary"
-                        className={priorityStyles[t.priority]}
-                      >
-                        {t.priority}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant="secondary"
-                        className={statusStyles[t.status]}
-                      >
-                        {t.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      {t.assignee === "غير مُسند" ? (
-                        <span className="text-sm text-muted-foreground">
-                          غير مُسند
-                        </span>
-                      ) : (
-                        <div className="flex items-center gap-2">
-                          <Avatar className="size-6">
-                            <AvatarImage
-                              src={t.assigneeAvatar}
-                              alt={t.assignee}
-                            />
-                            <AvatarFallback>
-                              {t.assignee.slice(0, 2)}
-                            </AvatarFallback>
-                          </Avatar>
-                          <span className="truncate text-sm">
-                            {t.assignee}
-                          </span>
-                        </div>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-muted-foreground tabular-nums">
-                      {formatDate(t.updated)}
-                    </TableCell>
-                    <TableCell className="pe-6">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="size-8">
-                            <IconDotsVertical className="size-4" />
-                            <span className="sr-only">إجراءات التذكرة</span>
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-44">
-                          <DropdownMenuItem asChild>
-                            <Link href={`/support/${t.id}`}>
-                              <IconEye className="size-4" /> عرض التذكرة
-                            </Link>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onSelect={() =>
-                              toast.success("أُسندت التذكرة إليك", {
-                                description: `أصبحت ${t.id} مُسندة إليك.`,
-                              })
-                            }
-                          >
-                            <IconUserPlus className="size-4" /> إسناد إليّ
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem
-                            onSelect={() => {
-                              setRows((prev) =>
-                                prev.map((x) =>
-                                  x.id === t.id
-                                    ? { ...x, status: "تم حلّها", updated: TODAY }
-                                    : x
-                                )
-                              );
-                              toast.success("تم حل التذكرة", {
-                                description: `تم وضع ${t.id} كمحلولة.`,
-                              });
-                            }}
-                          >
-                            <IconCircleCheckFilled className="size-4" /> Mark
-                            resolved
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                ))}
-                {filtered.length === 0 && (
-                  <TableRow>
-                    <TableCell
-                      colSpan={7}
-                      className="py-12 text-center text-muted-foreground"
-                    >
-                      <IconTicket className="mx-auto mb-2 size-6 opacity-50" />
-                      لا توجد تذاكر مطابقة للتصفية.
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </div>
-
-          <div className="px-6">
-            <p className="text-sm text-muted-foreground">
-              {filtered.length} ticket{filtered.length === 1 ? "" : "s"}
-            </p>
-          </div>
-        </CardContent>
-      </Card>
+          <DialogFooter>
+            <Button disabled={busy || form.subject.trim().length < 4 || form.body.trim().length < 10} onClick={() => void create()}>{busy && <IconLoader2 className="size-4 animate-spin" />} فتح التذكرة</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
+}
+
+/** useSearchParams يحتاج حدّ Suspense في البناء */
+export default function SupportPage() {
+  return <Suspense><SupportPageInner /></Suspense>;
 }
