@@ -397,6 +397,21 @@ export const updateZone = (
 export const deleteZone = (storeId: string, id: string) =>
   apiFetch<{ ok: true }>(`${s(storeId)}/zones/${id}`, { method: "DELETE" });
 
+// ── أسئلة المنتجات ────────────────────────────────────────
+/** 0 بانتظار الإجابة · 1 منشور · 2 مخفي */
+export interface Question {
+  id: string; name: string; question: string; answer: string; status: 0 | 1 | 2;
+  createdAt: string; answeredAt: string | null;
+  product: { id: string; name: string; image: string };
+}
+export interface QuestionsResponse { questions: Question[]; counts: Record<number, number> }
+export const listQuestions = (storeId: string, status?: number) =>
+  apiFetch<QuestionsResponse>(`${s(storeId)}/questions${status !== undefined ? `?status=${status}` : ""}`);
+export const answerQuestion = (storeId: string, id: string, input: { answer?: string; status?: 0 | 1 | 2 }) =>
+  apiFetch<Question>(`${s(storeId)}/questions/${id}`, { method: "PATCH", ...json(input) });
+export const deleteQuestion = (storeId: string, id: string) =>
+  apiFetch<{ ok: true }>(`${s(storeId)}/questions/${id}`, { method: "DELETE" });
+
 // ── جاهزية المتجر ─────────────────────────────────────────
 export interface ReadinessTask { key: string; title: string; hint: string; done: boolean; link: string }
 export interface Readiness { percent: number; done: number; total: number; next: string | null; tasks: ReadinessTask[] }

@@ -74,6 +74,14 @@ export const GUIDES: Record<string, Guide> = {
       { icon: "chart", title: "أرقامك يومًا بيوم", body: "المبيعات والزيارات والأكثر مبيعًا — مع تصدير CSV متى احتجت." },
     ],
   },
+  "/questions": {
+    id: "questions",
+    title: "أسئلة العملاء",
+    steps: [
+      { icon: "inbox", title: "سؤال قبل الشراء", body: "يسأل الزائر عن مقاس أو أصالة أو توصيل من صفحة المنتج — ويصلك إشعار." },
+      { icon: "check", title: "أجب مرة، يقرأها الجميع", body: "إجابتك تُنشر تحت المنتج فتقنع كل متردد بعده. ولا يُنشر سؤال بلا إجابة." },
+    ],
+  },
   "/discounts": {
     id: "discounts",
     title: "قسائم الخصم",
