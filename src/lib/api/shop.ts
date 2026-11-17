@@ -320,6 +320,10 @@ export interface Order {
   discount: number;
   /** سبب الإلغاء — يراه العميل في تتبّع طلبه */
   cancelReason?: string;
+  /** الشحن: الشركة ورقم الشحنة ورابط تتبّعها */
+  carrierName?: string;
+  trackingNo?: string;
+  trackUrl?: string;
   total: number;
   createdAt: string;
   items: OrderItem[];
@@ -629,6 +633,16 @@ export interface Analytics {
 
 export const getOverview = (storeId: string) =>
   apiFetch<Overview>(`${s(storeId)}/overview`);
+
+export interface Carrier { id: string; name: string; trackUrl: string; phone: string; active: boolean; orders: number }
+export type CarrierInput = { name: string; trackUrl?: string; phone?: string; active?: boolean };
+export const listCarriers = (storeId: string) => apiFetch<{ carriers: Carrier[] }>(`${s(storeId)}/carriers`);
+export const createCarrier = (storeId: string, input: CarrierInput) => apiFetch<Carrier>(`${s(storeId)}/carriers`, { method: "POST", ...json(input) });
+export const updateCarrier = (storeId: string, id: string, input: Partial<CarrierInput>) =>
+  apiFetch<Carrier>(`${s(storeId)}/carriers/${id}`, { method: "PATCH", ...json(input) });
+export const deleteCarrier = (storeId: string, id: string) => apiFetch<{ ok: true }>(`${s(storeId)}/carriers/${id}`, { method: "DELETE" });
+export const setOrderShipping = (storeId: string, orderId: string, input: { carrierId?: string | null; trackingNo?: string }) =>
+  apiFetch<{ carrierName: string; trackingNo: string; trackUrl: string }>(`${s(storeId)}/orders/${orderId}/shipping`, { method: "PATCH", ...json(input) });
 
 export interface VisitorsReport {
   range: { days: number; from: string; to: string };

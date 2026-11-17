@@ -19,6 +19,7 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { printInvoice } from "@/lib/shop/print-invoice";
+import { OrderShippingCard } from "@/components/shop/order-shipping-card";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -211,6 +212,8 @@ function OrderView({ store }: { store: Store }) {
               </Button>
             </CardContent>
           </Card>
+
+          <OrderShippingCard storeId={store.id} order={order} onSaved={() => void getOrder(store.id, order.id).then(setOrder)} />
 
           <Card>
             <CardHeader><CardTitle>الدفع</CardTitle></CardHeader>
