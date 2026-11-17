@@ -28,6 +28,7 @@ const RETURN_STATUS = [
 function ReturnCard({ r, store, onChange }: { r: ReturnRow; store: Store; onChange: () => void }) {
   const [refund, setRefund] = useState(String(r.refund));
   const [restock, setRestock] = useState(r.restock);
+  const [toWallet, setToWallet] = useState(false);
   const [note, setNote] = useState(r.note);
   const [busy, setBusy] = useState(false);
   const st = RETURN_STATUS.find((s) => s.value === r.status) ?? RETURN_STATUS[0];
@@ -37,7 +38,7 @@ function ReturnCard({ r, store, onChange }: { r: ReturnRow; store: Store; onChan
   async function set(status: 1 | 2 | 3, ok: string) {
     setBusy(true);
     try {
-      await updateReturn(store.id, r.id, { status, refund: Math.max(0, Math.trunc(Number(refund) || 0)), restock, note: note.trim() });
+      await updateReturn(store.id, r.id, { status, refund: Math.max(0, Math.trunc(Number(refund) || 0)), restock, note: note.trim(), ...(status === 3 && toWallet ? { toWallet: true } : {}) });
       toast.success(ok);
       onChange();
     } catch (err) {
@@ -63,6 +64,7 @@ function ReturnCard({ r, store, onChange }: { r: ReturnRow; store: Store; onChan
             <div className="space-y-1"><Label className="text-xs">المبلغ المُعاد ({store.currency})</Label><Input type="number" min={0} max={r.order.total} value={refund} onChange={(e) => setRefund(e.target.value)} /></div>
             <div className="space-y-1 sm:col-span-2"><Label className="text-xs">ملاحظة يراها العميل</Label><Input maxLength={300} value={note} onChange={(e) => setNote(e.target.value)} placeholder="مثال: أُعيد المبلغ إلى الكريمي" /></div>
             <label className="flex items-center gap-2 text-sm sm:col-span-3"><Switch checked={restock} onCheckedChange={setRestock} /> أعد الكميات إلى المخزون عند الإتمام</label>
+            <label className="flex items-center gap-2 text-sm sm:col-span-3"><Switch checked={toWallet} onCheckedChange={setToWallet} /> أعد المبلغ إلى محفظة العميل في متجرك (بدل التحويل) — يصله إشعار</label>
           </div>
         ) : (
           <p className="text-sm">{r.status === 3 ? <>أُعيد <b>{money(r.refund)}</b>{r.restock ? " وأُعيدت الكميات للمخزون" : ""}</> : null}{r.note ? <span className="text-muted-foreground"> — {r.note}</span> : null}</p>
@@ -92,9 +94,10 @@ function ReturnsView({ store }: { store: Store }) {
     }
   }, [store.id, status]);
   useEffect(() => {
-    setData(null);
-    void load();
-  }, [load]);
+    let on = true;
+    listReturns(store.id, status === "all" ? undefined : Number(status)).then((r) => { if (on) setData(r); }, (err) => toast.error(err instanceof ApiError ? err.message : "تعذّر تحميل المرتجعات."));
+    return () => { on = false; };
+  }, [store.id, status]);
 
   return (
     <div className="space-y-6">

@@ -154,6 +154,7 @@ export const navGroups: NavGroup[] = [
         icon: IconUsers,
         items: [
           { title: "عملاء المتجر", url: "/store/customers" },
+          { title: "إشعارات العملاء", url: "/store/broadcasts" },
           { title: "التقييمات", url: "/reviews" },
           { title: "أسئلة العملاء", url: "/questions" },
         ],

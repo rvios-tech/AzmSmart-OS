@@ -30,7 +30,7 @@ const SECTION_PAGES: Record<string, string[]> = {
   orders: ["/orders", "/returns", "/carts"],
   products: ["/products", "/categories", "/inventory", "/trash", "/questions", "/sections", "/reviews"],
   customers: ["/store/customers"],
-  marketing: ["/discounts"],
+  marketing: ["/discounts", "/store/broadcasts"],
   reports: ["/dashboard/analytics", "/reports"],
 };
 

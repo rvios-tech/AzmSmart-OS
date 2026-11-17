@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { IconGift, IconLoader2, IconMinus, IconPlus, IconSearch, IconUsers } from "@tabler/icons-react";
+import { IconGift, IconLoader2, IconWallet, IconMinus, IconPlus, IconSearch, IconUsers } from "@tabler/icons-react";
 
 import { PageHeader } from "@/components/page-header";
 import { RequireStore } from "@/components/require-store";
@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { WalletDialog } from "@/components/shop/balance-dialog";
 import { Input } from "@/components/ui/input";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
@@ -135,6 +136,7 @@ function PointsDialog({ store, customer, onClose, onChanged }: { store: Store; c
 function StoreCustomersView({ store }: { store: Store }) {
   const [rate, setRate] = useState(store.loyaltyRate ?? 0);
   const [open, setOpen] = useState<StoreCustomer | null>(null);
+  const [walletOf, setWalletOf] = useState<StoreCustomer | null>(null);
   const [rows, setRows] = useState<StoreCustomer[] | null>(null);
   const [returning, setReturning] = useState(0);
   const [search, setSearch] = useState("");
@@ -197,11 +199,12 @@ function StoreCustomersView({ store }: { store: Store }) {
                   <TableHead>الطلبات</TableHead>
                   <TableHead>الإنفاق</TableHead>
                   <TableHead>رصيد المكافآت</TableHead>
+                  <TableHead>المحفظة</TableHead>
                   <TableHead className="pe-6">آخر نشاط</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {!rows && <TableRow><TableCell colSpan={6} className="py-10 text-center"><IconLoader2 className="mx-auto size-5 animate-spin" /></TableCell></TableRow>}
+                {!rows && <TableRow><TableCell colSpan={7} className="py-10 text-center"><IconLoader2 className="mx-auto size-5 animate-spin" /></TableCell></TableRow>}
                 {filtered.map((c) => (
                   <TableRow key={c.id}>
                     <TableCell className="ps-6">
@@ -209,6 +212,7 @@ function StoreCustomersView({ store }: { store: Store }) {
                         <Avatar className="size-8"><AvatarFallback>{(c.name || "؟").slice(0, 2)}</AvatarFallback></Avatar>
                         <span className="font-medium">{c.name || "بلا اسم"}</span>
                         {c.ordersCount > 1 && <Badge variant="secondary" className="bg-emerald-500/10 text-emerald-600">عائد</Badge>}
+                        {c.verifiedAt && <Badge variant="outline" title="دخل إلى حسابه في متجرك برمز جواله">له حساب</Badge>}
                       </div>
                     </TableCell>
                     <TableCell className="text-muted-foreground" dir="ltr">{c.phone}</TableCell>
@@ -219,11 +223,16 @@ function StoreCustomersView({ store }: { store: Store }) {
                         <IconGift className="size-3.5 text-primary" /> {formatMoney(c.points ?? 0, store.currency)}
                       </Button>
                     </TableCell>
+                    <TableCell>
+                      <Button size="sm" variant="ghost" className="h-7 gap-1 px-2 tabular-nums" onClick={() => setWalletOf(c)} title="المحفظة">
+                        <IconWallet className="size-3.5 text-primary" /> {formatMoney(c.wallet ?? 0, store.currency)}
+                      </Button>
+                    </TableCell>
                     <TableCell className="pe-6 text-muted-foreground">{formatDateShort(c.lastAt)}</TableCell>
                   </TableRow>
                 ))}
                 {rows && filtered.length === 0 && (
-                  <TableRow><TableCell colSpan={6} className="py-10 text-center text-muted-foreground"><IconUsers className="mx-auto mb-2 size-6 opacity-50" />لا عملاء بعد.</TableCell></TableRow>
+                  <TableRow><TableCell colSpan={7} className="py-10 text-center text-muted-foreground"><IconUsers className="mx-auto mb-2 size-6 opacity-50" />لا عملاء بعد.</TableCell></TableRow>
                 )}
               </TableBody>
             </Table>
@@ -231,6 +240,10 @@ function StoreCustomersView({ store }: { store: Store }) {
         </CardContent>
       </Card>
       {rate === 0 && rows?.some((c) => c.points > 0) && <p className="text-xs text-muted-foreground">البرنامج متوقف — الأرصدة الموجودة باقية ويمكن صرفها.</p>}
+      {walletOf && (
+        <WalletDialog store={store} customer={walletOf} onClose={() => setWalletOf(null)}
+          onChanged={(wallet) => setRows((rs) => rs?.map((x) => (x.id === walletOf.id ? { ...x, wallet } : x)) ?? null)} />
+      )}
       {open && (
         <PointsDialog store={store} customer={open} onClose={() => setOpen(null)}
           onChanged={(points) => setRows((rs) => rs?.map((x) => (x.id === open.id ? { ...x, points } : x)) ?? null)} />

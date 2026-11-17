@@ -324,6 +324,8 @@ export interface Order {
   carrierName?: string;
   trackingNo?: string;
   trackUrl?: string;
+  /** ما دفعه العميل من محفظته — جزء من الإجمالي */
+  walletPaid?: number;
   total: number;
   createdAt: string;
   items: OrderItem[];
@@ -400,7 +402,23 @@ export interface StoreCustomer {
   lastOrder: string | null;
   /** رصيد المكافآت بعملة المتجر */
   points: number;
+  /** رصيد المحفظة بعملة المتجر */
+  wallet: number;
+  /** له حساب في المتجر (أثبت رقمه برمز) */
+  verifiedAt?: string | null;
 }
+
+export const getCustomerWallet = (storeId: string, customerId: string) =>
+  apiFetch<{ customer: { id: string; name: string; phone: string; wallet: number }; history: PointsTx[] }>(`${s(storeId)}/customers/${customerId}/wallet`);
+export const adjustCustomerWallet = (storeId: string, customerId: string, amount: number, note?: string) =>
+  apiFetch<{ wallet: number }>(`${s(storeId)}/customers/${customerId}/wallet`, { method: "POST", ...json({ amount, note }) });
+
+export type BroadcastAudience = "all" | "buyers" | "returning" | "accounts";
+export interface Broadcast { id: string; title: string; body: string; link: string; audience: BroadcastAudience; recipients: number; sent: number; createdAt: string }
+export const listBroadcasts = (storeId: string) =>
+  apiFetch<{ broadcasts: Broadcast[]; audience: { all: number; accounts: number; buyers: number }; smsAvailable: boolean }>(`${s(storeId)}/broadcasts`);
+export const sendBroadcast = (storeId: string, input: { title: string; body: string; link?: string; audience: BroadcastAudience; sms?: boolean }) =>
+  apiFetch<Broadcast>(`${s(storeId)}/broadcasts`, { method: "POST", ...json(input) });
 
 export interface PointsTx {
   id: string;
@@ -506,7 +524,7 @@ export interface ReturnRow {
 export interface ReturnsResponse { returns: ReturnRow[]; counts: Record<number, number> }
 export const listReturns = (storeId: string, status?: number) =>
   apiFetch<ReturnsResponse>(`${s(storeId)}/returns${status !== undefined ? `?status=${status}` : ""}`);
-export const updateReturn = (storeId: string, id: string, input: { status?: 1 | 2 | 3; refund?: number; restock?: boolean; note?: string }) =>
+export const updateReturn = (storeId: string, id: string, input: { status?: 1 | 2 | 3; refund?: number; restock?: boolean; note?: string; toWallet?: boolean }) =>
   apiFetch<ReturnRow>(`${s(storeId)}/returns/${id}`, { method: "PATCH", ...json(input) });
 export const createReturn = (storeId: string, input: { orderId: string; reason?: string; refund?: number; restock?: boolean; complete?: boolean }) =>
   apiFetch<ReturnRow>(`${s(storeId)}/returns`, { method: "POST", ...json(input) });

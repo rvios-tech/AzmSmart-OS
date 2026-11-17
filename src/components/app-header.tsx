@@ -73,6 +73,7 @@ const CRUMB_LABELS: Record<string, string> = {
   carts: "السلات المتروكة",
   verification: "التوثيق",
   visitors: "الزوار",
+  broadcasts: "إشعارات العملاء",
   carriers: "شركات الشحن",
   shipping: "الشحن",
   reviews: "التقييمات",
