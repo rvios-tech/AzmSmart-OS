@@ -400,6 +400,23 @@ export const updateZone = (
 export const deleteZone = (storeId: string, id: string) =>
   apiFetch<{ ok: true }>(`${s(storeId)}/zones/${id}`, { method: "DELETE" });
 
+// ── أقسام الرئيسية ────────────────────────────────────────
+export type SectionSource = "best" | "new" | "sale" | "category" | "brand" | "manual";
+export interface Section {
+  id: string; title: string; subtitle: string; source: SectionSource; ref: string; productIds: string[];
+  layout: "grid" | "row"; limit: number; sort: number; active: boolean;
+}
+export type SectionInput = Partial<Omit<Section, "id" | "sort">>;
+export const listSections = (storeId: string) => apiFetch<Section[]>(`${s(storeId)}/sections`);
+export const createSection = (storeId: string, input: SectionInput) =>
+  apiFetch<Section>(`${s(storeId)}/sections`, { method: "POST", ...json(input) });
+export const updateSection = (storeId: string, id: string, input: SectionInput) =>
+  apiFetch<Section>(`${s(storeId)}/sections/${id}`, { method: "PATCH", ...json(input) });
+export const reorderSections = (storeId: string, ids: string[]) =>
+  apiFetch<Section[]>(`${s(storeId)}/sections/reorder`, { method: "POST", ...json({ ids }) });
+export const deleteSection = (storeId: string, id: string) =>
+  apiFetch<{ ok: true }>(`${s(storeId)}/sections/${id}`, { method: "DELETE" });
+
 // ── الخيارات المحفوظة ─────────────────────────────────────
 export interface OptionSet { id: string; name: string; values: string[] }
 export const listOptionSets = (storeId: string) => apiFetch<OptionSet[]>(`${s(storeId)}/option-sets`);
