@@ -27,7 +27,7 @@ import {
 } from "@/components/ui/table";
 import { ApiError } from "@/lib/api/client";
 import {
-  advanceOrder, getOrder, setOrderPayment, type Order, type Store,
+  advanceOrder, createReturn, getOrder, setOrderPayment, type Order, type Store,
 } from "@/lib/api/shop";
 import { formatDateTime, formatMoney, formatNumber } from "@/lib/format";
 import { ORDER_FLOW, ORDER_NEXT, PAY_METHOD_LABEL, PAY_STATUS, orderStatus } from "@/lib/shop/constants";
@@ -93,7 +93,13 @@ function OrderView({ store }: { store: Store }) {
             {i === 0 && <IconCheck className="size-4" />} {n.label}
           </Button>
         ))}
-        {order.status !== 2 && order.status !== 3 && (
+        {(order.status === 2 || order.status === 5) && (
+          <Button size="sm" variant="outline" disabled={busy}
+            onClick={() => { if (window.confirm(`تسجيل مرتجع للطلب وإتمامه الآن؟ يُعاد ${money(order.total)} وتعود الكميات للمخزون، ويصير الطلب «مُرجَعًا».`)) void run(() => createReturn(store.id, { orderId: order.id, complete: true, restock: true }), "سُجّل المرتجع وعادت الكميات للمخزون"); }}>
+            تسجيل مرتجع
+          </Button>
+        )}
+        {order.status !== 2 && order.status !== 3 && order.status !== 6 && (
           <Button size="sm" variant="outline" className="text-destructive" disabled={busy} onClick={() => { setReason(""); setCancelOpen(true); }}>
             <IconX className="size-4" /> إلغاء
           </Button>
@@ -113,7 +119,9 @@ function OrderView({ store }: { store: Store }) {
         </DropdownMenu>
       </PageHeader>
 
-      {order.status === 3 ? (
+      {order.status === 6 ? (
+        <div className="rounded-lg border border-orange-500/30 bg-orange-500/5 px-4 py-3 text-sm"><b className="text-orange-600">أُرجع الطلب</b> <Link href="/returns" className="text-muted-foreground underline">تفاصيل المرتجع</Link></div>
+      ) : order.status === 3 ? (
         <div className="rounded-lg border border-rose-500/30 bg-rose-500/5 px-4 py-3 text-sm">
           <b className="text-rose-600 dark:text-rose-400">أُلغي الطلب</b>
           {order.cancelReason ? <span className="text-muted-foreground"> — {order.cancelReason}</span> : null}

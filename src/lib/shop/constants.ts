@@ -85,6 +85,7 @@ export const ORDER_STATUS = [
   { value: 5, label: "تم الشحن", tone: "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400" },
   { value: 2, label: "مكتمل", tone: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" },
   { value: 3, label: "ملغى", tone: "bg-rose-500/10 text-rose-600 dark:text-rose-400" },
+  { value: 6, label: "مُرجَع", tone: "bg-orange-500/10 text-orange-600 dark:text-orange-400" },
 ] as const;
 
 /** المرحلة التالية والبدائل المسموحة (كما في ORDER_NEXT بالخادم) — الإلغاء زر مستقل */

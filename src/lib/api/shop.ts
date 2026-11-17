@@ -261,7 +261,7 @@ export const deleteProduct = (storeId: string, id: string) =>
 // ── الطلبات والعملاء والتوصيل ─────────────────────────────
 /** 0=قيد التأكيد · 1=مؤكد · 2=مكتمل · 3=ملغى */
 /** 0 قيد التأكيد · 1 مؤكد · 4 قيد التجهيز · 5 تم الشحن · 2 مكتمل · 3 ملغى */
-export type OrderStatus = 0 | 1 | 2 | 3 | 4 | 5;
+export type OrderStatus = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 
 export interface OrderItem {
   id: string;
@@ -399,6 +399,21 @@ export const updateZone = (
 
 export const deleteZone = (storeId: string, id: string) =>
   apiFetch<{ ok: true }>(`${s(storeId)}/zones/${id}`, { method: "DELETE" });
+
+// ── المرتجعات ─────────────────────────────────────────────
+/** 0 طلب العميل · 1 مقبول · 2 مرفوض · 3 مكتمل */
+export interface ReturnRow {
+  id: string; reason: string; status: 0 | 1 | 2 | 3; refund: number; restock: boolean; note: string;
+  source: "customer" | "merchant"; createdAt: string;
+  order: { id: string; ref: string; total: number; custName: string; custPhone: string; createdAt: string; items: { name: string; variant: string; qty: number; price: number }[] };
+}
+export interface ReturnsResponse { returns: ReturnRow[]; counts: Record<number, number> }
+export const listReturns = (storeId: string, status?: number) =>
+  apiFetch<ReturnsResponse>(`${s(storeId)}/returns${status !== undefined ? `?status=${status}` : ""}`);
+export const updateReturn = (storeId: string, id: string, input: { status?: 1 | 2 | 3; refund?: number; restock?: boolean; note?: string }) =>
+  apiFetch<ReturnRow>(`${s(storeId)}/returns/${id}`, { method: "PATCH", ...json(input) });
+export const createReturn = (storeId: string, input: { orderId: string; reason?: string; refund?: number; restock?: boolean; complete?: boolean }) =>
+  apiFetch<ReturnRow>(`${s(storeId)}/returns`, { method: "POST", ...json(input) });
 
 // ── أسئلة المنتجات ────────────────────────────────────────
 /** 0 بانتظار الإجابة · 1 منشور · 2 مخفي */
