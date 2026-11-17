@@ -630,6 +630,21 @@ export interface Analytics {
 export const getOverview = (storeId: string) =>
   apiFetch<Overview>(`${s(storeId)}/overview`);
 
+export interface VisitorsReport {
+  range: { days: number; from: string; to: string };
+  totals: { visitors: number; views: number; avgDaily: number; pagesPerVisit: number };
+  series: Array<{ day: string; visitors: number; views: number }>;
+  devices: Record<string, number>;
+  /** ٢٤ خانة بتوقيت بلد المتجر */
+  hours: number[];
+  /** الأحد أولًا */
+  weekdays: number[];
+  pages: Array<{ path: string; views: number; name: string | null }>;
+  sources: Array<{ source: string; visitors: number }>;
+}
+export const getVisitors = (storeId: string, days = 30) =>
+  apiFetch<VisitorsReport>(`${s(storeId)}/analytics/visitors?days=${days}`);
+
 export const getAnalytics = (storeId: string, days = 30) =>
   apiFetch<Analytics>(`${s(storeId)}/analytics?days=${days}`);
 
