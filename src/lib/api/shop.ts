@@ -400,6 +400,14 @@ export const updateZone = (
 export const deleteZone = (storeId: string, id: string) =>
   apiFetch<{ ok: true }>(`${s(storeId)}/zones/${id}`, { method: "DELETE" });
 
+// ── الخيارات المحفوظة ─────────────────────────────────────
+export interface OptionSet { id: string; name: string; values: string[] }
+export const listOptionSets = (storeId: string) => apiFetch<OptionSet[]>(`${s(storeId)}/option-sets`);
+export const saveOptionSet = (storeId: string, input: { name: string; values: string[] }) =>
+  apiFetch<OptionSet>(`${s(storeId)}/option-sets`, { method: "POST", ...json(input) });
+export const deleteOptionSet = (storeId: string, id: string) =>
+  apiFetch<{ ok: true }>(`${s(storeId)}/option-sets/${id}`, { method: "DELETE" });
+
 // ── المرتجعات ─────────────────────────────────────────────
 /** 0 طلب العميل · 1 مقبول · 2 مرفوض · 3 مكتمل */
 export interface ReturnRow {

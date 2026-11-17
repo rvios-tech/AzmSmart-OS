@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ImageDropzone, ImageUploadButton } from "@/components/image-uploader";
 import { ProductWriter } from "@/components/ai/ai-tools";
+import { OptionSetsBar } from "@/components/shop/option-sets-bar";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -247,6 +248,19 @@ export function ProductForm({
                 <Input id="o2" maxLength={24} placeholder="اللون" value={opt2} onChange={(e) => setOpt2(e.target.value)} />
               </div>
             </div>
+
+            <OptionSetsBar
+              storeId={store.id}
+              opt1={opt1}
+              opt2={opt2}
+              rows={variants}
+              onApply={({ opt1: n1, opt2: n2, pairs }) => {
+                setOpt1(n1);
+                setOpt2(n2);
+                // ما كان موجودًا بالقيمتين نفسيهما يبقى بكميته وسعره
+                setVariants((prev) => pairs.map((p) => prev.find((x) => x.v1 === p.v1 && x.v2 === p.v2) ?? { v1: p.v1, v2: p.v2, price: "", qty: "0", sku: "", image: "", live: true }));
+              }}
+            />
 
             {variants.map((v, i) => (
               <div key={v.id ?? i} className="grid grid-cols-2 gap-2 rounded-lg border p-3 sm:grid-cols-8">
