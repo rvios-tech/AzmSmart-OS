@@ -26,7 +26,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 
-const PLAN_LABEL = { basic: "مجانية", plus: "احترافية", pro: "أعمال" } as const;
+const PLAN_LABEL = { basic: "مجانية", plus: "النمو", pro: "الاحترافية", max: "الأعمال" } as const;
 
 /**
  * مبدّل المتجر النشط — يحلّ محلّ «مساحات العمل» الوهمية. الحساب الواحد قد
@@ -39,7 +39,7 @@ export function TeamSwitcher() {
   const { roleLabel } = useWorkspace();
 
   const title = store?.name ?? company?.name ?? "RVIOS OS";
-  const subtitle = store ? PLAN_LABEL[store.plan] : roleLabel;
+  const subtitle = store ? (store.planName ?? PLAN_LABEL[store.plan]) : roleLabel;
 
   return (
     <SidebarMenu>

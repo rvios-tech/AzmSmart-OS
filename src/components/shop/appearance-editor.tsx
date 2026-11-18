@@ -177,7 +177,7 @@ export function AppearanceEditor({ store, api, team = false }: { store: Store; a
       draft: {
         store: {
           slug: store.slug, name: draft.name, color: draft.color, whatsapp: store.whatsapp, template: store.template,
-          planTier: { basic: "free", plus: "pro", pro: "biz" }[store.plan], customDomain: null, createdAt: store.createdAt,
+          planTier: ({ basic: "free", plus: "pro", pro: "biz", max: "biz" } as const)[store.plan], customDomain: null, createdAt: store.createdAt,
           tagline: store.tagline, about: store.about, city: store.city,
           logo: draft.logo, banner: draft.banner, showcase: draft.showcase, appearance: { copy: draft.copy, hidden: draft.hidden, images: draft.images, fonts: draft.fonts, social: draft.social },
         },

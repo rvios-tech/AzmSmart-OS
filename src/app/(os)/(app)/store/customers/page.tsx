@@ -14,6 +14,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { WalletDialog } from "@/components/shop/balance-dialog";
+import { hasFeature, UpgradeCard } from "@/components/shop/plan-gate";
 import { Input } from "@/components/ui/input";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
@@ -174,7 +175,7 @@ function StoreCustomersView({ store }: { store: Store }) {
     <div className="space-y-6">
       <PageHeader title="عملاء المتجر" description="من اشترى منك — يُبنى تلقائيًا من الطلبات، الجوال هو هوية العميل." />
 
-      <LoyaltyCard store={store} onSaved={setRate} />
+      {hasFeature(store, "loyalty") ? <LoyaltyCard store={store} onSaved={setRate} /> : <UpgradeCard feature="loyalty" compact />}
 
       <div className="grid gap-4 sm:grid-cols-3">
         <MetricCard label="إجمالي العملاء" value={formatNumber(rows?.length ?? 0)} />
@@ -199,7 +200,7 @@ function StoreCustomersView({ store }: { store: Store }) {
                   <TableHead>الطلبات</TableHead>
                   <TableHead>الإنفاق</TableHead>
                   <TableHead>رصيد المكافآت</TableHead>
-                  <TableHead>المحفظة</TableHead>
+                  {hasFeature(store, "customerAccounts") && <TableHead>المحفظة</TableHead>}
                   <TableHead className="pe-6">آخر نشاط</TableHead>
                 </TableRow>
               </TableHeader>
@@ -223,11 +224,11 @@ function StoreCustomersView({ store }: { store: Store }) {
                         <IconGift className="size-3.5 text-primary" /> {formatMoney(c.points ?? 0, store.currency)}
                       </Button>
                     </TableCell>
-                    <TableCell>
+                    {hasFeature(store, "customerAccounts") && <TableCell>
                       <Button size="sm" variant="ghost" className="h-7 gap-1 px-2 tabular-nums" onClick={() => setWalletOf(c)} title="المحفظة">
                         <IconWallet className="size-3.5 text-primary" /> {formatMoney(c.wallet ?? 0, store.currency)}
                       </Button>
-                    </TableCell>
+                    </TableCell>}
                     <TableCell className="pe-6 text-muted-foreground">{formatDateShort(c.lastAt)}</TableCell>
                   </TableRow>
                 ))}

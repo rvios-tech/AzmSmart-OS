@@ -46,7 +46,8 @@ export const SECTORS = [
 export const STOREFRONT_URL = (process.env.NEXT_PUBLIC_STOREFRONT_URL ?? "https://rvios.store").replace(/\/+$/, "");
 export const storeUrl = (slug: string) => `${STOREFRONT_URL}/s/${slug}`;
 
-export const PLAN_LABEL = { basic: "المجانية", plus: "الاحترافية", pro: "الأعمال" } as const;
+/** أسماء احتياطية — الأسماء الفعلية من إعداد الباقات (usePlans) */
+export const PLAN_LABEL = { basic: "المجانية", plus: "النمو", pro: "الاحترافية", max: "الأعمال" } as const;
 
 export type TemplateTier = "free" | "standard" | "signature";
 export const TEMPLATE_TIER_LABEL: Record<TemplateTier, string> = { free: "مجاني", standard: "قياسي", signature: "توقيع" };

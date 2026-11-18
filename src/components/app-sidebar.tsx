@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { IconChevronLeft } from "@tabler/icons-react";
+import { IconChevronLeft, IconLock } from "@tabler/icons-react";
 
 import { cn } from "@/lib/utils";
 import { type NavItem } from "@/config/nav";
@@ -92,6 +92,7 @@ function NavEntry({ item, pathname }: { item: NavItem; pathname: string }) {
         <Link href={item.url ?? "#"} onClick={closeMobile}>
           {item.icon && <item.icon className="size-4" />}
           <span>{item.title}</span>
+          {item.locked && <IconLock className="ms-auto size-3.5 opacity-50" aria-label="خارج باقتك" />}
         </Link>
       </SidebarMenuButton>
       {item.badge && (
@@ -153,6 +154,7 @@ function NavParent({ item, pathname, onNavigate }: { item: NavItem; pathname: st
                   <SidebarMenuSubButton asChild isActive={current === sub.url}>
                     <Link href={sub.url} onClick={onNavigate}>
                       {sub.title}
+                      {sub.locked && <IconLock className="ms-auto size-3.5 opacity-50" aria-label="خارج باقتك" />}
                     </Link>
                   </SidebarMenuSubButton>
                 </SidebarMenuSubItem>

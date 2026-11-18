@@ -16,6 +16,7 @@ import { Switch } from "@/components/ui/switch";
 import { ApiError } from "@/lib/api/client";
 import { createCarrier, deleteCarrier, listCarriers, updateCarrier, type Carrier, type Store } from "@/lib/api/shop";
 import { formatNumber } from "@/lib/format";
+import { PlanGate } from "@/components/shop/plan-gate";
 
 type Draft = { id?: string; name: string; trackUrl: string; phone: string; active: boolean };
 const EMPTY: Draft = { name: "", trackUrl: "", phone: "", active: true };
@@ -108,5 +109,5 @@ function CarriersView({ store }: { store: Store }) {
 }
 
 export default function CarriersPage() {
-  return <RequireStore allowSuspended>{(store) => <CarriersView store={store} />}</RequireStore>;
+  return <RequireStore allowSuspended>{(store) => <PlanGate store={store} feature="carriers"><CarriersView store={store} /></PlanGate>}</RequireStore>;
 }

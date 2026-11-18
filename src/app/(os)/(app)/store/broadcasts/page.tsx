@@ -17,6 +17,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { ApiError } from "@/lib/api/client";
 import { listBroadcasts, sendBroadcast, type BroadcastAudience, type Store } from "@/lib/api/shop";
 import { formatNumber, formatRelativeTime } from "@/lib/format";
+import { PlanGate } from "@/components/shop/plan-gate";
 
 const AUDIENCE: Record<BroadcastAudience, string> = { all: "كل العملاء", buyers: "من اشترى منك", returning: "العملاء العائدون", accounts: "من لهم حساب في متجرك" };
 
@@ -101,5 +102,5 @@ function BroadcastsView({ store }: { store: Store }) {
 }
 
 export default function BroadcastsPage() {
-  return <RequireStore allowSuspended>{(store) => <BroadcastsView store={store} />}</RequireStore>;
+  return <RequireStore allowSuspended>{(store) => <PlanGate store={store} feature="broadcasts"><BroadcastsView store={store} /></PlanGate>}</RequireStore>;
 }

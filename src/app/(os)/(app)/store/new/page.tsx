@@ -25,15 +25,16 @@ import {
   COUNTRIES, PLAN_LABEL, SECTORS, STOREFRONT_URL, STORE_TEMPLATES, TEMPLATE_TIER_LABEL,
 } from "@/lib/shop/constants";
 import { useStore } from "@/lib/shop/store-context";
+import { PLAN_ORDER, usePlans } from "@/lib/shop/plans";
 import { cn } from "@/lib/utils";
 
 const COLORS = ["#9E2226", "#2F5D50", "#1F4E79", "#7A4B1E", "#5B2A6E", "#A8641B", "#2C2C2C", "#0F766E"];
 /** باقة النظام ← مفتاحها في جدول الأسعار العام */
-const PRICE_KEY = { plus: "pro", pro: "biz" } as const;
 const PERKS: Record<Plan, string[]> = {
   basic: ["القالب الأساسي المجاني", "تعديل شكل المتجر بنفسك", "١٠ منتجات"],
   plus: ["كل القوالب (المدفوع دفعة واحدة)", "ربط دومين خاص", "٥٠٠ منتج وكوبونات"],
   pro: ["القياسية مجانًا، والتوقيع بخصم ٤٠٪", "دومين خاص", "منتجات بلا حد، وفريق ومخزون"],
+  max: [],
 };
 type Billing = "month" | "year";
 
@@ -100,7 +101,9 @@ export default function NewStorePage() {
   const currency = pricing?.currency ?? "USD";
   const paid = plan !== "basic";
   const basePrice = (id: string) => pricing?.templates?.find((t) => t.id === id)?.price ?? 0;
-  const planPrice = (p: Plan, b: Billing) => (p === "basic" ? 0 : pricing?.plans?.[PRICE_KEY[p]]?.[b] ?? 0);
+  // الباقات المدفوعة تُفعَّل من داخل اللوحة بعد الإنشاء — الإنشاء هنا مجاني دائمًا
+  const planPrice = (pl: Plan, b: Billing) => (pl === "basic" || b === "month" ? 0 : 0);
+  const plans = usePlans();
   // في خطوة القالب لم تُختر باقة بعد: يظهر سعر القالب نفسه
   const templateCost = paid ? costOf(template.tier, plan, basePrice(templateId)) ?? 0 : basePrice(templateId);
   const subscription = planPrice(plan, billing);
@@ -111,7 +114,6 @@ export default function NewStorePage() {
     setTemplateId(id);
     const tier = STORE_TEMPLATES.find((t) => t.id === id)?.tier;
     // القالب المدفوع يحتاج باقة مدفوعة
-    if (tier !== "free" && plan === "basic") setPlan("plus");
   }
 
   const noSlot = slots !== null && slots.free === 0 && slots.owned > 0;
@@ -224,37 +226,22 @@ export default function NewStorePage() {
 
           {step === 1 && (
             <div className="space-y-4">
-              <div className="inline-flex rounded-lg border p-1 text-sm">
-                {(["month", "year"] as const).map((b) => (
-                  <button key={b} type="button" onClick={() => setBilling(b)} aria-pressed={billing === b}
-                    className={cn("rounded-md px-3 py-1.5", billing === b && "bg-primary text-primary-foreground")}>
-                    {b === "month" ? "شهري" : "سنوي"}
-                  </button>
-                ))}
+              <div className="rounded-xl border border-primary/30 bg-primary/[0.05] p-5">
+                <p className="text-lg font-semibold">يبدأ متجرك على الباقة المجانية</p>
+                <p className="mt-1 text-sm text-muted-foreground">أنشئ متجرك الآن وجرّبه كاملًا، ثم فعّل المزايا الأعلى متى شئت من «الباقة والاشتراك» داخل لوحتك — أسعار كل باقة ومقارنتها هناك.</p>
               </div>
-              <div className="grid gap-4 xl:grid-cols-3">
-                {(["basic", "plus", "pro"] as const).map((p) => {
-                  const locked = p === "basic" && premium;
-                  return (
-                    <button key={p} type="button" disabled={locked} onClick={() => setPlan(p)} aria-pressed={plan === p}
-                      className={cn("space-y-3 rounded-xl border p-4 text-start transition-colors",
-                        plan === p ? "border-primary ring-2 ring-primary/30" : "hover:border-foreground/30", locked && "cursor-not-allowed opacity-60")}>
-                      <span className="block font-semibold">{PLAN_LABEL[p]}</span>
-                      <span className="block text-2xl font-semibold tabular-nums">
-                        {p === "basic" ? "مجانًا" : formatBilling(planPrice(p, billing), currency)}
-                        {p !== "basic" && <small className="ms-1 text-xs font-normal text-muted-foreground">/ {billing === "year" ? "سنة" : "شهر"}</small>}
-                      </span>
-                      <ul className="space-y-1.5 text-sm text-muted-foreground">
-                        {PERKS[p].map((x) => <li key={x} className="flex gap-1.5"><IconCheck className="mt-0.5 size-4 shrink-0 text-primary" />{x}</li>)}
-                      </ul>
-                      {locked && <span className="flex items-center gap-1 text-xs"><IconLock className="size-3.5" /> تشمل القالب الأساسي فقط</span>}
-                    </button>
-                  );
-                })}
-              </div>
+              {plans && (
+                <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                  {PLAN_ORDER.map((c) => (
+                    <div key={c} className={cn("rounded-xl border p-4", c === "basic" && "border-primary ring-2 ring-primary/20")}>
+                      <p className="font-semibold">{plans.plans[c].name}{c === "basic" && <span className="ms-2 text-xs text-primary">تبدأ بها</span>}</p>
+                      <p className="mt-1 text-xs text-muted-foreground">{plans.plans[c].tagline}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
-
           {step === 2 && (
             <Card>
               <CardContent className="space-y-5">

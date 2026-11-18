@@ -19,6 +19,7 @@ import { ApiError } from "@/lib/api/client";
 import { createManualOrder, listProducts, listStoreCustomers, listZones, type Product, type Store, type StoreCustomer, type Zone } from "@/lib/api/shop";
 import { formatMoney, formatNumber } from "@/lib/format";
 import { PAY_METHOD_LABEL } from "@/lib/shop/constants";
+import { PlanGate } from "@/components/shop/plan-gate";
 
 type Line = { key: string; product: Product; variantId: string | null; qty: number };
 
@@ -242,5 +243,5 @@ function NewOrderView({ store }: { store: Store }) {
 }
 
 export default function NewOrderPage() {
-  return <RequireStore>{(store) => <NewOrderView store={store} />}</RequireStore>;
+  return <RequireStore>{(store) => <PlanGate store={store} feature="manualOrders"><NewOrderView store={store} /></PlanGate>}</RequireStore>;
 }

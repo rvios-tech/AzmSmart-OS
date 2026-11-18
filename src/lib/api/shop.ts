@@ -8,7 +8,7 @@ import { apiFetch, uploadFile } from "./client";
 // المتجر (`store.currency`) ولا تُخزَّن.
 // ---------------------------------------------------------------------------
 
-export type Plan = "basic" | "plus" | "pro";
+export type Plan = "basic" | "plus" | "pro" | "max";
 
 export interface Store {
   id: string;
@@ -50,6 +50,13 @@ export interface Store {
   currency: string;
   deliveryFee: number;
   deliveryFreeOver: number;
+  /** اسم الباقة الفعّالة ومزاياها وحدودها (من الخادم) — اللوحة تقفل ما ليس فيها */
+  planName?: string;
+  features?: Record<string, boolean>;
+  limits?: import("@/lib/shop/plans").PlanLimits;
+  /** وضع الجملة بلا أسعار، والمساعد الذكي للمتسوّقين */
+  wholesale?: boolean;
+  aiAssistant?: boolean;
   /** برنامج المكافآت: ٪ من الطلب المكتمل لرصيد العميل (0 متوقف) */
   loyaltyRate: number;
   deliveryNote: string;
@@ -74,7 +81,7 @@ export interface CreateStoreInput {
   color?: string;
   colorDeep?: string;
   /** باقة مدفوعة: المتجر طلبٌ يفعّله فريق المنصة بعد الدفع، ومعه فاتورتا الباقة والقالب */
-  plan?: "plus" | "pro";
+  plan?: "plus" | "pro" | "max";
   months?: 1 | 12;
   template?: string;
 }
@@ -85,7 +92,7 @@ export type UpdateStoreInput = Partial<
     | "name" | "tagline" | "about" | "city" | "address" | "hours" | "logo"
     | "banner" | "showcase" | "sector" | "color" | "colorDeep" | "theme"
     | "layout" | "country" | "whatsapp" | "slug" | "deliveryFee"
-    | "deliveryFreeOver" | "deliveryNote" | "payNote" | "template" | "loyaltyRate"
+    | "deliveryFreeOver" | "deliveryNote" | "payNote" | "template" | "loyaltyRate" | "wholesale" | "aiAssistant"
   > & { payMethods: string[]; /** نصّ فارغ يحذف النطاق */ customDomain: string }
 >;
 
@@ -722,8 +729,8 @@ export interface Pricing {
   yearlyMonthsFree: number;
   /** عملة الفوترة (ISO) — USD افتراضيًا */
   currency: string;
-  /** بأسماء منصة المتاجر: احترافي = plus، أعمال = pro */
-  plans?: Record<"free" | "pro" | "biz", { month: number | null; year: number | null }>;
+  /** الباقات الأربع بأسعارها لكل فترة — داخل اللوحة فقط */
+  plans?: { currency: string; periods: number[]; plans: Record<string, { name: string; prices: Record<string, number> }> };
   templates?: { id: string; tier: "free" | "standard" | "signature"; price: number }[];
   methods: Array<{ id: string; name: string; scope: string; instructions: string }>;
   /** حسابات الاستلام المعلنة (الكريمي، جيب، جوالي…) */
@@ -761,7 +768,7 @@ export const listShopInvoices = (storeId: string) =>
 export const createShopInvoice = (input: {
   storeRef: string;
   kind: 0 | 1 | 2 | 3 | 4;
-  plan?: "plus" | "pro";
+  plan?: "plus" | "pro" | "max";
   months?: number;
   /** لفواتير القوالب */
   template?: string;

@@ -14,6 +14,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ApiError } from "@/lib/api/client";
 import { deleteCart, listCarts, markCartReminded, type CartsResponse, type Store } from "@/lib/api/shop";
 import { formatMoney, formatNumber, formatRelativeTime } from "@/lib/format";
+import { PlanGate } from "@/components/shop/plan-gate";
 
 function CartsView({ store }: { store: Store }) {
   const [tab, setTab] = useState("0");
@@ -79,5 +80,5 @@ function CartsView({ store }: { store: Store }) {
 }
 
 export default function CartsPage() {
-  return <RequireStore allowSuspended>{(store) => <CartsView store={store} />}</RequireStore>;
+  return <RequireStore allowSuspended>{(store) => <PlanGate store={store} feature="abandonedCarts"><CartsView store={store} /></PlanGate>}</RequireStore>;
 }

@@ -23,6 +23,8 @@ import { useStore } from "@/lib/shop/store-context";
 import { TemplatePicker } from "@/components/shop/template-picker";
 import { DomainCard } from "@/components/shop/domain-card";
 import { DeleteStoreCard } from "@/components/shop/delete-store-card";
+import { SellingModesCard } from "@/components/shop/selling-modes-card";
+import { hasFeature } from "@/components/shop/plan-gate";
 
 function SettingsView({ store }: { store: Store }) {
   const { reload } = useStore();
@@ -136,11 +138,12 @@ function SettingsView({ store }: { store: Store }) {
             <div className="flex flex-wrap gap-6">
               {(["cod", "wallet", "bank"] as const).map((m) => (
                 <label key={m} className="flex items-center gap-2 text-sm">
-                  <Checkbox checked={pay.includes(m)} disabled={m === "cod"} onCheckedChange={(c) => togglePay(m, c === true)} />
+                  <Checkbox checked={pay.includes(m)} disabled={m === "cod" || !hasFeature(store, "onlinePayments")} onCheckedChange={(c) => togglePay(m, c === true)} />
                   {PAY_METHOD_LABEL[m]}{m === "cod" && <span className="text-xs text-muted-foreground">(دائمًا)</span>}
                 </label>
               ))}
             </div>
+            {!hasFeature(store, "onlinePayments") && <p className="text-xs text-muted-foreground">باقتك بالدفع عند الاستلام — المحافظ والتحويل البنكي من باقة أعلى (<a href="/store/plan" className="text-primary hover:underline">قارن الباقات</a>).</p>}
             <div className="space-y-2">
               <Label>تعليمات التحويل</Label>
               <Textarea rows={3} maxLength={400} value={f.payNote} onChange={(e) => set("payNote", e.target.value)} placeholder="حوّل إلى الكريمي رقم ١٢٣٤ باسم …" />
@@ -153,6 +156,7 @@ function SettingsView({ store }: { store: Store }) {
         </div>
       </form>
       {/* خارج النموذج: يُحفظ وحده، و Enter فيه لا يحفظ بقية الإعدادات */}
+      <SellingModesCard store={store} />
       <DomainCard store={store} />
       <DeleteStoreCard store={store} />
     </div>

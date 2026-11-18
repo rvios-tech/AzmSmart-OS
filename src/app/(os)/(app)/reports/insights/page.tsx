@@ -21,6 +21,7 @@ import { formatMoney, formatNumber, formatPercent } from "@/lib/format";
 import { downloadCsv } from "@/lib/shop/csv";
 import { ORDER_STATUS, PAY_METHOD_LABEL } from "@/lib/shop/constants";
 import { cn } from "@/lib/utils";
+import { PlanGate } from "@/components/shop/plan-gate";
 
 const ymd = (d: Date) => d.toISOString().slice(0, 10);
 const daysAgo = (n: number) => ymd(new Date(Date.now() - n * 86_400_000));
@@ -281,5 +282,5 @@ function InsightsView({ store }: { store: Store }) {
 }
 
 export default function InsightsPage() {
-  return <RequireStore allowSuspended>{(store) => <InsightsView store={store} />}</RequireStore>;
+  return <RequireStore allowSuspended>{(store) => <PlanGate store={store} feature="advancedReports"><InsightsView store={store} /></PlanGate>}</RequireStore>;
 }

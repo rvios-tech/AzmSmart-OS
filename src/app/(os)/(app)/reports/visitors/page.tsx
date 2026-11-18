@@ -19,6 +19,7 @@ import { ApiError } from "@/lib/api/client";
 import { getVisitors, type Store, type VisitorsReport } from "@/lib/api/shop";
 import { formatNumber, formatPercent } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import { PlanGate } from "@/components/shop/plan-gate";
 
 const RANGES = [
   { days: 1, label: "اليوم" },
@@ -183,5 +184,5 @@ function VisitorsView({ store }: { store: Store }) {
 }
 
 export default function VisitorsPage() {
-  return <RequireStore allowSuspended>{(store) => <VisitorsView store={store} />}</RequireStore>;
+  return <RequireStore allowSuspended>{(store) => <PlanGate store={store} feature="advancedReports"><VisitorsView store={store} /></PlanGate>}</RequireStore>;
 }

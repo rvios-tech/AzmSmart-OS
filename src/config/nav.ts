@@ -63,7 +63,7 @@ export const workspaces: Workspace[] = [
   { name: "مجموعة الأفق", plan: "مجاني", icon: IconWorld },
 ];
 
-export type NavChild = { title: string; url: string };
+export type NavChild = { title: string; url: string; /** خارج باقة المتجر — قفل صغير */ locked?: boolean };
 
 export type NavItem = {
   title: string;
@@ -71,6 +71,7 @@ export type NavItem = {
   icon?: Icon;
   badge?: string;
   items?: NavChild[];
+  locked?: boolean;
 };
 
 /**
@@ -100,6 +101,7 @@ export const navGroups: NavGroup[] = [
       { title: "تذاكر الدعم", url: "/platform/support", icon: IconLifebuoy },
       { title: "طلبات التصميم الخاص", url: "/platform/leads", icon: IconPalette },
       { title: "المتاجر", url: "/platform/stores", icon: IconShoppingBag },
+      { title: "الباقات", url: "/platform/plans", icon: IconTag },
       { title: "اشتراكات المتاجر", url: "/platform/subscriptions", icon: IconCalendarDollar },
       { title: "الفواتير", url: "/platform/invoices", icon: IconFileInvoice },
       { title: "الحسابات", url: "/platform/users", icon: IconUserShield },
@@ -187,7 +189,7 @@ export const navGroups: NavGroup[] = [
     items: [
       { title: "الإعدادات", url: "/store/settings", icon: IconSettings },
       { title: "شكل المتجر", url: "/store/appearance", icon: IconPalette },
-      { title: "الاشتراك", url: "/store/plan", icon: IconTag },
+      { title: "الباقة والاشتراك", url: "/store/plan", icon: IconTag },
       { title: "توثيق المتجر", url: "/store/verification", icon: IconRosetteDiscountCheck },
       { title: "الدعم الفني", url: "/support", icon: IconLifebuoy },
     ],

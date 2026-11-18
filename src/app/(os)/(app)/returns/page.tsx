@@ -17,6 +17,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ApiError } from "@/lib/api/client";
 import { listReturns, updateReturn, type ReturnRow, type ReturnsResponse, type Store } from "@/lib/api/shop";
 import { formatMoney, formatNumber, formatRelativeTime } from "@/lib/format";
+import { PlanGate } from "@/components/shop/plan-gate";
 
 const RETURN_STATUS = [
   { value: 0, label: "طلبات جديدة", tone: "bg-amber-500/10 text-amber-600 dark:text-amber-400" },
@@ -123,5 +124,5 @@ function ReturnsView({ store }: { store: Store }) {
 }
 
 export default function ReturnsPage() {
-  return <RequireStore allowSuspended>{(store) => <ReturnsView store={store} />}</RequireStore>;
+  return <RequireStore allowSuspended>{(store) => <PlanGate store={store} feature="returns"><ReturnsView store={store} /></PlanGate>}</RequireStore>;
 }
