@@ -333,6 +333,8 @@ export interface Order {
   trackUrl?: string;
   /** ما دفعه العميل من محفظته — جزء من الإجمالي */
   walletPaid?: number;
+  /** store · manual · quote (طلب تسعير من متجر جملة) */
+  source?: string;
   total: number;
   createdAt: string;
   items: OrderItem[];

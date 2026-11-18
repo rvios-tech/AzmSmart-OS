@@ -163,6 +163,7 @@ function OrdersView({ store }: { store: Store }) {
                       <TableRow key={o.id}>
                         <TableCell className="ps-6">
                           <Link href={`/orders/${o.id}`} className="font-medium hover:underline" dir="ltr">{o.ref}</Link>
+                          {o.source === "quote" && <span className="ms-1.5 rounded bg-violet-500/10 px-1.5 py-0.5 text-[10px] font-medium text-violet-600">تسعير</span>}
                           <p className="text-xs text-muted-foreground">{formatDateTime(o.createdAt)}</p>
                         </TableCell>
                         <TableCell>

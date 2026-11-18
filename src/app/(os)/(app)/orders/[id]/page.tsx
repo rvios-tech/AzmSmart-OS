@@ -88,6 +88,7 @@ function OrderView({ store }: { store: Store }) {
 
       <PageHeader title={`الطلب ${order.ref}`} description={formatDateTime(order.createdAt)}>
         <Badge variant="secondary" className={st.tone}>{st.label}</Badge>
+        {order.source === "quote" && <Badge variant="outline" className="border-violet-500/50 text-violet-600" title="العميل لم يرَ الأسعار — تواصل معه بالسعر ثم أكّد الطلب">طلب تسعير (جملة)</Badge>}
         {(ORDER_NEXT[order.status] ?? []).map((n, i) => (
           <Button key={n.to} size="sm" variant={i === 0 ? "default" : "outline"} disabled={busy}
             onClick={() => void run(() => advanceOrder(store.id, order.id, n.to), n.done)}>
