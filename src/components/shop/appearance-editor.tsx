@@ -284,7 +284,7 @@ export function AppearanceEditor({ store, api, team = false }: { store: Store; a
                   <p className="text-sm font-semibold">قالب المتجر</p>
                   <p className="text-xs text-muted-foreground">يتغيّر فورًا مع بقاء منتجاتك ونصوصك. القوالب المدفوعة تحتاج باقة مدفوعة وشراء القالب من «الباقة والفواتير».</p>
                   <div className="grid grid-cols-2 gap-2">
-                    {pickableTemplates(store.template).map((t) => {
+                    {pickableTemplates().map((t) => {
                       const on = store.template === t.id;
                       const owned = t.tier === "free" || store.ownedTemplates?.includes(t.id);
                       return (

@@ -94,7 +94,7 @@ export function TemplatePicker({ store }: { store: Store }) {
       </CardHeader>
       <CardContent>
         <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {pickableTemplates(store.template).map((t) => {
+          {pickableTemplates().map((t) => {
             const current = store.template === t.id;
             const owned = t.tier === "free" || store.ownedTemplates.includes(t.id);
             const cost = owned ? 0 : costOf(t.tier, store.plan, price(t.id));

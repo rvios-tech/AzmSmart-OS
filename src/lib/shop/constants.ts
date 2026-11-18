@@ -125,6 +125,5 @@ export const PAY_METHOD_LABEL: Record<string, string> = {
 export const orderStatus = (v: number) =>
   ORDER_STATUS.find((s) => s.value === v) ?? ORDER_STATUS[0];
 
-/** القوالب المتاحة للاختيار: ما يُدار إدارة كاملة من «شكل المتجر» — البقية مخفية حتى يُعاد تطويرها، والمتجر عليها يبقى يعمل */
-export const ACTIVE_TEMPLATES = new Set<string>(["rvios"]);
-export const pickableTemplates = (current?: string) => STORE_TEMPLATES.filter((t) => ACTIVE_TEMPLATES.has(t.id) || t.id === current);
+/** القوالب المتاحة للاختيار — «ريفيوس برو» أولًا ثم البقية (كلها تأخذ صفحات المتجر المشتركة) */
+export const pickableTemplates = () => [...STORE_TEMPLATES.filter((t) => t.id === "rvios"), ...STORE_TEMPLATES.filter((t) => t.id !== "rvios")];
