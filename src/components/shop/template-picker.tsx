@@ -12,7 +12,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { ApiError } from "@/lib/api/client";
 import { createShopInvoice, getPricing, updateStore, type Pricing, type Store } from "@/lib/api/shop";
 import { formatBilling } from "@/lib/format";
-import { STORE_TEMPLATES, TEMPLATE_TIER_LABEL, type TemplateTier } from "@/lib/shop/constants";
+import { pickableTemplates, TEMPLATE_TIER_LABEL, type TemplateTier } from "@/lib/shop/constants";
 import { useStore } from "@/lib/shop/store-context";
 import { cn } from "@/lib/utils";
 
@@ -94,7 +94,7 @@ export function TemplatePicker({ store }: { store: Store }) {
       </CardHeader>
       <CardContent>
         <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {STORE_TEMPLATES.map((t) => {
+          {pickableTemplates(store.template).map((t) => {
             const current = store.template === t.id;
             const owned = t.tier === "free" || store.ownedTemplates.includes(t.id);
             const cost = owned ? 0 : costOf(t.tier, store.plan, price(t.id));

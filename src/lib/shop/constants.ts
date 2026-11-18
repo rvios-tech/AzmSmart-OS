@@ -54,6 +54,7 @@ export const TEMPLATE_TIER_LABEL: Record<TemplateTier, string> = { free: "مجا
 
 /** قوالب واجهة منصة المتاجر (RVIOS StoreOS) — الأسماء للعرض، والأسعار والحقوق من الخادم */
 export const STORE_TEMPLATES: { id: string; name: string; tier: TemplateTier }[] = [
+  { id: "rvios", name: "ريفيوس برو", tier: "free" },
   { id: "essential", name: "أساسي", tier: "free" },
   { id: "dahab", name: "ذهب", tier: "signature" },
   { id: "noir", name: "نوار", tier: "signature" },
@@ -123,3 +124,7 @@ export const PAY_METHOD_LABEL: Record<string, string> = {
 
 export const orderStatus = (v: number) =>
   ORDER_STATUS.find((s) => s.value === v) ?? ORDER_STATUS[0];
+
+/** القوالب المتاحة للاختيار: ما يُدار إدارة كاملة من «شكل المتجر» — البقية مخفية حتى يُعاد تطويرها، والمتجر عليها يبقى يعمل */
+export const ACTIVE_TEMPLATES = new Set<string>(["rvios"]);
+export const pickableTemplates = (current?: string) => STORE_TEMPLATES.filter((t) => ACTIVE_TEMPLATES.has(t.id) || t.id === current);

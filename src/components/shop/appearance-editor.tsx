@@ -24,7 +24,7 @@ import type { ProductsResponse, SaveAppearanceInput, Store } from "@/lib/api/sho
 import type { UploadedImage } from "@/lib/api/uploads";
 import { teamWhatsapp } from "@/lib/contact";
 import { formatDateShort, formatNumber } from "@/lib/format";
-import { STORE_TEMPLATES, STOREFRONT_URL, TEMPLATE_TIER_LABEL, storeUrl, templateName } from "@/lib/shop/constants";
+import { pickableTemplates, STOREFRONT_URL, TEMPLATE_TIER_LABEL, storeUrl, templateName } from "@/lib/shop/constants";
 import { BODY_FONTS, DISPLAY_FONTS, SOCIAL_NETWORKS, SOCIAL_PLACEMENTS } from "@/lib/shop/store-fonts";
 import { cn } from "@/lib/utils";
 
@@ -284,7 +284,7 @@ export function AppearanceEditor({ store, api, team = false }: { store: Store; a
                   <p className="text-sm font-semibold">قالب المتجر</p>
                   <p className="text-xs text-muted-foreground">يتغيّر فورًا مع بقاء منتجاتك ونصوصك. القوالب المدفوعة تحتاج باقة مدفوعة وشراء القالب من «الباقة والفواتير».</p>
                   <div className="grid grid-cols-2 gap-2">
-                    {STORE_TEMPLATES.map((t) => {
+                    {pickableTemplates(store.template).map((t) => {
                       const on = store.template === t.id;
                       const owned = t.tier === "free" || store.ownedTemplates?.includes(t.id);
                       return (
