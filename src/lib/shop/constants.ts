@@ -44,7 +44,15 @@ export const SECTORS = [
  * `/s/<slug>` يعمل دائمًا، أمّا النطاق الخاص فيعمل بعد انتشار DNS فقط.
  */
 export const STOREFRONT_URL = (process.env.NEXT_PUBLIC_STOREFRONT_URL ?? "https://rvios.store").replace(/\/+$/, "");
-export const storeUrl = (slug: string) => `${STOREFRONT_URL}/s/${slug}`;
+/** نطاق روابط المتاجر: <slug>.rvios.com (مثل madad.rvios.com) */
+export const STORE_DOMAIN = (process.env.NEXT_PUBLIC_STORE_DOMAIN ?? "rvios.com").toLowerCase();
+const LOCAL_STOREFRONT = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(STOREFRONT_URL);
+/** المتجر على المنصة نفسها (/s/<slug>) — للمعاينة داخل المحرر (نفس أصل STOREFRONT_URL) */
+export const storePreviewUrl = (slug: string) => `${STOREFRONT_URL}/s/${slug}`;
+/** الرابط العام للمتجر: https://<slug>.rvios.com — وفي التطوير المحلي مسار /s/ */
+export const storeUrl = (slug: string) => (LOCAL_STOREFRONT ? storePreviewUrl(slug) : `https://${slug}.${STORE_DOMAIN}`);
+/** اسم المضيف المعروض للتاجر: madad.rvios.com */
+export const storeHost = (slug: string) => `${slug}.${STORE_DOMAIN}`;
 
 /** أسماء احتياطية — الأسماء الفعلية من إعداد الباقات (usePlans) */
 export const PLAN_LABEL = { basic: "المجانية", plus: "النمو", pro: "الاحترافية", max: "الأعمال" } as const;

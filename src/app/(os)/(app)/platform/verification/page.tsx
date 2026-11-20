@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
+import { storeUrl } from "@/lib/shop/constants";
 import { ApiError } from "@/lib/api/client";
 import { decideKyc, listKycRequests, platformKycDocPath, type KycRequest } from "@/lib/api/platform-ops";
 import { formatNumber, formatRelativeTime } from "@/lib/format";
@@ -37,7 +38,7 @@ function RequestCard({ r, onDone, onZoom }: { r: KycRequest; onDone: () => void;
       <CardContent className="space-y-4">
         <div className="flex flex-wrap items-center gap-2">
           <b>{r.store.name}</b>
-          <a href={`https://${r.store.slug}.rvios.store`} target="_blank" rel="noopener noreferrer" className="text-xs text-muted-foreground hover:underline" dir="ltr">{r.store.slug}</a>
+          <a href={storeUrl(r.store.slug)} target="_blank" rel="noopener noreferrer" className="text-xs text-muted-foreground hover:underline" dir="ltr">{r.store.slug}</a>
           <span className="text-xs text-muted-foreground">· {r.store.organization.name}</span>
           {r.submittedAt && <span className="ms-auto text-xs text-muted-foreground">{formatRelativeTime(r.submittedAt)}</span>}
         </div>

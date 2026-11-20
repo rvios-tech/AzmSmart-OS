@@ -24,7 +24,7 @@ import type { ProductsResponse, SaveAppearanceInput, Store } from "@/lib/api/sho
 import type { UploadedImage } from "@/lib/api/uploads";
 import { teamWhatsapp } from "@/lib/contact";
 import { formatDateShort, formatNumber } from "@/lib/format";
-import { pickableTemplates, STOREFRONT_URL, TEMPLATE_TIER_LABEL, storeUrl, templateName } from "@/lib/shop/constants";
+import { pickableTemplates, STOREFRONT_URL, TEMPLATE_TIER_LABEL, storePreviewUrl, storeUrl, templateName } from "@/lib/shop/constants";
 import { BODY_FONTS, DISPLAY_FONTS, SOCIAL_NETWORKS, SOCIAL_PLACEMENTS } from "@/lib/shop/store-fonts";
 import { cn } from "@/lib/utils";
 
@@ -393,7 +393,7 @@ export function AppearanceEditor({ store, api, team = false }: { store: Store; a
               key={frameKey}
               ref={frame}
               title="معاينة المتجر"
-              src={`${storeUrl(store.slug)}?editor=1`}
+              src={`${storePreviewUrl(store.slug)}?editor=1`}
               style={{ width: DEVICES.find((d) => d.id === device)!.width, maxWidth: "100%" }}
               className="mx-auto block h-[calc(100svh-12rem)] min-h-[560px] bg-background transition-[width] duration-300"
             />

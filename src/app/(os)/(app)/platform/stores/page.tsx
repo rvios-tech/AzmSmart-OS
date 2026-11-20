@@ -18,7 +18,7 @@ import {
   deletePlatformStore, listPlatformStores, setPlatformStoreStatus, setPlatformStoreVerified, unlockPlatformStoreAppearance, type PlatformShopStore,
 } from "@/lib/api/platform";
 import { formatDateShort, formatNumber } from "@/lib/format";
-import { storeUrl } from "@/lib/shop/constants";
+import { storeHost, storeUrl } from "@/lib/shop/constants";
 import { useWorkspace } from "@/lib/workspace/workspace-context";
 import {
   AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
@@ -97,7 +97,7 @@ export default function PlatformStoresPage() {
                       <Link href={`/platform/stores/${s.id}`} className="hover:underline">{s.name}</Link>
                       {s.verified && <IconRosetteDiscountCheck className="size-4 text-sky-600" aria-label="موثَّق" />}
                     </div>
-                    <div className="text-xs text-muted-foreground" dir="ltr"><a href={storeUrl(s.slug)} target="_blank" rel="noopener" className="hover:underline">/{s.slug}</a> · {formatDateShort(s.createdAt)}</div>
+                    <div className="text-xs text-muted-foreground" dir="ltr"><a href={storeUrl(s.slug)} target="_blank" rel="noopener" className="hover:underline">{storeHost(s.slug)}</a> · {formatDateShort(s.createdAt)}</div>
                   </TableCell>
                   <TableCell>{s.organization.name}</TableCell>
                   <TableCell className="tabular-nums">{formatNumber(s._count.products)}</TableCell>

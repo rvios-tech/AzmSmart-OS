@@ -22,7 +22,7 @@ import { teamWhatsapp } from "@/lib/contact";
 import { clearDraft, readDraft } from "@/lib/shop/store-draft";
 import { formatBilling } from "@/lib/format";
 import {
-  COUNTRIES, PLAN_LABEL, SECTORS, STOREFRONT_URL, STORE_TEMPLATES, TEMPLATE_TIER_LABEL,
+  COUNTRIES, PLAN_LABEL, SECTORS, STOREFRONT_URL, STORE_DOMAIN, STORE_TEMPLATES, TEMPLATE_TIER_LABEL,
 } from "@/lib/shop/constants";
 import { useStore } from "@/lib/shop/store-context";
 import { PLAN_ORDER, usePlans } from "@/lib/shop/plans";
@@ -254,16 +254,17 @@ export default function NewStorePage() {
                 <div className="space-y-2">
                   <Label htmlFor="slug">رابط المتجر</Label>
                   <div dir="ltr" className="flex items-center gap-2">
-                    <span className="shrink-0 text-sm text-muted-foreground">rviosstore.com/</span>
+                    <span className="shrink-0 text-sm text-muted-foreground">https://</span>
                     <Input id="slug" value={slug} onChange={(e) => setSlug(e.target.value)}
                       placeholder={check?.slug || "yazan"} spellCheck={false} />
+                    <span className="shrink-0 text-sm text-muted-foreground">.{STORE_DOMAIN}</span>
                   </div>
                   <p className="flex items-center gap-1.5 text-xs">
                     {checking ? (
                       <><IconLoader2 className="size-3.5 animate-spin" /> جارٍ الفحص…</>
                     ) : check ? (
                       check.ok ? (
-                        <span className="flex items-center gap-1 text-emerald-600"><IconCheck className="size-3.5" /> الرابط متاح: {check.slug}</span>
+                        <span className="flex items-center gap-1 text-emerald-600"><IconCheck className="size-3.5" /> الرابط متاح: <b dir="ltr">{check.slug}.{STORE_DOMAIN}</b></span>
                       ) : (
                         <span className="flex items-center gap-1 text-destructive">
                           <IconX className="size-3.5" /> {check.reason}
