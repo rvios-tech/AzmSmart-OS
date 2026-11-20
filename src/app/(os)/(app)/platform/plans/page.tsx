@@ -100,6 +100,8 @@ export default function PlatformPlansPage() {
                   <Label className="text-xs text-muted-foreground">اسم الباقة ({code})</Label>
                   <Input value={p.name} maxLength={30} onChange={(e) => change((c) => { c.plans[code].name = e.target.value; })} />
                   <Input value={p.tagline} maxLength={80} placeholder="سطر تعريفي" onChange={(e) => change((c) => { c.plans[code].tagline = e.target.value; })} />
+                  <Label className="pt-1 text-xs text-muted-foreground">ما يُكتب على البطاقة (سطر لكل ميزة)</Label>
+                  <textarea className="min-h-32 rounded-md border bg-background p-2 text-sm leading-relaxed" value={(p.bullets ?? []).join("\n")} onChange={(e) => change((c) => { c.plans[code].bullets = e.target.value.split("\n").map((x) => x.slice(0, 120)).slice(0, 14); })} />
                 </div>
                 <label className="flex items-center justify-between text-sm">«الأكثر اختيارًا»<Switch checked={p.highlight} onCheckedChange={(v) => change((c) => { for (const k of PLAN_ORDER) c.plans[k].highlight = v && k === code; })} /></label>
               </CardHeader>

@@ -21,6 +21,8 @@ export interface PlanInfo {
   tagline: string;
   highlight: boolean;
   prices: Record<string, number>;
+  /** جمل تسويقية تُعرض على بطاقة الباقة */
+  bullets?: string[];
   limits: PlanLimits;
   features: Record<string, boolean>;
 }
@@ -70,4 +72,6 @@ export const FEATURE_OF_URL: Record<string, string> = {
   "/ai": "merchantAI",
 };
 
+/** «ثلاثة أشهر» · «ستة أشهر» · «سنة» — للبطاقات */
+export const periodWords = (m: number) => ({ 1: "شهر", 2: "شهرين", 3: "ثلاثة أشهر", 6: "ستة أشهر", 9: "تسعة أشهر", 12: "سنة", 24: "سنتين" } as Record<number, string>)[m] ?? `${m} أشهر`;
 export const periodLabel = (m: number) => (m === 12 ? "سنة" : m === 1 ? "شهر" : m === 2 ? "شهران" : m <= 10 ? `${m} أشهر` : `${m} شهرًا`);

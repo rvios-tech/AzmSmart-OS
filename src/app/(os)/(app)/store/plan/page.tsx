@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
+import { Fragment, useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { IconCheck, IconCrown, IconGift, IconLoader2, IconMinus, IconSparkles, IconWallet } from "@tabler/icons-react";
 import Link from "next/link";
@@ -12,14 +12,13 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ApiError } from "@/lib/api/client";
 import {
   createShopInvoice, getMerchantWallet, getPricing, getSubscription, listShopInvoices, startStoreTrial,
   type MerchantWallet, type Pricing, type ShopInvoice, type Store, type Subscription,
 } from "@/lib/api/shop";
 import { formatBilling, formatDate, formatNumber } from "@/lib/format";
-import { PLAN_ORDER, loadPlans, periodLabel, type PlanCode, type PlansCatalog } from "@/lib/shop/plans";
+import { PLAN_ORDER, loadPlans, periodLabel, periodWords, type PlanCode, type PlansCatalog } from "@/lib/shop/plans";
 import { useStore } from "@/lib/shop/store-context";
 import { cn } from "@/lib/utils";
 
@@ -41,7 +40,7 @@ function PlanView({ store }: { store: Store }) {
   const [pricing, setPricing] = useState<Pricing | null>(null);
   const [cat, setCat] = useState<PlansCatalog | null>(null);
   const [invoices, setInvoices] = useState<ShopInvoice[]>([]);
-  const [months, setMonths] = useState<number | null>(null);
+  const [pick, setPick] = useState<Partial<Record<PlanCode, number>>>({});
   const [busy, setBusy] = useState(false);
   const [wallet, setWallet] = useState<MerchantWallet | null>(null);
 
@@ -49,25 +48,13 @@ function PlanView({ store }: { store: Store }) {
     try {
       const [s, p, i, c, w] = await Promise.all([getSubscription(store.id), getPricing(), listShopInvoices(store.id), loadPlans(true), getMerchantWallet().catch(() => null)]);
       setSub(s); setPricing(p); setInvoices(i); setCat(c); setWallet(w);
-      setMonths((m) => m ?? c.periods[c.periods.length - 1] ?? null);
     } catch (err) {
       toast.error(err instanceof ApiError ? err.message : "تعذّر تحميل بيانات الاشتراك.");
     }
   }, [store.id]);
   useEffect(() => { void (async () => { await load(); })(); }, [load]);
 
-  /** التوفير مقارنةً بتكرار أقصر فترة */
-  const saving = useMemo(() => {
-    if (!cat || !months) return 0;
-    const base = cat.periods[0];
-    const ref = cat.plans.pro.prices[base];
-    const cur = cat.plans.pro.prices[months];
-    if (!ref || !cur || months === base) return 0;
-    return Math.round((1 - cur / (ref * (months / base))) * 100);
-  }, [cat, months]);
-
-  async function upgrade(plan: PlanCode) {
-    if (!months) return;
+  async function upgrade(plan: PlanCode, months: number) {
     setBusy(true);
     try {
       await createShopInvoice({ storeRef: store.id, kind: 0, plan: plan as "plus" | "pro" | "max", months });
@@ -118,7 +105,7 @@ function PlanView({ store }: { store: Store }) {
 
   return (
     <div className="space-y-8">
-      <PageHeader title="الباقة والاشتراك" description="قارن الباقات واختر ما يناسب متجرك — الترقية تُفعَّل فور إرفاق إيصال الدفع." />
+      <PageHeader title="الباقة والاشتراك" description="اختر الباقة المناسبة لعملك — تُفعَّل فورًا عند الدفع من المحفظة أو بإرفاق إيصال التحويل." />
 
       <Card className="overflow-hidden">
         <CardContent className="flex flex-wrap items-center gap-x-6 gap-y-3">
@@ -150,52 +137,61 @@ function PlanView({ store }: { store: Store }) {
         </Card>
       )}
 
-      <div className="flex flex-col items-center gap-2">
-        <Tabs value={String(months)} onValueChange={(v) => setMonths(Number(v))}>
-          <TabsList className="h-11">
-            {cat.periods.map((m) => <TabsTrigger key={m} value={String(m)} className="px-5">{periodLabel(m)}</TabsTrigger>)}
-          </TabsList>
-        </Tabs>
-        {saving > 0 && <p className="text-sm font-medium text-emerald-600">وفّر {formatNumber(saving)}٪ مع اشتراك {periodLabel(months!)}</p>}
+      <div className="text-center">
+        <p className="text-sm font-semibold text-primary">خطط RVIOS</p>
+        <h2 className="mt-1 text-2xl font-bold sm:text-3xl">اختر الباقة المناسبة لعملك</h2>
       </div>
-
-      <div className="grid gap-4 pt-2 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-5 pt-2 sm:grid-cols-2 xl:grid-cols-4">
         {PLAN_ORDER.map((code) => {
           const p = cat.plans[code];
-          const price = months ? p.prices[months] : undefined;
+          const terms = Object.keys(p.prices).map(Number).sort((x, y) => x - y);
+          const m = pick[code] ?? terms[0];
+          const price = m ? p.prices[m] : undefined;
           const isCurrent = current === code;
           const lower = rank(code) < rank(current);
+          const prev = rank(code) > 1 ? cat.plans[PLAN_ORDER[rank(code) - 1]] : null;
           return (
-            <Card key={code} className={cn("relative flex flex-col overflow-visible", p.highlight && "border-primary shadow-lg shadow-primary/10", isCurrent && "ring-2 ring-primary/40")}>
+            <Card key={code} className={cn("relative flex flex-col overflow-visible transition-shadow hover:shadow-xl", p.highlight && "border-primary shadow-lg shadow-primary/15 xl:-translate-y-2", isCurrent && "ring-2 ring-primary/40")}>
               {p.highlight && (
-                <span className="absolute -top-3 inset-x-0 mx-auto w-fit rounded-full bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground">
-                  <IconSparkles className="me-1 inline size-3.5" />الأكثر اختيارًا
+                <span className="absolute -top-3 inset-x-0 mx-auto w-fit rounded-full bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground shadow">
+                  <IconSparkles className="me-1 inline size-3.5" />الأكثر طلبًا
                 </span>
               )}
-              <CardHeader className="space-y-1">
-                <CardTitle className="text-xl">{p.name}</CardTitle>
-                <p className="text-sm text-muted-foreground">{p.tagline}</p>
+              <CardHeader className="space-y-2">
+                <div className="flex items-center justify-between gap-2">
+                  <CardTitle className="text-xl">{p.name}</CardTitle>
+                  {isCurrent && <Badge variant="secondary">باقتك</Badge>}
+                </div>
+                <p className="min-h-10 text-sm leading-relaxed text-muted-foreground">{p.tagline}</p>
               </CardHeader>
               <CardContent className="flex flex-1 flex-col gap-5">
-                <div>
-                  {code === "basic" ? <p className="text-3xl font-bold">مجانية</p> : price ? (
+                <div className="rounded-xl bg-muted/50 p-4">
+                  {code === "basic" ? (
+                    <><p className="text-3xl font-extrabold">مجانية</p><p className="text-xs text-muted-foreground">للأبد، بلا بطاقة</p></>
+                  ) : price && m ? (
                     <>
-                      <p className="text-3xl font-bold tabular-nums">{formatBilling(price, cat.currency)}</p>
-                      <p className="text-xs text-muted-foreground">لمدة {periodLabel(months!)} · {formatBilling(Math.round(price / months!), cat.currency)} شهريًا</p>
+                      <p className="flex items-baseline gap-1.5"><span className="text-3xl font-extrabold tabular-nums">{formatBilling(price, cat.currency)}</span><span className="text-sm text-muted-foreground">/ {periodWords(m)}</span></p>
+                      <p className="mt-1 text-xs text-muted-foreground">أي نحو {formatBilling(Math.round(price / m), cat.currency)} شهريًا</p>
+                      {terms.length > 1 && (
+                        <div className="mt-3 flex flex-wrap gap-1.5">
+                          {terms.map((t) => <button key={t} type="button" onClick={() => setPick((x) => ({ ...x, [code]: t }))} className={cn("rounded-md border px-2.5 py-1 text-xs", t === m ? "border-primary bg-primary/10 text-primary" : "text-muted-foreground")}>{periodLabel(t)}</button>)}
+                        </div>
+                      )}
                     </>
-                  ) : <p className="text-sm text-muted-foreground">غير متاحة لهذه المدة</p>}
+                  ) : <p className="text-sm text-muted-foreground">السعر لم يُعلن بعد</p>}
                 </div>
-                <ul className="flex-1 space-y-2 text-sm">
-                  {highlights(cat, code).map((h) => (
-                    <li key={h} className={cn("flex items-start gap-2", h.startsWith("كل ما في") && "font-medium text-muted-foreground")}>
-                      {!h.startsWith("كل ما في") && <IconCheck className="mt-0.5 size-4 shrink-0 text-emerald-600" />}{h}
+                {prev && <p className="-mb-2 text-sm font-semibold">كل مزايا {prev.name}، بالإضافة إلى:</p>}
+                <ul className="flex-1 space-y-2.5 text-sm">
+                  {(p.bullets?.length ? p.bullets : highlights(cat, code)).map((h) => (
+                    <li key={h} className="flex items-start gap-2.5 leading-relaxed">
+                      <span className={cn("mt-0.5 grid size-5 shrink-0 place-items-center rounded-full", p.highlight ? "bg-primary text-primary-foreground" : "bg-emerald-500/15 text-emerald-600")}><IconCheck className="size-3.5" /></span>{h}
                     </li>
                   ))}
                 </ul>
                 {code !== "basic" && (
-                  <Button className="w-full" variant={p.highlight ? "default" : "outline"} disabled={busy || lower || !price || (isCurrent && sub.status === 0 && sub.daysLeft !== null && sub.daysLeft > 30)} onClick={() => void upgrade(code)}>
+                  <Button size="lg" className="w-full" variant={p.highlight ? "default" : "outline"} disabled={busy || lower || !price || (isCurrent && !sub.trial && sub.status === 0 && sub.daysLeft !== null && sub.daysLeft > 30)} onClick={() => m && void upgrade(code, m)}>
                     {busy && <IconLoader2 className="size-4 animate-spin" />}
-                    {isCurrent ? "جدّد الباقة" : lower ? "أقل من باقتك" : `اشترك في ${p.name}`}
+                    {isCurrent && !sub.trial ? "جدّد الباقة" : lower ? "أقل من باقتك" : `اختر ${p.name}`}
                   </Button>
                 )}
               </CardContent>
