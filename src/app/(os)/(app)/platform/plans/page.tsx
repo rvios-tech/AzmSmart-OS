@@ -40,7 +40,7 @@ export default function PlatformPlansPage() {
     if (reset && !window.confirm("إعادة الباقات إلى الإعداد الافتراضي؟ تسري على كل المتاجر.")) return;
     setBusy(true);
     try {
-      const body = { currency: cfg!.currency, periods: cfg!.periods, plans: cfg!.plans };
+      const body = { currency: cfg!.currency, periods: cfg!.periods, plans: cfg!.plans, trialDays: cfg!.trialDays, trialPlan: cfg!.trialPlan, referralPercent: cfg!.referralPercent };
       const r = await apiFetch<PlansCatalog>("/platform/plans", reset ? { method: "DELETE" } : { method: "PUT", body: JSON.stringify(body) });
       setCfg(r);
       setDirty(false);
@@ -74,6 +74,19 @@ export default function PlatformPlansPage() {
               <Button type="submit" variant="outline" size="icon" aria-label="إضافة فترة"><IconPlus className="size-4" /></Button>
             </form>
           )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader><CardTitle>الفترة التجريبية والإحالات</CardTitle><CardDescription>تجربة مجانية مرة لكل حساب، ومكافأة لمن يدعو تاجرًا تُضاف لمحفظته عند أول اشتراك يدفعه المدعوّ.</CardDescription></CardHeader>
+        <CardContent className="grid gap-4 sm:grid-cols-3">
+          <div className="grid gap-2"><Label>أيام التجربة (0 = إيقافها)</Label><Input type="number" min={0} max={60} value={cfg.trialDays ?? 14} onChange={(e) => change((c) => { c.trialDays = Math.max(0, Math.min(60, Math.trunc(Number(e.target.value) || 0))); })} /></div>
+          <div className="grid gap-2"><Label>الباقة التي تُجرَّب</Label>
+            <select className="h-9 rounded-md border bg-background px-3 text-sm" value={cfg.trialPlan ?? "pro"} onChange={(e) => change((c) => { c.trialPlan = e.target.value as PlanCode; })}>
+              {PLAN_ORDER.filter((c) => c !== "basic").map((c) => <option key={c} value={c}>{cfg.plans[c].name}</option>)}
+            </select>
+          </div>
+          <div className="grid gap-2"><Label>مكافأة الإحالة ٪ (0–50)</Label><Input type="number" min={0} max={50} value={cfg.referralPercent ?? 10} onChange={(e) => change((c) => { c.referralPercent = Math.max(0, Math.min(50, Math.trunc(Number(e.target.value) || 0))); })} /></div>
         </CardContent>
       </Card>
 

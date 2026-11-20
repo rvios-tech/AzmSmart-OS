@@ -61,6 +61,8 @@ export function register(input: {
   password: string;
   displayName: string;
   companyName: string;
+  /** رمز إحالة تاجر دعاه */
+  ref?: string;
 }): Promise<RegisterResponse | VerificationRequired> {
   return apiFetch<RegisterResponse | VerificationRequired>("/auth/register", {
     method: "POST",

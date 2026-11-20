@@ -1,4 +1,5 @@
 import {
+  IconWallet,
   IconLayoutDashboard,
   IconShoppingCart,
   IconUsers,
@@ -190,6 +191,7 @@ export const navGroups: NavGroup[] = [
       { title: "الإعدادات", url: "/store/settings", icon: IconSettings },
       { title: "شكل المتجر", url: "/store/appearance", icon: IconPalette },
       { title: "الباقة والاشتراك", url: "/store/plan", icon: IconTag },
+      { title: "المحفظة والمكافآت", url: "/store/wallet", icon: IconWallet },
       { title: "توثيق المتجر", url: "/store/verification", icon: IconRosetteDiscountCheck },
       { title: "الدعم الفني", url: "/support", icon: IconLifebuoy },
     ],

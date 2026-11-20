@@ -257,7 +257,7 @@ export default function NewStorePage() {
                     <span className="shrink-0 text-sm text-muted-foreground">https://</span>
                     <Input id="slug" value={slug} onChange={(e) => setSlug(e.target.value)}
                       placeholder={check?.slug || "yazan"} spellCheck={false} />
-                    <span className="shrink-0 text-sm text-muted-foreground">.{STORE_DOMAIN}</span>
+                    <span dir="ltr" className="shrink-0 text-sm text-muted-foreground">.{STORE_DOMAIN}</span>
                   </div>
                   <p className="flex items-center gap-1.5 text-xs">
                     {checking ? (

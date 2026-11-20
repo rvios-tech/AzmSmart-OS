@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { IconLoader2 } from "@tabler/icons-react";
@@ -24,13 +24,28 @@ export default function RegisterPage() {
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [ref, setRef] = useState("");
+
+  // رابط دعوة تاجر (?ref=RV…) — يُحفظ ليبقى إن تنقّل الزائر قبل التسجيل
+  useEffect(() => {
+    void (async () => {
+      try {
+        const q = new URLSearchParams(window.location.search).get("ref")?.trim().toUpperCase();
+        const valid = q && /^RV[A-Z0-9]{6}$/.test(q) ? q : "";
+        if (valid) localStorage.setItem("rv-ref", valid);
+        const saved = valid || localStorage.getItem("rv-ref") || "";
+        if (saved) setRef(saved);
+      } catch { /* تخزين معطّل */ }
+    })();
+  }, []);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
     setSubmitting(true);
     try {
-      const needsCode = await register({ email, password, displayName, companyName });
+      const needsCode = await register({ email, password, displayName, companyName, ...(ref ? { ref } : {}) });
+      try { localStorage.removeItem("rv-ref"); } catch { /* */ }
       router.push(needsCode ? "/verify-otp" : afterAuthPath());
     } catch (err) {
       setError(
@@ -55,6 +70,7 @@ export default function RegisterPage() {
       <GoogleButton />
 
       <form className="space-y-4" onSubmit={handleSubmit}>
+        {ref && <p className="rounded-lg bg-violet-500/10 px-3 py-2 text-sm text-violet-700 dark:text-violet-300">سجّلت بدعوة تاجر (الرمز <b dir="ltr">{ref}</b>) — أهلًا بك في RVIOS.</p>}
         {error && (
           <div className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
             {error}

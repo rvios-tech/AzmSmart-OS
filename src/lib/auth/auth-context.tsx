@@ -35,6 +35,7 @@ interface AuthContextValue extends AuthState {
     password: string;
     displayName: string;
     companyName: string;
+    ref?: string;
   }) => Promise<boolean>;
   logout: () => void;
 }
@@ -191,6 +192,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       password: string;
       displayName: string;
       companyName: string;
+      ref?: string;
     }) => {
       const res = await authApi.register(input);
       if ("verificationRequired" in res) {

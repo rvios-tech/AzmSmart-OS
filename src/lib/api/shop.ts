@@ -719,6 +719,8 @@ export interface Subscription {
   daysLeft: number | null;
   effectivePlan: Plan;
   graceDays: number;
+  /** فترة تجريبية مجانية */
+  trial?: boolean;
 }
 
 export interface Pricing {
@@ -769,12 +771,26 @@ export const listShopInvoices = (storeId: string) =>
 
 export const createShopInvoice = (input: {
   storeRef: string;
-  kind: 0 | 1 | 2 | 3 | 4;
+  kind: 0 | 1 | 2 | 3 | 4 | 5;
   plan?: "plus" | "pro" | "max";
   months?: number;
   /** لفواتير القوالب */
   template?: string;
+  /** مبلغ شحن المحفظة (kind=5) */
+  amount?: number;
 }) => apiFetch<ShopInvoice>("/shop/invoices", { method: "POST", ...json(input) });
+
+/** محفظة التاجر لدى RVIOS والإحالات والتجربة */
+export interface MerchantWallet {
+  balance: number;
+  currency: string;
+  txs: { id: string; amount: number; balance: number; kind: "topup" | "pay" | "referral" | "refund" | "adjust"; note: string | null; invoiceId: string | null; createdAt: string }[];
+  referral: { code: string; link: string; percent: number; invited: number; rewarded: number; pending: number; earned: number };
+  trial: { days: number; plan: string; planName: string; usedAt: string | null; available: boolean };
+}
+export const getMerchantWallet = () => apiFetch<MerchantWallet>("/shop/wallet");
+export const payInvoiceFromWallet = (id: string) => apiFetch<ShopInvoice>(`/shop/invoices/${id}/pay-wallet`, { method: "POST" });
+export const startStoreTrial = (storeRef: string) => apiFetch<Subscription>("/shop/billing/trial", { method: "POST", ...json({ storeRef }) });
 
 export const submitInvoiceProof = (
   id: string,

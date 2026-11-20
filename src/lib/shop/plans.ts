@@ -30,6 +30,11 @@ export interface PlansCatalog {
   plans: Record<PlanCode, PlanInfo>;
   features: Record<string, { label: string; group: string; hint: string }>;
   order: PlanCode[];
+  /** أيام الفترة التجريبية (0 = بلا تجربة) والباقة التي تُجرَّب */
+  trialDays?: number;
+  trialPlan?: PlanCode;
+  /** نسبة مكافأة الإحالة من أول اشتراك للمدعوّ */
+  referralPercent?: number;
 }
 
 let cache: Promise<PlansCatalog> | null = null;

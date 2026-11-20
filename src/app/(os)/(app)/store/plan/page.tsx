@@ -1,39 +1,28 @@
 "use client";
 
-import { PayAccounts } from "@/components/pay-accounts";
-import type { PayAccount } from "@/lib/api/platform-ops";
 import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { IconCheck, IconCrown, IconLoader2, IconMinus, IconSparkles } from "@tabler/icons-react";
+import { IconCheck, IconCrown, IconGift, IconLoader2, IconMinus, IconSparkles, IconWallet } from "@tabler/icons-react";
+import Link from "next/link";
+import { InvoiceCard } from "@/components/shop/invoice-card";
 
 import { PageHeader } from "@/components/page-header";
 import { RequireStore } from "@/components/require-store";
-import { ImageUploadButton } from "@/components/image-uploader";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ApiError } from "@/lib/api/client";
 import {
-  createShopInvoice, getPricing, getSubscription, listShopInvoices, submitInvoiceProof,
-  type Pricing, type ShopInvoice, type Store, type Subscription,
+  createShopInvoice, getMerchantWallet, getPricing, getSubscription, listShopInvoices, startStoreTrial,
+  type MerchantWallet, type Pricing, type ShopInvoice, type Store, type Subscription,
 } from "@/lib/api/shop";
 import { formatBilling, formatDate, formatNumber } from "@/lib/format";
-import { templateName } from "@/lib/shop/constants";
 import { PLAN_ORDER, loadPlans, periodLabel, type PlanCode, type PlansCatalog } from "@/lib/shop/plans";
 import { useStore } from "@/lib/shop/store-context";
 import { cn } from "@/lib/utils";
 
-const KIND = ["اشتراك", "بناء متجر", "دومين", "متجر إضافي", "قالب"];
-const INVOICE_STATUS = [
-  { label: "بانتظار الدفع", tone: "bg-amber-500/10 text-amber-600" },
-  { label: "قيد المراجعة", tone: "bg-sky-500/10 text-sky-600" },
-  { label: "مدفوعة", tone: "bg-emerald-500/10 text-emerald-600" },
-  { label: "ملغاة", tone: "bg-rose-500/10 text-rose-600" },
-];
 const SUB_STATUS = ["نشط", "في المهلة", "منتهٍ"];
 const rank = (p: string) => PLAN_ORDER.indexOf(p as PlanCode);
 const lim = (v: number | null, unit: string) => (v === null ? `${unit} بلا حد` : `${formatNumber(v)} ${unit}`);
@@ -54,12 +43,12 @@ function PlanView({ store }: { store: Store }) {
   const [invoices, setInvoices] = useState<ShopInvoice[]>([]);
   const [months, setMonths] = useState<number | null>(null);
   const [busy, setBusy] = useState(false);
-  const [proof, setProof] = useState<Record<string, { method: string; key: string }>>({});
+  const [wallet, setWallet] = useState<MerchantWallet | null>(null);
 
   const load = useCallback(async () => {
     try {
-      const [s, p, i, c] = await Promise.all([getSubscription(store.id), getPricing(), listShopInvoices(store.id), loadPlans(true)]);
-      setSub(s); setPricing(p); setInvoices(i); setCat(c);
+      const [s, p, i, c, w] = await Promise.all([getSubscription(store.id), getPricing(), listShopInvoices(store.id), loadPlans(true), getMerchantWallet().catch(() => null)]);
+      setSub(s); setPricing(p); setInvoices(i); setCat(c); setWallet(w);
       setMonths((m) => m ?? c.periods[c.periods.length - 1] ?? null);
     } catch (err) {
       toast.error(err instanceof ApiError ? err.message : "تعذّر تحميل بيانات الاشتراك.");
@@ -92,16 +81,14 @@ function PlanView({ store }: { store: Store }) {
     }
   }
 
-  async function sendProof(inv: ShopInvoice) {
-    const p = proof[inv.id];
-    if (!p?.key.trim()) return toast.error("ارفع صورة الإيصال");
+  async function startTrial() {
     setBusy(true);
     try {
-      await submitInvoiceProof(inv.id, { method: (p.method || undefined) as string | undefined, proofKey: p.key.trim() });
-      toast.success("وصل إيصالك وفُعّلت باقتك فورًا. سنراجعه خلال يوم عمل.");
+      await startStoreTrial(store.id);
+      toast.success("بدأت فترتك التجريبية — كل مزايا الباقة مفتوحة لمتجرك الآن");
       await Promise.all([load(), reload()]);
     } catch (err) {
-      toast.error(err instanceof ApiError ? err.message : "تعذّر إرسال الإيصال.");
+      toast.error(err instanceof ApiError ? err.message : "تعذّر بدء الفترة التجريبية.");
     } finally {
       setBusy(false);
     }
@@ -144,9 +131,24 @@ function PlanView({ store }: { store: Store }) {
           {sub.currentPeriodEnd && current !== "basic" && (
             <p className="text-sm text-muted-foreground">تنتهي {formatDate(sub.currentPeriodEnd)}{sub.daysLeft !== null ? ` · بعد ${formatNumber(Math.max(0, sub.daysLeft))} يومًا` : ""}</p>
           )}
+          {sub.trial && current !== "basic" && <Badge className="bg-violet-500/10 text-violet-600">فترة تجريبية</Badge>}
+          {wallet && <Link href="/store/wallet" className="ms-auto flex items-center gap-2 rounded-lg border px-3 py-2 text-sm hover:bg-muted"><IconWallet className="size-4 text-primary" /> رصيد المحفظة: <b className="tabular-nums">{formatBilling(wallet.balance, wallet.currency)}</b></Link>}
           {sub.effectivePlan !== sub.plan && <p className="w-full text-sm text-amber-600">انتهى اشتراكك — متجرك يعمل الآن بحدود الباقة المجانية، وبياناتك محفوظة كلها. جدّد لتعود مزاياك.</p>}
         </CardContent>
       </Card>
+
+      {wallet?.trial.available && current === "basic" && (
+        <Card className="overflow-hidden border-violet-500/30 bg-gradient-to-l from-violet-500/10 to-transparent">
+          <CardContent className="flex flex-wrap items-center gap-4">
+            <span className="grid size-12 place-items-center rounded-2xl bg-violet-600 text-white"><IconGift className="size-6" /></span>
+            <div className="flex-1">
+              <p className="text-lg font-bold">جرّب باقة {wallet.trial.planName} مجانًا {formatNumber(wallet.trial.days)} يومًا</p>
+              <p className="text-sm text-muted-foreground">كل مزاياها مفتوحة لمتجرك بلا دفع ولا بطاقة — مرة واحدة لكل حساب، وتعود بعدها للمجانية تلقائيًا إن لم تشترك، دون أن تفقد شيئًا.</p>
+            </div>
+            <Button className="bg-violet-600 hover:bg-violet-700" disabled={busy} onClick={() => void startTrial()}>{busy && <IconLoader2 className="size-4 animate-spin" />} ابدأ التجربة المجانية</Button>
+          </CardContent>
+        </Card>
+      )}
 
       <div className="flex flex-col items-center gap-2">
         <Tabs value={String(months)} onValueChange={(v) => setMonths(Number(v))}>
@@ -255,57 +257,11 @@ function PlanView({ store }: { store: Store }) {
         <CardHeader><CardTitle>الفواتير</CardTitle></CardHeader>
         <CardContent className="space-y-4">
           {invoices.length === 0 && <p className="text-sm text-muted-foreground">لا فواتير بعد.</p>}
-          {invoices.map((inv) => {
-            const st = INVOICE_STATUS[inv.status] ?? INVOICE_STATUS[0];
-            return (
-              <div key={inv.id} className="space-y-3 rounded-lg border p-4">
-                <div className="flex flex-wrap items-center gap-3">
-                  <span className="font-medium" dir="ltr">{inv.invoiceNumber}</span>
-                  <Badge variant="secondary" className={st.tone}>{st.label}</Badge>
-                  <span className="text-sm text-muted-foreground">{KIND[inv.kind]}{inv.plan && cat ? ` — ${cat.plans[PLAN_ORDER[inv.plan]]?.name ?? ""}` : ""}{inv.months ? ` · ${periodLabel(inv.months)}` : ""}{inv.item ? ` — ${templateName(inv.item)}` : ""}</span>
-                  <span className="ms-auto font-semibold tabular-nums">{formatBilling(Number(inv.amount), inv.currency)}</span>
-                </div>
-                {inv.status === 0 && (
-                  <div className="space-y-3 text-sm">
-                    <p className="text-muted-foreground">اكتب رقم الفاتورة <b dir="ltr">{inv.invoiceNumber}</b> في ملاحظات التحويل.</p>
-                    <PayAccounts accounts={pricing?.accounts} />
-                    {pricing && !pricing.accounts?.length && pricing.methods.map((m) => (
-                      <div key={m.id} className="rounded-md bg-muted p-3"><b>{m.name}:</b> {m.instructions}</div>
-                    ))}
-                    {pricing && !pricing.accounts?.length && pricing.methods.length === 0 && <p className="text-amber-600">لم تُضبط وسائل الدفع بعد — تواصل مع الدعم.</p>}
-                    <div className="grid gap-2 sm:grid-cols-4">
-                      <Select value={proof[inv.id]?.method ?? ""} onValueChange={(v) => setProof((p) => ({ ...p, [inv.id]: { key: p[inv.id]?.key ?? "", method: v } }))}>
-                        <SelectTrigger className="w-full"><SelectValue placeholder="وسيلة الدفع" /></SelectTrigger>
-                        <SelectContent>
-                          {payMethodsOf(pricing).map((m) => <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>)}
-                        </SelectContent>
-                      </Select>
-                      <div className="flex gap-2 sm:col-span-2">
-                        <Input className="flex-1" dir="ltr" placeholder="رابط صورة الإيصال" value={proof[inv.id]?.key ?? ""}
-                          onChange={(e) => setProof((p) => ({ ...p, [inv.id]: { method: p[inv.id]?.method ?? "", key: e.target.value } }))} />
-                        <ImageUploadButton label="رفع" storeId={store.id} onUploaded={(url) => setProof((p) => ({ ...p, [inv.id]: { method: p[inv.id]?.method ?? "", key: url } }))} />
-                      </div>
-                      <Button disabled={busy} onClick={() => void sendProof(inv)}>إرسال الإيصال</Button>
-                    </div>
-                  </div>
-                )}
-                {inv.status === 3 && inv.voidReason && <p className="text-sm text-muted-foreground">السبب: {inv.voidReason}</p>}
-              </div>
-            );
-          })}
+          {invoices.map((inv) => <InvoiceCard key={inv.id} inv={inv} pricing={pricing} cat={cat} storeId={store.id} walletBalance={wallet?.balance} onChanged={async () => { await Promise.all([load(), reload()]); }} />)}
         </CardContent>
       </Card>
     </div>
   );
-}
-
-/** وسائل الإيصال: مزوّدو الحسابات المعلنة بلا تكرار، وإلا الوسائل القديمة */
-function payMethodsOf(pricing: { accounts?: PayAccount[]; methods: { id: string; name: string }[] } | null | undefined) {
-  if (!pricing) return [];
-  if (!pricing.accounts?.length) return pricing.methods;
-  const seen = new Map<string, string>();
-  for (const a of pricing.accounts) if (!seen.has(a.provider)) seen.set(a.provider, a.providerName ?? a.provider);
-  return [...seen].map(([id, name]) => ({ id, name }));
 }
 
 export default function StorePlanPage() {
